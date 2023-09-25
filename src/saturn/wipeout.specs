@@ -1,0 +1,3 @@
+%rename link wipeout_link
+*link:
+-T src/saturn/wipeout.x
