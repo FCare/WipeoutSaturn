@@ -21,10 +21,11 @@ COMMON_SRC = \
 	src/wipeout/track.c \
 	src/wipeout/weapon.c \
 	src/wipeout/particle.c \
-	src/wipeout/sfx.c \
 	src/types.c \
 	src/system.c \
 	src/input.c
+
+SFX_SRC= 	src/wipeout/sfx.c
 
 ifeq ($(PORT), Saturn)
 # DEBUG=ON PORT=Saturn make -j16 -C ..
@@ -81,6 +82,12 @@ SH_PROGRAM:= wipeout-rewrite
 SH_SRCS:= \
 	$(COMMON_SRC) \
 	$(DEDICATED_SRC)
+
+ifeq ($(DEBUG), OFF)
+SH_SRCS += $(SFX_SRC)
+else
+SH_SRCS += src/saturn/no_sfx.c
+endif
 
 include $(YAUL_INSTALL_ROOT)/share/build.post.iso-cue.mk
 
@@ -191,7 +198,8 @@ DEDICATED_SRC = \
 PORT_SRC= \
 	$(COMMON_SRC) \
 	$(DEDICATED_SRC) \
-	$(RENDERER_SRC)
+	$(RENDERER_SRC) \
+	$(SFX_SRC)
 
 
 # Targets native ---------------------------------------------------------------
