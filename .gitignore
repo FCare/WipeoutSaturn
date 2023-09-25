@@ -1,0 +1,10 @@
+/wipeout.sublime-project
+/wipeout.sublime-workspace
+
+/wipeout/
+/build/
+
+/wipegame
+/save.dat
+.DS_STORE
+gamecontrollerdb.txt
