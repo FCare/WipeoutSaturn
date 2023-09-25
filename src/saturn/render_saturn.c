@@ -102,7 +102,7 @@ vec3_t render_transform(vec3_t pos){
   return vec3_transform(vec3_transform(pos, &view_mat), &projection_mat);
 }
 
-static void render_push_native_quads(quads_t *quad, uint16_t texture_index) {
+static void render_push_native_quads(quads_t *quad, rgba_t color, uint16_t texture_index) {
   float w2 = screen_size.x * 0.5;
   float h2 = screen_size.y * 0.5;
 
@@ -113,12 +113,12 @@ static void render_push_native_quads(quads_t *quad, uint16_t texture_index) {
     quad->vertices[i].pos.y = h2 - quad->vertices[i].pos.y * h2;
   }
   //Add a quad to the vdp1 list v0,v1,v2,v3
-  render_vdp1_add(quad, texture_index);
+  render_vdp1_add(quad, color, texture_index);
 }
 
 void render_push_quads(quads_t *quad, uint16_t texture_index) {
   printf("%s\n", __FUNCTION__);
-  render_push_native_quads(quad, texture_index);
+  render_push_native_quads(quad, (rgba_t){0,0,0,0}, texture_index);
 }
 
 void render_push_stripe(quads_t *quad, uint16_t texture_index) {
@@ -132,7 +132,7 @@ void render_push_stripe(quads_t *quad, uint16_t texture_index) {
   // quad->vertices[2].pos = quad->vertices[3].pos;
   // quad->vertices[3].pos = temp;
   // //Add a quad to the vdp1 list v0,v2,v3,v1
-  // render_vdp1_add(quad, texture_index);
+  // render_vdp1_add(quad, (rgba_t){0,0,0,0}, texture_index);
 }
 
 void render_push_tris(tris_t tris, uint16_t texture_index){
@@ -142,7 +142,7 @@ void render_push_tris(tris_t tris, uint16_t texture_index){
   //     tris.vertices[0], tris.vertices[0], tris.vertices[1], tris.vertices[2]
   //   }
   // };
-  // render_push_native_quads(&q, texture_index);
+  // render_push_native_quads(&q, (rgba_t){0,0,0,0}, texture_index);
 }
 
 void render_push_sprite(vec3_t pos, vec2i_t size, rgba_t color, uint16_t texture_index){
@@ -161,7 +161,7 @@ void render_push_sprite(vec3_t pos, vec2i_t size, rgba_t color, uint16_t texture
       {.pos = p3, .uv = {0 + t->size.x, 0 + t->size.y}, .color = color},
     }
   };
-  render_push_native_quads(&q, texture_index);
+  render_push_native_quads(&q, color, texture_index);
 }
 void render_push_2d(vec2i_t pos, vec2i_t size, rgba_t color, uint16_t texture){
   printf("%s\n", __FUNCTION__);
@@ -179,6 +179,7 @@ void render_push_2d(vec2i_t pos, vec2i_t size, rgba_t color, uint16_t texture){
   nb_planes++;
 }
 void render_push_2d_tile(vec2i_t pos, vec2i_t uv_offset, vec2i_t uv_size, vec2i_t size, rgba_t color, uint16_t texture_index){
+  printf("%s\n", __FUNCTION__);
   //toujours des scaled_sprites
   nb_planes++;
   quads_t q = (quads_t){
@@ -227,7 +228,7 @@ void render_push_2d_tile(vec2i_t pos, vec2i_t uv_offset, vec2i_t uv_size, vec2i_
     (int32_t)q.vertices[3].uv.x,
     (int32_t)q.vertices[3].uv.y
   );
-  render_push_native_quads(&q, texture_index);
+  render_push_native_quads(&q, color, texture_index);
 }
 
 static inline rgb1555_t convert_to_rgb(rgba_t val) {

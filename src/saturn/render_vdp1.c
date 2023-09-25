@@ -89,7 +89,7 @@ void vdp1_init(void)
   vdp1_sync_interval_set(0);
 }
 
-void render_vdp1_add(quads_t *quad, uint16_t texture_index)
+void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
 {
   printf(
     "%dx%d %dx%d %dx%d %dx%d\n",
@@ -122,7 +122,7 @@ void render_vdp1_add(quads_t *quad, uint16_t texture_index)
   vdp1_cmdt_t *cmd = &cmdts[nbCommand];
 
   vec2i_t size;
-  uint16_t*character = getVdp1VramAddress(texture_index, id, quad, &size); //a revoir parce qu'il ne faut copier suivant le UV
+  uint16_t*character = getVdp1VramAddress(texture_index, id, quad, color, &size); //a revoir parce qu'il ne faut copier suivant le UV
   printf(
     "after %dx%d %dx%d %dx%d %dx%d\n",
     (uint32_t)quad->vertices[0].pos.x,
