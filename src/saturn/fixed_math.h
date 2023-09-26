@@ -8,6 +8,7 @@
 extern float sqrt(float x);
 extern float sin(float x);
 extern float cos(float x);
+extern float tan(float x);
 extern float acos(float x);
 extern float fmod(float x, float y);
 extern float atan2(float x, float y);

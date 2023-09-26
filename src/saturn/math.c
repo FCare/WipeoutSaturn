@@ -14,6 +14,10 @@ float cos(float x) {
   return (float)fix16_cos((angle_t)RAD2ANGLE(x))/65536.0f;
 }
 
+float tan(float x) {
+  return (float)fix16_tan((angle_t)RAD2ANGLE(x))/65536.0f;
+}
+
 float acos(float x) {
   //to be developed
   return 0.0f;
