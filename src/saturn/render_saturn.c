@@ -22,6 +22,27 @@ static mat4_t mvp_mat = mat4_identity();
 static mat4_t projection_mat = mat4_identity();
 static mat4_t sprite_mat = mat4_identity();
 
+static void print_mat(mat4_t *m) {
+  printf("[%d %d %d %d]\n      [%d %d %d %d]\n      [%d %d %d %d]\n      [%d %d %d %d]\n",
+  (int32_t)(m->m[0]*1000.0),
+  (int32_t)(m->m[1]*1000.0),
+  (int32_t)(m->m[2]*1000.0),
+  (int32_t)(m->m[3]*1000.0),
+  (int32_t)(m->m[4]*1000.0),
+  (int32_t)(m->m[5]*1000.0),
+  (int32_t)(m->m[6]*1000.0),
+  (int32_t)(m->m[7]*1000.0),
+  (int32_t)(m->m[8]*1000.0),
+  (int32_t)(m->m[9]*1000.0),
+  (int32_t)(m->m[10]*1000.0),
+  (int32_t)(m->m[11]*1000.0),
+  (int32_t)(m->m[12]*1000.0),
+  (int32_t)(m->m[13]*1000.0),
+  (int32_t)(m->m[14]*1000.0),
+  (int32_t)(m->m[15]*1000.0)
+  );
+}
+
 void render_init(vec2i_t size) {
   screen_size = size;
 
@@ -100,24 +121,6 @@ void render_set_view_2d(void){
     (left + right) * lr, (top + bottom) * bt, (far + near) * nf, 1.0f
   );
 
-  printf("MVP = [%d %d %d %d]\n      [%d %d %d %d]\n      [%d %d %d %d]\n      [%d %d %d %d]\n",
-  (int32_t)(mvp_mat.m[0]*1000.0),
-  (int32_t)(mvp_mat.m[1]*1000.0),
-  (int32_t)(mvp_mat.m[2]*1000.0),
-  (int32_t)(mvp_mat.m[3]*1000.0),
-  (int32_t)(mvp_mat.m[4]*1000.0),
-  (int32_t)(mvp_mat.m[5]*1000.0),
-  (int32_t)(mvp_mat.m[6]*1000.0),
-  (int32_t)(mvp_mat.m[7]*1000.0),
-  (int32_t)(mvp_mat.m[8]*1000.0),
-  (int32_t)(mvp_mat.m[9]*1000.0),
-  (int32_t)(mvp_mat.m[10]*1000.0),
-  (int32_t)(mvp_mat.m[11]*1000.0),
-  (int32_t)(mvp_mat.m[12]*1000.0),
-  (int32_t)(mvp_mat.m[13]*1000.0),
-  (int32_t)(mvp_mat.m[14]*1000.0),
-  (int32_t)(mvp_mat.m[15]*1000.0)
-);
 }
 void render_set_model_mat(mat4_t *m){
     printf("%s\n", __FUNCTION__);
