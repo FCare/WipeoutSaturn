@@ -23,6 +23,9 @@ static layer_ctrl_t layer_ctrl[LAYER_NB] = {
       .bitmap_base   = VDP2_VRAM_ADDR(0, 0x00000)
     },
     .priority = 1,
+    .texture = 0xFFFF,
+    .pos = vec2i(0,0),
+    .size = vec2i(0,0),
   },
 };
 
@@ -76,10 +79,16 @@ static void setup_vdp2(vdp2_layer_t layer) {
 }
 
 void set_vdp2_texture(uint16_t texture_index, vec2i_t pos, vec2i_t size, vdp2_layer_t layer) {
-  layer_ctrl[layer].texture = texture_index;
-  layer_ctrl[layer].pos = pos;
-  layer_ctrl[layer].size = size;
-  layer_ctrl[layer].dirty = 1;
+  if ((layer_ctrl[layer].texture != texture_index) ||
+     (layer_ctrl[layer].pos.x != pos.x) ||
+     (layer_ctrl[layer].pos.y != pos.y) ||
+     (layer_ctrl[layer].size.x != size.x) ||
+     (layer_ctrl[layer].size.y != size.y)) {
+       layer_ctrl[layer].texture = texture_index;
+       layer_ctrl[layer].pos = pos;
+       layer_ctrl[layer].size = size;
+       layer_ctrl[layer].dirty = 1;
+     }
   layer_ctrl[layer].enable = 1;
 }
 
@@ -122,6 +131,9 @@ void vdp2_video_sync(void) {
   //Wait VblankIn
   vdp2_sync();
   vdp2_sync_wait();
+  for (int i = 0; i< LAYER_NB; i++) {
+    layer_ctrl[i].enable = 0;
+  }
 }
 
 static void _vblank_in_handler(void *work __unused)
@@ -134,10 +146,11 @@ static void _vblank_in_handler(void *work __unused)
     if (ctrl->dirty != 0) {
       render_texture_t* src = get_tex(ctrl->texture);
       volatile rgb1555_t *dst = ctrl->format.bitmap_base + ctrl->pos.y*512+ ctrl->pos.x;
+      printf("&&&&&&&&&&&&&&& Texture vdp2!!!!!!!!!!!!!!!!ééééééééé\n");
       for (int32_t i = 0; i< src->size.y; i++) {
         memcpy((void *)&(dst[512*i]), &src->pixels[i*src->size.x], src->size.x*sizeof(rgb1555_t));
       }
-    ctrl->dirty = 0;
+      ctrl->dirty = 0;
     }
     if (ctrl->enable != 0) {
       val |= ctrl->format.scroll_screen;

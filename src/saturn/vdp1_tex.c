@@ -10,6 +10,8 @@ typedef struct {
   uint16_t index;
 	vec2_t uv[4];
 	rgb1555_t *pixels;
+	uint8_t used;
+	rgba_t color;
 } vdp1_texture_t;
 
 static vdp1_texture_t textures[2][VDP1_TEXTURES_MAX];
@@ -52,6 +54,14 @@ static uint8_t isSameUv(vec2_t *uv, quads_t *q) {
 	return 1;
 }
 
+static uint8_t isSameColor(rgba_t a, rgba_t b) {
+	if (a.r != b.r) return 0;
+	if (a.g != b.g) return 0;
+	if (a.b != b.b) return 0;
+	if (a.a != b.a) return 0;
+	return 1;
+}
+
 
 uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *quad, rgba_t color, vec2i_t *size) {
 	render_texture_t* src = get_tex(texture_index);
@@ -72,17 +82,26 @@ uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *quad, 
 	}
 
   for (uint16_t i=0; i<textures_len[id]; i++) {
-    if ((textures[id][i].index == texture_index) && (isSameUv(textures[id][i].uv, quad)))
+    if ((textures[id][i].index == texture_index) && isSameUv(textures[id][i].uv, quad) && isSameColor(textures[id][i].color, color))
 		{
+			textures[id][i].used = 1;
+				printf("&&&&&&&&&&&&&&& Texture vdp1 reused :-) :-) :-)\n");
       return textures[id][i].pixels;
     }
   }
   //Not found, bump a new one
   uint32_t length = w*h*sizeof(rgb1555_t);
+	textures[id][textures_len[id]].used = 1;
+	for (int i = 0; i<4; i++) {
+		textures[id][textures_len[id]].uv[i].x = quad->vertices[i].uv.x;
+		textures[id][textures_len[id]].uv[i].y = quad->vertices[i].uv.y;
+	}
   textures[id][textures_len[id]].index = texture_index;
+	textures[id][textures_len[id]].color = color;
   textures[id][textures_len[id]].size = *size;
   textures[id][textures_len[id]].pixels = vdp1_tex_bump(length, id);
 	rgb1555_t *src_buf = &src->pixels[(int32_t)quad->vertices[0].uv.y * src->size.x + (int32_t)quad->vertices[0].uv.x];
+	printf("&&&&&&&&&&&&&&& Texture vdp1!!!!!!!!!!!!!!!!ééééééééé\n");
 	if (((color.r>>3) == 0)&&((color.g>>3) == 0)&&((color.b>>3) == 0)) {
 		for (int i = 0; i<h; i++) {
 			memcpy(&textures[id][textures_len[id]].pixels[i*w], &src_buf[i*src->size.x], orig_w*sizeof(rgb1555_t));
@@ -132,6 +151,15 @@ uint16_t canAllocateVdp1(uint16_t texture_index, uint8_t id, quads_t *quad) {
 }
 
 void reset_vdp1_pool(uint8_t id) {
-  textures_len[id] = 0;
-	tex_len[id] = 0;
+	printf("%s\n", __FUNCTION__);
+	uint8_t id_reset = 0;
+	while((textures[id][id_reset].used == 1) && (id_reset < textures_len[id])) id_reset++;
+	for (int i = 0; i<textures_len[id]; i++) {
+		textures[id][i].used = 0;
+	}
+	printf("reset[%d] to %d\n", id, id_reset);
+	if (textures_len[id] != id_reset) {
+		textures_len[id] = id_reset;
+		tex_len[id] = (uint32_t)(&textures[id][id_reset].pixels[textures[id][id_reset].size.x*textures[id][id_reset].size.y] - &textures[id][0].pixels[0]);
+	}
 }
