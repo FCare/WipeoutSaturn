@@ -543,7 +543,7 @@ void main_menu_init(void) {
 void main_menu_update(void) {
 	render_set_view_2d();
 	render_push_2d(vec2i(0, 0), render_size(), rgba(128, 128, 128, 255), background);
-
+	printf("Update menu\n");
 	menu_update(main_menu);
 }
 

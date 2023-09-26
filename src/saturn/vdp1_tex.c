@@ -81,14 +81,14 @@ uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *quad, 
 		quad->vertices[2].pos.x += (quad->vertices[2].pos.x - quad->vertices[0].pos.x)*ratioX;
 	}
 
-  for (uint16_t i=0; i<textures_len[id]; i++) {
-    if ((textures[id][i].index == texture_index) && isSameUv(textures[id][i].uv, quad) && isSameColor(textures[id][i].color, color))
-		{
-			textures[id][i].used = 1;
-				printf("&&&&&&&&&&&&&&& Texture vdp1 reused :-) :-) :-)\n");
-      return textures[id][i].pixels;
-    }
-  }
+  // for (uint16_t i=0; i<textures_len[id]; i++) {
+  //   if ((textures[id][i].index == texture_index) && isSameUv(textures[id][i].uv, quad))
+	// 	{
+	// 		textures[id][i].used = 1;
+	// 			printf("&&&&&&&&&&&&&&& Texture vdp1 reused :-) :-) :-)\n");
+  //     return textures[id][i].pixels;
+  //   }
+  // }
   //Not found, bump a new one
   uint32_t length = w*h*sizeof(rgb1555_t);
 	textures[id][textures_len[id]].used = 1;
@@ -102,27 +102,27 @@ uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *quad, 
   textures[id][textures_len[id]].pixels = vdp1_tex_bump(length, id);
 	rgb1555_t *src_buf = &src->pixels[(int32_t)quad->vertices[0].uv.y * src->size.x + (int32_t)quad->vertices[0].uv.x];
 	printf("&&&&&&&&&&&&&&& Texture vdp1!!!!!!!!!!!!!!!!ééééééééé\n");
-	if (((color.r>>3) == 0)&&((color.g>>3) == 0)&&((color.b>>3) == 0)) {
-		for (int i = 0; i<h; i++) {
-			memcpy(&textures[id][textures_len[id]].pixels[i*w], &src_buf[i*src->size.x], orig_w*sizeof(rgb1555_t));
-			memset(&textures[id][textures_len[id]].pixels[i*w+orig_w], 0, (w-orig_w)*sizeof(rgb1555_t));
-		}
-	} else {
+	// if (((color.r>>3) == 0)&&((color.g>>3) == 0)&&((color.b>>3) == 0)) {
+		// for (int i = 0; i<h; i++) {
+		// 	memcpy(&textures[id][textures_len[id]].pixels[i*w], &src_buf[i*src->size.x], orig_w*sizeof(rgb1555_t));
+		// 	memset(&textures[id][textures_len[id]].pixels[i*w+orig_w], 0, (w-orig_w)*sizeof(rgb1555_t));
+		// }
+	// } else {
 		for (int i = 0; i<h; i++) {
 			for (int j = 0; j<orig_w; j++) {
 				rgb1555_t *dst = &textures[id][textures_len[id]].pixels[i*w+j];
 				*dst = src_buf[i*src->size.x+j];
-				if ((dst->msb != 0) || (dst->r != 0) || (dst->g!=0) || (dst->b != 0)) {
-					dst->r *= (color.r/255.0)*2.0;
-					dst->g *= (color.g/255.0)*2.0;
-					dst->b *= (color.b/255.0)*2.0;
-				}
+				// if ((dst->msb != 0) || (dst->r != 0) || (dst->g!=0) || (dst->b != 0)) {
+				// 	dst->r *= (color.r/255.0)*2.0;
+				// 	dst->g *= (color.g/255.0)*2.0;
+				// 	dst->b *= (color.b/255.0)*2.0;
+				// }
 			}
 			for (int j = orig_w; j<w; j++) {
 				textures[id][textures_len[id]].pixels[i*w+j] = (rgb1555_t){.msb=0,.r=0,.g=0,.b=0};
 			}
 		}
-	}
+	// }
   return textures[id][textures_len[id]++].pixels;
 }
 

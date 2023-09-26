@@ -5,24 +5,23 @@
 #include "vdp1_tex.h"
 #include "tex.h"
 
-static uint8_t nbCommand = 0;
+static uint16_t nbCommand = 0;
+static uint16_t gouraud_cmd = 0;
 
 vdp1_cmdt_list_t *cmdt_list;
 vdp1_cmdt_t *cmdts;
 uint32_t cmdt_max;
 
 static uint8_t id = 0;
+static vdp1_vram_partitions_t _vdp1_vram_partitions;
 
 static void cmdt_list_init(void)
 {
-  vdp1_vram_partitions_t vdp1_vram_partitions;
   vec2i_t screen = platform_screen_size();
   int16_vec2_t size = {.x=screen.x, .y=screen.y};
   nbCommand = 0;
 
-  vdp1_vram_partitions_get(&vdp1_vram_partitions);
-
-  cmdt_max = vdp1_vram_partitions.cmdt_size/sizeof(vdp1_cmdt_t);
+  cmdt_max = _vdp1_vram_partitions.cmdt_size/sizeof(vdp1_cmdt_t);
   cmdt_list = vdp1_cmdt_list_alloc(cmdt_max);
   assert(cmdt_list != NULL);
 
@@ -54,6 +53,8 @@ static void cmdt_list_init(void)
 void vdp1_init(void)
 {
   vec2i_t screen = platform_screen_size();
+
+  vdp1_vram_partitions_get(&_vdp1_vram_partitions);
 
   init_vdp1_tex();
 
@@ -109,6 +110,7 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
   };
 
   vdp1_cmdt_t *cmd = &cmdts[nbCommand];
+  memset(cmd, 0x0, sizeof(vdp1_cmdt_t));
 
   vec2i_t size;
   uint16_t*character = getVdp1VramAddress(texture_index, id, quad, color, &size); //a revoir parce qu'il ne faut copier suivant le UV
@@ -130,6 +132,20 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
   vdp1_cmdt_draw_mode_set(cmd, draw_mode);
   vdp1_cmdt_char_size_set(cmd, size.x, size.y);
   vdp1_cmdt_char_base_set(cmd, character);
+
+  if ((color.r != 0) || (color.g != 0) || (color.b != 0)) {
+    //apply gouraud
+    vdp1_gouraud_table_t *gouraud_base;
+    rgb1555_t gouraud = RGB1555(1, color.r,  color.g,  color.b);
+    gouraud_base = &_vdp1_vram_partitions.gouraud_base[gouraud_cmd];
+    gouraud_base->colors[0] = gouraud;
+    gouraud_base->colors[1] = gouraud;
+    gouraud_base->colors[2] = gouraud;
+    gouraud_base->colors[3] = gouraud;
+    gouraud_cmd++;
+
+   vdp1_cmdt_gouraud_base_set(cmd, (uint32_t)gouraud_base);
+  }
 
   cmd->cmd_xa = (uint32_t)quad->vertices[0].pos.x;
   cmd->cmd_ya = (uint32_t)quad->vertices[0].pos.y;
@@ -155,6 +171,7 @@ void render_vdp1_flush(void) {
   id = (id+1)%2;
   reset_vdp1_pool(id);
   nbCommand = 0;
+  gouraud_cmd = 0;
   vdp1_sync_render();
 
   vdp1_sync();

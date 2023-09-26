@@ -163,14 +163,17 @@ void render_push_stripe(quads_t *quad, uint16_t texture_index) {
   printf("%s\n", __FUNCTION__);
   for (int i = 0; i<4; i++) {
     quad->vertices[i].pos = vec3_transform(quad->vertices[i].pos, &mvp_mat);
-    if (quad->vertices[i].pos.z >= 1.0) return;
+    if (quad->vertices[i].pos.z >= 1.0) {
+      printf("discard due to Z=%d\n", (uint32_t)quad->vertices[i].pos.z);
+      return;
+    }
   }
   vec3_t temp = quad->vertices[1].pos;
   quad->vertices[1].pos = quad->vertices[2].pos;
   quad->vertices[2].pos = quad->vertices[3].pos;
   quad->vertices[3].pos = temp;
   //Add a quad to the vdp1 list v0,v2,v3,v1
-  // render_vdp1_add(quad, rgba(128,128,128,255), texture_index);
+  render_vdp1_add(quad, rgba(128,128,128,255), texture_index);
 }
 
 void render_push_tris(tris_t tris, uint16_t texture_index){
