@@ -31,6 +31,8 @@ ifeq ($(PORT), Saturn)
 # DEBUG=ON PORT=Saturn make -j16 -C ..
 DEBUG?=OFF
 
+NO_SFX?=OFF
+
 DEDICATED_SRC = \
 	src/saturn/math.c \
 	src/saturn/mem.c \
@@ -51,6 +53,7 @@ SH_SPECS:= yaul.specs yaul-main.specs src/saturn/wipeout.specs
 include $(YAUL_INSTALL_ROOT)/share/build.pre.mk
 
 ifeq ($(DEBUG), ON)
+NO_SFX=ON
 USER_CFLAGS += -DDEBUG_PRINT
 endif
 
@@ -84,7 +87,7 @@ SH_SRCS:= \
 	$(COMMON_SRC) \
 	$(DEDICATED_SRC)
 
-ifeq ($(DEBUG), OFF)
+ifeq ($(NO_SFX), OFF)
 SH_SRCS += $(SFX_SRC)
 else
 SH_SRCS += src/saturn/no_sfx.c
