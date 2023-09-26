@@ -20,6 +20,7 @@ static void setup_fs(void) {
 }
 
 static void controller_update(void) {
+  printf("Update Controller\n");
   smpc_peripheral_digital_t _digital;
   smpc_peripheral_process(); //A chaque process
   smpc_peripheral_digital_port(1, &_digital);

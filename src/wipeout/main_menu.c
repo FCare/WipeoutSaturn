@@ -517,6 +517,8 @@ static void objects_unpack_imp(Object **dest_array, int len, Object *src) {
 
 
 void main_menu_init(void) {
+
+	ships_load();
 	g.is_attract_mode = false;
 
 	ships_reset_exhaust_plumes();

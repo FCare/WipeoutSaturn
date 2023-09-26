@@ -7,6 +7,8 @@
 #include "utils.h"
 #include "mem.h"
 
+#define NEAR_PLANE 16.0
+#define FAR_PLANE (RENDER_FADEOUT_FAR)
 #define TEXTURES_MAX 1024
 
 uint16_t RENDER_NO_TEXTURE;
@@ -37,6 +39,16 @@ void render_cleanup(void){}
 
 void render_set_screen_size(vec2i_t size){
   //Screen is always same size on saturn port
+  float aspect = (float)screen_size.x / (float)screen_size.y;
+  float fov = (73.75 / 180.0) * 3.14159265358;
+  float f = 1.0 / tan(fov / 2);
+  float nf = 1.0 / (NEAR_PLANE - FAR_PLANE);
+  projection_mat = mat4(
+    f / aspect, 0, 0, 0,
+    0, f, 0, 0,
+    0, 0, (FAR_PLANE + NEAR_PLANE) * nf, -1,
+    0, 0, 2 * FAR_PLANE * NEAR_PLANE * nf, 0
+  );
 }
 void render_set_resolution(render_resolution_t res){
   //Resolution is always same size on saturn port
@@ -60,6 +72,7 @@ void render_frame_end(void){
 }
 
 void render_set_view(vec3_t pos, vec3_t angles){
+    printf("%s\n", __FUNCTION__);
   view_mat = mat4_identity();
   mat4_set_translation(&view_mat, vec3(0, 0, 0));
   mat4_set_roll_pitch_yaw(&view_mat, vec3(angles.x, -angles.y + M_PI, angles.z + M_PI));
@@ -70,6 +83,7 @@ void render_set_view(vec3_t pos, vec3_t angles){
 }
 void render_set_view_2d(void){
   printf("%s\n", __FUNCTION__);
+
   float near = -1.0f;
   float far = 1.0f;
   float left = 0.0f;
@@ -85,8 +99,28 @@ void render_set_view_2d(void){
     0.0f,        0.0f,  2.0f * nf,    0.0f,
     (left + right) * lr, (top + bottom) * bt, (far + near) * nf, 1.0f
   );
+
+  printf("MVP = [%d %d %d %d]\n      [%d %d %d %d]\n      [%d %d %d %d]\n      [%d %d %d %d]\n",
+  (int32_t)(mvp_mat.m[0]*1000.0),
+  (int32_t)(mvp_mat.m[1]*1000.0),
+  (int32_t)(mvp_mat.m[2]*1000.0),
+  (int32_t)(mvp_mat.m[3]*1000.0),
+  (int32_t)(mvp_mat.m[4]*1000.0),
+  (int32_t)(mvp_mat.m[5]*1000.0),
+  (int32_t)(mvp_mat.m[6]*1000.0),
+  (int32_t)(mvp_mat.m[7]*1000.0),
+  (int32_t)(mvp_mat.m[8]*1000.0),
+  (int32_t)(mvp_mat.m[9]*1000.0),
+  (int32_t)(mvp_mat.m[10]*1000.0),
+  (int32_t)(mvp_mat.m[11]*1000.0),
+  (int32_t)(mvp_mat.m[12]*1000.0),
+  (int32_t)(mvp_mat.m[13]*1000.0),
+  (int32_t)(mvp_mat.m[14]*1000.0),
+  (int32_t)(mvp_mat.m[15]*1000.0)
+);
 }
 void render_set_model_mat(mat4_t *m){
+    printf("%s\n", __FUNCTION__);
   mat4_t vm_mat;
 	mat4_mul(&vm_mat, &view_mat, m);
 	mat4_mul(&mvp_mat, &projection_mat, &vm_mat);
@@ -105,10 +139,17 @@ vec3_t render_transform(vec3_t pos){
 static void render_push_native_quads(quads_t *quad, rgba_t color, uint16_t texture_index) {
   float w2 = screen_size.x * 0.5;
   float h2 = screen_size.y * 0.5;
-
+  nb_planes++;
   for (int i = 0; i<4; i++) {
+    // quad->vertices[i].pos.x += w2;
+    // quad->vertices[i].pos.y += h2;
+
     quad->vertices[i].pos = vec3_transform(quad->vertices[i].pos, &mvp_mat);
-    if (quad->vertices[i].pos.z >= 1.0) return;
+    //Z-clamp
+    if (quad->vertices[i].pos.z >= 1.0) {
+      printf("discard due to Z=%d\n", (uint32_t)quad->vertices[i].pos.z);
+      return;
+    }
     quad->vertices[i].pos.x = quad->vertices[i].pos.x * w2 + w2;
     quad->vertices[i].pos.y = h2 - quad->vertices[i].pos.y * h2;
   }
@@ -118,31 +159,73 @@ static void render_push_native_quads(quads_t *quad, rgba_t color, uint16_t textu
 
 void render_push_quads(quads_t *quad, uint16_t texture_index) {
   printf("%s\n", __FUNCTION__);
-  render_push_native_quads(quad, (rgba_t){0,0,0,0}, texture_index);
+  render_push_native_quads(quad, rgba(128,128,128,255), texture_index);
 }
 
 void render_push_stripe(quads_t *quad, uint16_t texture_index) {
   printf("%s\n", __FUNCTION__);
-  // for (int i = 0; i<4; i++) {
-  //   quad->vertices[i].pos = vec3_transform(quad->vertices[i].pos, &mvp_mat);
-  //   if (quad->vertices[i].pos.z >= 1.0) return;
-  // }
-  // vec3_t temp = quad->vertices[1].pos;
-  // quad->vertices[1].pos = quad->vertices[2].pos;
-  // quad->vertices[2].pos = quad->vertices[3].pos;
-  // quad->vertices[3].pos = temp;
-  // //Add a quad to the vdp1 list v0,v2,v3,v1
-  // render_vdp1_add(quad, (rgba_t){0,0,0,0}, texture_index);
+  for (int i = 0; i<4; i++) {
+    quad->vertices[i].pos = vec3_transform(quad->vertices[i].pos, &mvp_mat);
+    if (quad->vertices[i].pos.z >= 1.0) return;
+  }
+  vec3_t temp = quad->vertices[1].pos;
+  quad->vertices[1].pos = quad->vertices[2].pos;
+  quad->vertices[2].pos = quad->vertices[3].pos;
+  quad->vertices[3].pos = temp;
+  //Add a quad to the vdp1 list v0,v2,v3,v1
+  // render_vdp1_add(quad, rgba(128,128,128,255), texture_index);
 }
 
 void render_push_tris(tris_t tris, uint16_t texture_index){
-  // printf("%s\n", __FUNCTION__);
-  // quads_t q= {
-  //   .vertices = {
-  //     tris.vertices[0], tris.vertices[0], tris.vertices[1], tris.vertices[2]
-  //   }
-  // };
-  // render_push_native_quads(&q, (rgba_t){0,0,0,0}, texture_index);
+  printf("%s\n", __FUNCTION__);
+  printf(
+    " pos %dx%d %dx%d %dx%d\n",
+    (int32_t)tris.vertices[0].pos.x,
+    (int32_t)tris.vertices[0].pos.y,
+    (int32_t)tris.vertices[1].pos.x,
+    (int32_t)tris.vertices[1].pos.y,
+    (int32_t)tris.vertices[2].pos.x,
+    (int32_t)tris.vertices[2].pos.y
+  );
+  printf(
+    " uv %dx%d %dx%d %dx%d\n",
+    (int32_t)tris.vertices[0].uv.x,
+    (int32_t)tris.vertices[0].uv.y,
+    (int32_t)tris.vertices[1].uv.x,
+    (int32_t)tris.vertices[1].uv.y,
+    (int32_t)tris.vertices[2].uv.x,
+    (int32_t)tris.vertices[2].uv.y
+  );
+  quads_t q= (quads_t){
+    .vertices = {
+      tris.vertices[0], tris.vertices[1], tris.vertices[1], tris.vertices[2]
+    }
+  };
+
+  printf(
+    " pos %dx%d %dx%d %dx%d %dx%d\n",
+    (int32_t)q.vertices[0].pos.x,
+    (int32_t)q.vertices[0].pos.y,
+    (int32_t)q.vertices[1].pos.x,
+    (int32_t)q.vertices[1].pos.y,
+    (int32_t)q.vertices[2].pos.x,
+    (int32_t)q.vertices[2].pos.y,
+    (int32_t)q.vertices[3].pos.x,
+    (int32_t)q.vertices[3].pos.y
+  );
+  printf(
+    " uv %dx%d %dx%d %dx%d %dx%d\n",
+    (int32_t)q.vertices[0].uv.x,
+    (int32_t)q.vertices[0].uv.y,
+    (int32_t)q.vertices[1].uv.x,
+    (int32_t)q.vertices[1].uv.y,
+    (int32_t)q.vertices[2].uv.x,
+    (int32_t)q.vertices[2].uv.y,
+    (int32_t)q.vertices[3].uv.x,
+    (int32_t)q.vertices[3].uv.y
+  );
+
+  render_push_native_quads(&q, rgba(128,128,128,255), texture_index);
 }
 
 void render_push_sprite(vec3_t pos, vec2i_t size, rgba_t color, uint16_t texture_index){
@@ -171,17 +254,15 @@ void render_push_2d(vec2i_t pos, vec2i_t size, rgba_t color, uint16_t texture){
   //Can use NBG0 and NBG1, with Sprite in between based on priority (to be optimized later)
   printf("Size = %dx%d Texture=%dx%d\n", size.x, size.y, tex_size.x, tex_size.y);
   if ((nb_planes == 0) && (size.x == tex_size.x) && (size.y == tex_size.y)) {
+    nb_planes++;
     set_vdp2_texture(texture, pos, size, NBG0);
   } else {
     render_push_2d_tile(pos, vec2i(0, 0), tex_size, size, color, texture);
   }
-
-  nb_planes++;
 }
 void render_push_2d_tile(vec2i_t pos, vec2i_t uv_offset, vec2i_t uv_size, vec2i_t size, rgba_t color, uint16_t texture_index){
   printf("%s\n", __FUNCTION__);
   //toujours des scaled_sprites
-  nb_planes++;
   quads_t q = (quads_t){
 		.vertices = {
       {

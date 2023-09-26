@@ -523,19 +523,19 @@ void game_init(void) {
 
 	srand((int)(platform_now() * 100));
 
-	ui_load();
+	ui_load(); //used everywhere. Better to get them in persistent memory
 	sfx_load();
-	hud_load();
-	ships_load();
-	droid_load();
-	particles_load();
-	weapons_load();
+	// hud_load();
+	// ships_load();
+	// droid_load();
+	// particles_load();
+	// weapons_load();
 
 	global_textures_len = render_textures_len();
 	global_mem_mark = mem_mark();
 
 	sfx_music_mode(SFX_MUSIC_PAUSED);
-	// sfx_music_play(rand_int(0, len(def.music)));
+	sfx_music_play(rand_int(0, len(def.music)));
 
 
 	// System binds; always fixed
@@ -580,7 +580,6 @@ void game_init(void) {
 			input_bind(INPUT_LAYER_USER, save.buttons[action][1], action);
 		}
 	}
-
 
 	game_set_scene(GAME_SCENE_TITLE);
 }

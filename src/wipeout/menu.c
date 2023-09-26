@@ -77,7 +77,7 @@ void menu_page_add_toggle(menu_page_t *page, int data, char *text, const char **
 
 void menu_update(menu_t *menu) {
 	render_set_view_2d();
-	
+
 	error_if(menu->index < 0, "Attempt to update menu without a page");
 	menu_page_t *page = &menu->pages[menu->index];
 
@@ -163,7 +163,7 @@ void menu_update(menu_t *menu) {
 			ui_draw_text_centered(page->title, ui_scaled_pos(page->title_anchor, title_pos), UI_SIZE_12, UI_COLOR_ACCENT);
 		}
 		else {
-			ui_draw_text(page->title, ui_scaled_pos(page->title_anchor, title_pos), UI_SIZE_12, UI_COLOR_ACCENT);	
+			ui_draw_text(page->title, ui_scaled_pos(page->title_anchor, title_pos), UI_SIZE_12, UI_COLOR_ACCENT);
 		}
 
 		page = &menu->pages[menu->index];

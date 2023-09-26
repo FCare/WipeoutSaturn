@@ -92,15 +92,15 @@ void vdp1_init(void)
 void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
 {
   printf(
-    "%dx%d %dx%d %dx%d %dx%d\n",
-    (uint32_t)quad->vertices[0].pos.x,
-    (uint32_t)quad->vertices[0].pos.y,
-    (uint32_t)quad->vertices[1].pos.x,
-    (uint32_t)quad->vertices[1].pos.y,
-    (uint32_t)quad->vertices[2].pos.x,
-    (uint32_t)quad->vertices[2].pos.y,
-    (uint32_t)quad->vertices[3].pos.x,
-    (uint32_t)quad->vertices[3].pos.y
+    "vdp1 add %dx%d %dx%d %dx%d %dx%d\n",
+    (int32_t)quad->vertices[0].pos.x,
+    (int32_t)quad->vertices[0].pos.y,
+    (int32_t)quad->vertices[1].pos.x,
+    (int32_t)quad->vertices[1].pos.y,
+    (int32_t)quad->vertices[2].pos.x,
+    (int32_t)quad->vertices[2].pos.y,
+    (int32_t)quad->vertices[3].pos.x,
+    (int32_t)quad->vertices[3].pos.y
   );
 
   if (nbCommand >= VDP1T_CMD_NB) {
@@ -125,14 +125,14 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
   uint16_t*character = getVdp1VramAddress(texture_index, id, quad, color, &size); //a revoir parce qu'il ne faut copier suivant le UV
   printf(
     "after %dx%d %dx%d %dx%d %dx%d\n",
-    (uint32_t)quad->vertices[0].pos.x,
-    (uint32_t)quad->vertices[0].pos.y,
-    (uint32_t)quad->vertices[1].pos.x,
-    (uint32_t)quad->vertices[1].pos.y,
-    (uint32_t)quad->vertices[2].pos.x,
-    (uint32_t)quad->vertices[2].pos.y,
-    (uint32_t)quad->vertices[3].pos.x,
-    (uint32_t)quad->vertices[3].pos.y
+    (int32_t)quad->vertices[0].pos.x,
+    (int32_t)quad->vertices[0].pos.y,
+    (int32_t)quad->vertices[1].pos.x,
+    (int32_t)quad->vertices[1].pos.y,
+    (int32_t)quad->vertices[2].pos.x,
+    (int32_t)quad->vertices[2].pos.y,
+    (int32_t)quad->vertices[3].pos.x,
+    (int32_t)quad->vertices[3].pos.y
   );
   //Donc il faut transformer le UV en rectangle
   render_texture_t* src = get_tex(texture_index);
