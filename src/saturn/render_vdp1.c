@@ -5,27 +5,28 @@
 #include "vdp1_tex.h"
 #include "tex.h"
 
-#define VDP1T_CMD_NB  61 //Every 64 command Vdp1 draw command will be issued
-#define VDP1_TEX_SIZE (0x7D000)
-
 static uint8_t nbCommand = 0;
 
 vdp1_cmdt_list_t *cmdt_list;
 vdp1_cmdt_t *cmdts;
+uint32_t cmdt_max;
 
 static uint8_t id = 0;
 
 static void cmdt_list_init(void)
 {
-
+  vdp1_vram_partitions_t vdp1_vram_partitions;
   vec2i_t screen = platform_screen_size();
   int16_vec2_t size = {.x=screen.x, .y=screen.y};
   nbCommand = 0;
-  cmdt_list = vdp1_cmdt_list_alloc(VDP1T_CMD_NB+2);
+
+  vdp1_vram_partitions_get(&vdp1_vram_partitions);
+
+  cmdt_max = vdp1_vram_partitions.cmdt_size/sizeof(vdp1_cmdt_t);
+  cmdt_list = vdp1_cmdt_list_alloc(cmdt_max);
   assert(cmdt_list != NULL);
 
-  (void)memset(&(cmdt_list->cmdts[0]), 0x00, sizeof(vdp1_cmdt_t) * (VDP1T_CMD_NB+2));
-
+  (void)memset(&(cmdt_list->cmdts[0]), 0x00, sizeof(vdp1_cmdt_t) * (cmdt_max));
 
   const int16_vec2_t local_coords = INT16_VEC2_INITIALIZER(0,0);
 
@@ -54,12 +55,6 @@ void vdp1_init(void)
 {
   vec2i_t screen = platform_screen_size();
 
-  vdp1_vram_partitions_set(
-      VDP1T_CMD_NB,
-      VDP1_TEX_SIZE,
-      0,
-      0);
-
   init_vdp1_tex();
 
   int16_vec2_t size = {.x=screen.x, .y=screen.y};
@@ -80,12 +75,6 @@ void vdp1_init(void)
 
   vdp2_sprite_priority_set(0, 6);
 
-  vdp1_vram_partitions_set(
-      VDP1T_CMD_NB,
-      VDP1_TEX_SIZE,
-      0,
-      0);
-
   vdp1_sync_interval_set(0);
 }
 
@@ -103,7 +92,7 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
     (int32_t)quad->vertices[3].pos.y
   );
 
-  if (nbCommand >= VDP1T_CMD_NB) {
+  if (nbCommand >= cmdt_max-2) {
     printf("Too much command - Shall flush\n");
     render_vdp1_flush();
   }
