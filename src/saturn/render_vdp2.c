@@ -93,18 +93,12 @@ void set_vdp2_texture(uint16_t texture_index, vec2i_t pos, vec2i_t size, vdp2_la
 }
 
 static void drawVdp2_splash(vdp2_layer_t layer) {
-  volatile rgb1555_t * const vram = layer_ctrl[layer].format.bitmap_base;
-
-  for (uint32_t y = 0; y < 256; y++) {
-          for (uint32_t x = 0; x < 512; x++) {
-                  const uint8_t r = (x < 256) ? x : (255 - x);
-                  const uint8_t g = y;
-                  const uint8_t b = 0;
-
-                  vram[x + (y * 512)] = RGB888_RGB1555(1, r, g, b);
-          }
+  uint16_t title_image = image_get_texture("wipeout/textures/wiptitle.tim");
+  render_texture_t* src = get_tex(title_image);
+  volatile rgb1555_t *dst = layer_ctrl[layer].format.bitmap_base;
+  for (int32_t i = 0; i< src->size.y; i++) {
+    memcpy((void *)&(dst[512*i]), &src->pixels[i*src->size.x], src->size.x*sizeof(rgb1555_t));
   }
-
   layer_ctrl[layer].enable = 1;
   layer_ctrl[layer].dirty = 0;
 }
@@ -121,9 +115,8 @@ void vdp2_init(void)
 {
   printf("Setup vdp2\n");
   vdp_sync_vblank_in_set(_vblank_in_handler, NULL);
-  vec2i_t screen = platform_screen_size();
-  drawVdp2_splash(NBG0);
   setup_vdp2(NBG0);
+  drawVdp2_splash(NBG0);
   vdp2_output_video();
 }
 
