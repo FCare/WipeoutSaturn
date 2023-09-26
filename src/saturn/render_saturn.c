@@ -23,7 +23,7 @@ static mat4_t projection_mat = mat4_identity();
 static mat4_t sprite_mat = mat4_identity();
 
 static void print_mat(mat4_t *m) {
-  printf("[%d %d %d %d]\n      [%d %d %d %d]\n      [%d %d %d %d]\n      [%d %d %d %d]\n",
+  printf("\t[%d %d %d %d]\n\t[%d %d %d %d]\n\t[%d %d %d %d]\n\t[%d %d %d %d]\n",
   (int32_t)(m->m[0]*1000.0),
   (int32_t)(m->m[1]*1000.0),
   (int32_t)(m->m[2]*1000.0),
@@ -52,6 +52,7 @@ void render_init(vec2i_t size) {
   };
   RENDER_NO_TEXTURE = render_texture_create(2, 2, white_pixels);
 
+  render_set_screen_size(screen_size);
   vdp1_init();
   vdp2_init();
 
@@ -60,15 +61,20 @@ void render_cleanup(void){}
 
 void render_set_screen_size(vec2i_t size){
   //Screen is always same size on saturn port
-  float aspect = (float)screen_size.x / (float)screen_size.y;
-  float fov = (73.75 / 180.0) * 3.14159265358;
-  float f = 1.0 / tan(fov / 2);
-  float nf = 1.0 / (NEAR_PLANE - FAR_PLANE);
+  float near = -1.0f;
+  float far = 1.0f;
+  float left = 0.0f;
+  float right = (float)screen_size.x;
+  float bottom = (float)screen_size.y;
+  float top = 0.0f;
+  float lr = 1.0f / (left - right);
+  float bt = 1.0f / (bottom - top);
+  float nf = 1.0f / (near - far);
   projection_mat = mat4(
-    f / aspect, 0, 0, 0,
-    0, f, 0, 0,
-    0, 0, (FAR_PLANE + NEAR_PLANE) * nf, -1,
-    0, 0, 2 * FAR_PLANE * NEAR_PLANE * nf, 0
+    -2.0f * lr,  0.0f,  0.0f,  0.0f,
+    0.0f,  -2.0f * bt,  0.0f,  0.0f,
+    0.0f,        0.0f,  2.0f * nf,    0.0f,
+    (left + right) * lr, (top + bottom) * bt, (far + near) * nf, 1.0f
   );
 }
 void render_set_resolution(render_resolution_t res){
@@ -104,23 +110,7 @@ void render_set_view(vec3_t pos, vec3_t angles){
 }
 void render_set_view_2d(void){
   printf("%s\n", __FUNCTION__);
-
-  float near = -1.0f;
-  float far = 1.0f;
-  float left = 0.0f;
-  float right = (float)screen_size.x;
-  float bottom = (float)screen_size.y;
-  float top = 0.0f;
-  float lr = 1.0f / (left - right);
-  float bt = 1.0f / (bottom - top);
-  float nf = 1.0f / (near - far);
-  mvp_mat = mat4(
-    -2.0f * lr,  0.0f,  0.0f,  0.0f,
-    0.0f,  -2.0f * bt,  0.0f,  0.0f,
-    0.0f,        0.0f,  2.0f * nf,    0.0f,
-    (left + right) * lr, (top + bottom) * bt, (far + near) * nf, 1.0f
-  );
-
+  render_set_model_mat(&mat4_identity());
 }
 void render_set_model_mat(mat4_t *m){
     printf("%s\n", __FUNCTION__);
@@ -128,10 +118,13 @@ void render_set_model_mat(mat4_t *m){
 	mat4_mul(&vm_mat, &view_mat, m);
 	mat4_mul(&mvp_mat, &projection_mat, &vm_mat);
 }
+
 void render_set_depth_write(bool enabled){}
 void render_set_depth_test(bool enabled){}
 void render_set_depth_offset(float offset){}
-void render_set_screen_position(vec2_t pos){}
+void render_set_screen_position(vec2_t pos){
+
+}
 void render_set_blend_mode(render_blend_mode_t mode){}
 void render_set_cull_backface(bool enabled){}
 
@@ -143,10 +136,11 @@ static void render_push_native_quads(quads_t *quad, rgba_t color, uint16_t textu
   float w2 = screen_size.x * 0.5;
   float h2 = screen_size.y * 0.5;
   nb_planes++;
+  printf("MVP =\n");
+  print_mat(&mvp_mat);
   for (int i = 0; i<4; i++) {
     // quad->vertices[i].pos.x += w2;
     // quad->vertices[i].pos.y += h2;
-
     quad->vertices[i].pos = vec3_transform(quad->vertices[i].pos, &mvp_mat);
     //Z-clamp
     if (quad->vertices[i].pos.z >= 1.0) {
@@ -206,15 +200,19 @@ void render_push_tris(tris_t tris, uint16_t texture_index){
   };
 
   printf(
-    " pos %dx%d %dx%d %dx%d %dx%d\n",
+    " pos %dx%dx%d %dx%dx%d %dx%dx%d %dx%dx%d\n",
     (int32_t)q.vertices[0].pos.x,
     (int32_t)q.vertices[0].pos.y,
+    (int32_t)q.vertices[0].pos.z,
     (int32_t)q.vertices[1].pos.x,
     (int32_t)q.vertices[1].pos.y,
+    (int32_t)q.vertices[1].pos.z,
     (int32_t)q.vertices[2].pos.x,
     (int32_t)q.vertices[2].pos.y,
+    (int32_t)q.vertices[2].pos.z,
     (int32_t)q.vertices[3].pos.x,
-    (int32_t)q.vertices[3].pos.y
+    (int32_t)q.vertices[3].pos.y,
+    (int32_t)q.vertices[3].pos.z
   );
   printf(
     " uv %dx%d %dx%d %dx%d %dx%d\n",
