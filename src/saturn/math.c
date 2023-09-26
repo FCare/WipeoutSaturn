@@ -7,11 +7,11 @@ float sqrt(float x) {
 }
 
 float sin(float x) {
-  return (float)fix16_sin((angle_t)RAD2ANGLE(x));
+  return (float)fix16_sin((angle_t)RAD2ANGLE(x))/65536.0f;
 }
 
 float cos(float x) {
-  return (float)fix16_cos((angle_t)RAD2ANGLE(x));
+  return (float)fix16_cos((angle_t)RAD2ANGLE(x))/65536.0f;
 }
 
 float acos(float x) {
