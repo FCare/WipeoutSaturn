@@ -17,7 +17,6 @@ static vdp1_texture_t textures[2][VDP1_TEXTURES_MAX];
 
 static uint8_t* tex[2];
 static uint32_t tex_len[2] = {0};
-static uint32_t max_mem[2] = {0};
 
 static uint16_t textures_len[2] = {0};
 
@@ -27,10 +26,6 @@ static void *vdp1_tex_bump(uint32_t size, uint8_t id) {
 	error_if(tex_len[id] + size >= vdp1_size, "Failed to allocate %d bytes on VDP1 RAM", size);
 	uint8_t *p = &tex[id][tex_len[id]];
 	tex_len[id] += size;
-  if (max_mem[id] < tex_len[id]) {
-    max_mem[id] = tex_len[id];
-    printf("%d Vdp1 Texture Mem => %d kB\n",__LINE__, max_mem[id]/1024);
-  }
 	return p;
 }
 
