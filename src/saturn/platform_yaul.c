@@ -20,14 +20,14 @@ static void setup_fs(void) {
 }
 
 static void controller_update(void) {
-  printf("Update Controller\n");
+  LOGD("Update Controller\n");
   smpc_peripheral_digital_t _digital;
   smpc_peripheral_process(); //A chaque process
   smpc_peripheral_digital_port(1, &_digital);
 
-  if(_digital.held.button.start) printf("START\n");
-  if(_digital.held.button.up) printf("UP\n");
-  if(_digital.held.button.down) printf("DOWN\n");
+  if(_digital.held.button.start) LOGD("START\n");
+  if(_digital.held.button.up) LOGD("UP\n");
+  if(_digital.held.button.down) LOGD("DOWN\n");
 
   input_set_button_state(INPUT_GAMEPAD_DPAD_UP, _digital.held.button.up);
   input_set_button_state(INPUT_GAMEPAD_DPAD_DOWN, _digital.held.button.down);
@@ -45,17 +45,17 @@ static void controller_update(void) {
 void main(void) {
   //Init Saturn
   mem_init();
-  printf("Init filesystem access\n");
+  LOGD("Init filesystem access\n");
   setup_fs();
   //Init game engine
-  printf("Init Game\n");
+  LOGD("Init Game\n");
   system_init();
 
   while (true) {
     //Update controller
     controller_update();
 
-    printf("Update Game\n");
+    LOGD("Update Game\n");
     system_update();
     vdp2_video_sync();
   }
@@ -106,7 +106,7 @@ double platform_now(void) {
   smpc_rtc_time_bcd_from(time, &time_dec);
   uint32_t current = ((uint32_t)time_dec.hours * 3600UL) + ((uint32_t)time_dec.minutes * 60UL) + (uint32_t)time_dec.seconds;
   /* Use SMPC RTC date as a 32-bit seed for the default PRNG */
-  printf("Return time %d\n", current);
+  LOGD("Return time %d\n", current);
   return current;
 }
 
@@ -116,7 +116,7 @@ bool platform_get_fullscreen(void){
 
 void platform_set_fullscreen(bool fullscreen __attribute__((unused))) {
 //Always fullscreen on saturn
-  printf("Set fullscreen\n");
+  LOGD("Set fullscreen\n");
 };
 
 void platform_set_audio_mix_cb(void (*cb)(float *buffer, uint32_t len)) {
@@ -171,7 +171,7 @@ static cdfs_filelist_entry_t* getEntry(const char *file) {
 }
 
 uint8_t *platform_load_asset(const char *name, uint32_t *bytes_read) {
-  printf("Load asset %s\n", name);
+  LOGD("Load asset %s\n", name);
   int ret __unused;
   cdfs_filelist_entry_t *file_entry = getEntry(name);
   uint8_t *bytes = (uint8_t *)mem_temp_alloc(file_entry->size);

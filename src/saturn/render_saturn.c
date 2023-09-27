@@ -23,7 +23,7 @@ static mat4_t projection_mat = mat4_identity();
 static mat4_t sprite_mat = mat4_identity();
 
 static void print_mat(mat4_t *m) {
-  printf("\t[%d %d %d %d]\n\t[%d %d %d %d]\n\t[%d %d %d %d]\n\t[%d %d %d %d]\n",
+  LOGD("\t[%d %d %d %d]\n\t[%d %d %d %d]\n\t[%d %d %d %d]\n\t[%d %d %d %d]\n",
   (int32_t)(m->m[0]*1000.0),
   (int32_t)(m->m[1]*1000.0),
   (int32_t)(m->m[2]*1000.0),
@@ -89,17 +89,17 @@ vec2i_t render_size(void){
 void render_frame_prepare(void){
   //Function called every frame need to prepare render list
   //Faire un clear screen a chaque frame (VDP1 VBlank Erase)?
-  printf("%s\n", __FUNCTION__);
+  LOGD("%s\n", __FUNCTION__);
 }
 void render_frame_end(void){
   //On peut lancer la queue.
-  printf("%s\n", __FUNCTION__);
+  LOGD("%s\n", __FUNCTION__);
   nb_planes = 0;
   render_vdp1_flush();
 }
 
 void render_set_view(vec3_t pos, vec3_t angles){
-    printf("%s\n", __FUNCTION__);
+    LOGD("%s\n", __FUNCTION__);
   view_mat = mat4_identity();
   mat4_set_translation(&view_mat, vec3(0, 0, 0));
   mat4_set_roll_pitch_yaw(&view_mat, vec3(angles.x, -angles.y + M_PI, angles.z + M_PI));
@@ -109,11 +109,11 @@ void render_set_view(vec3_t pos, vec3_t angles){
   render_set_model_mat(&mat4_identity());
 }
 void render_set_view_2d(void){
-  printf("%s\n", __FUNCTION__);
+  LOGD("%s\n", __FUNCTION__);
   render_set_model_mat(&mat4_identity());
 }
 void render_set_model_mat(mat4_t *m){
-    printf("%s\n", __FUNCTION__);
+    LOGD("%s\n", __FUNCTION__);
   mat4_t vm_mat;
 	mat4_mul(&vm_mat, &view_mat, m);
 	mat4_mul(&mvp_mat, &projection_mat, &vm_mat);
@@ -136,7 +136,7 @@ static void render_push_native_quads(quads_t *quad, rgba_t color, uint16_t textu
   float w2 = screen_size.x * 0.5;
   float h2 = screen_size.y * 0.5;
   nb_planes++;
-  printf("MVP =\n");
+  LOGD("MVP =\n");
   print_mat(&mvp_mat);
   for (int i = 0; i<4; i++) {
     // quad->vertices[i].pos.x += w2;
@@ -144,7 +144,7 @@ static void render_push_native_quads(quads_t *quad, rgba_t color, uint16_t textu
     quad->vertices[i].pos = vec3_transform(quad->vertices[i].pos, &mvp_mat);
     //Z-clamp
     if (quad->vertices[i].pos.z >= 1.0) {
-      printf("discard due to Z=%d\n", (uint32_t)quad->vertices[i].pos.z);
+      LOGD("discard due to Z=%d\n", (uint32_t)quad->vertices[i].pos.z);
       return;
     }
     quad->vertices[i].pos.x = quad->vertices[i].pos.x * w2 + w2;
@@ -155,16 +155,16 @@ static void render_push_native_quads(quads_t *quad, rgba_t color, uint16_t textu
 }
 
 void render_push_quads(quads_t *quad, uint16_t texture_index) {
-  printf("%s\n", __FUNCTION__);
+  LOGD("%s\n", __FUNCTION__);
   render_push_native_quads(quad, rgba(128,128,128,255), texture_index);
 }
 
 void render_push_stripe(quads_t *quad, uint16_t texture_index) {
-  printf("%s\n", __FUNCTION__);
+  LOGD("%s\n", __FUNCTION__);
   for (int i = 0; i<4; i++) {
     quad->vertices[i].pos = vec3_transform(quad->vertices[i].pos, &mvp_mat);
     if (quad->vertices[i].pos.z >= 1.0) {
-      printf("discard due to Z=%d\n", (uint32_t)quad->vertices[i].pos.z);
+      LOGD("discard due to Z=%d\n", (uint32_t)quad->vertices[i].pos.z);
       return;
     }
   }
@@ -177,8 +177,8 @@ void render_push_stripe(quads_t *quad, uint16_t texture_index) {
 }
 
 void render_push_tris(tris_t tris, uint16_t texture_index){
-  printf("%s\n", __FUNCTION__);
-  printf(
+  LOGD("%s\n", __FUNCTION__);
+  LOGD(
     " pos %dx%d %dx%d %dx%d\n",
     (int32_t)tris.vertices[0].pos.x,
     (int32_t)tris.vertices[0].pos.y,
@@ -187,7 +187,7 @@ void render_push_tris(tris_t tris, uint16_t texture_index){
     (int32_t)tris.vertices[2].pos.x,
     (int32_t)tris.vertices[2].pos.y
   );
-  printf(
+  LOGD(
     " uv %dx%d %dx%d %dx%d\n",
     (int32_t)tris.vertices[0].uv.x,
     (int32_t)tris.vertices[0].uv.y,
@@ -202,7 +202,7 @@ void render_push_tris(tris_t tris, uint16_t texture_index){
     }
   };
 
-  printf(
+  LOGD(
     " pos %dx%dx%d %dx%dx%d %dx%dx%d %dx%dx%d\n",
     (int32_t)q.vertices[0].pos.x,
     (int32_t)q.vertices[0].pos.y,
@@ -217,7 +217,7 @@ void render_push_tris(tris_t tris, uint16_t texture_index){
     (int32_t)q.vertices[3].pos.y,
     (int32_t)q.vertices[3].pos.z
   );
-  printf(
+  LOGD(
     " uv %dx%d %dx%d %dx%d %dx%d\n",
     (int32_t)q.vertices[0].uv.x,
     (int32_t)q.vertices[0].uv.y,
@@ -233,7 +233,7 @@ void render_push_tris(tris_t tris, uint16_t texture_index){
 }
 
 void render_push_sprite(vec3_t pos, vec2i_t size, rgba_t color, uint16_t texture_index){
-  printf("%s\n", __FUNCTION__);
+  LOGD("%s\n", __FUNCTION__);
   vec3_t p0 = vec3_add(pos, vec3_transform(vec3(-size.x * 0.5, -size.y * 0.5, 0), &sprite_mat));
   vec3_t p1 = vec3_add(pos, vec3_transform(vec3( size.x * 0.5, -size.y * 0.5, 0), &sprite_mat));
   vec3_t p2 = vec3_add(pos, vec3_transform(vec3(-size.x * 0.5,  size.y * 0.5, 0), &sprite_mat));
@@ -251,12 +251,12 @@ void render_push_sprite(vec3_t pos, vec2i_t size, rgba_t color, uint16_t texture
   render_push_native_quads(&q, color, texture_index);
 }
 void render_push_2d(vec2i_t pos, vec2i_t size, rgba_t color, uint16_t texture){
-  printf("%s\n", __FUNCTION__);
+  LOGD("%s\n", __FUNCTION__);
   vec2i_t tex_size = render_texture_size(texture);
   //toujours des normals sprites ou du vdp2
   //If it is the first one, use a vdp2 surface to render
   //Can use NBG0 and NBG1, with Sprite in between based on priority (to be optimized later)
-  printf("Size = %dx%d Texture=%dx%d\n", size.x, size.y, tex_size.x, tex_size.y);
+  LOGD("Size = %dx%d Texture=%dx%d\n", size.x, size.y, tex_size.x, tex_size.y);
   if ((nb_planes == 0) && (size.x == tex_size.x) && (size.y == tex_size.y)) {
     nb_planes++;
     set_vdp2_texture(texture, pos, size, NBG0);
@@ -265,7 +265,7 @@ void render_push_2d(vec2i_t pos, vec2i_t size, rgba_t color, uint16_t texture){
   }
 }
 void render_push_2d_tile(vec2i_t pos, vec2i_t uv_offset, vec2i_t uv_size, vec2i_t size, rgba_t color, uint16_t texture_index){
-  printf("%s\n", __FUNCTION__);
+  LOGD("%s\n", __FUNCTION__);
   //toujours des scaled_sprites
   quads_t q = (quads_t){
 		.vertices = {
@@ -291,7 +291,7 @@ void render_push_2d_tile(vec2i_t pos, vec2i_t uv_offset, vec2i_t uv_size, vec2i_
       },
 		}
 	};
-  printf(
+  LOGD(
     " pos %dx%d %dx%d %dx%d %dx%d\n",
     (int32_t)q.vertices[0].pos.x,
     (int32_t)q.vertices[0].pos.y,
@@ -302,7 +302,7 @@ void render_push_2d_tile(vec2i_t pos, vec2i_t uv_offset, vec2i_t uv_size, vec2i_
     (int32_t)q.vertices[3].pos.x,
     (int32_t)q.vertices[3].pos.y
   );
-  printf(
+  LOGD(
     " uv %dx%d %dx%d %dx%d %dx%d\n",
     (int32_t)q.vertices[0].uv.x,
     (int32_t)q.vertices[0].uv.y,
@@ -328,8 +328,8 @@ static inline rgb1555_t convert_to_rgb(rgba_t val) {
 
 uint16_t render_texture_create(uint32_t width, uint32_t height, rgba_t *pixels){
   uint32_t byte_size = width * height * sizeof(rgb1555_t);
-  printf("Need %d kB\n", byte_size/1024);
-  printf("Create Texture(%dx%d)\n", width, height);
+  LOGD("Need %d kB\n", byte_size/1024);
+  LOGD("Create Texture(%dx%d)\n", width, height);
   rgb1555_t *buffer = (rgb1555_t *)tex_bump(byte_size);
 
   for (uint32_t i=0; i<width*height; i++) {
@@ -339,11 +339,11 @@ uint16_t render_texture_create(uint32_t width, uint32_t height, rgba_t *pixels){
 	return allocate_tex(width, height, buffer);
 }
 vec2i_t render_texture_size(uint16_t texture){
-  printf("%s\n", __FUNCTION__);
+  LOGD("%s\n", __FUNCTION__);
   return get_tex(texture)->size;
 }
 void render_texture_replace_pixels(uint16_t texture_index, rgba_t *pixels){
-  printf("%s\n", __FUNCTION__);
+  LOGD("%s\n", __FUNCTION__);
   render_texture_t *t = get_tex(texture_index);
   for (int i=0; i<t->size.x*t->size.y; i++) {
     t->pixels[i] = convert_to_rgb(pixels[i]);
@@ -353,8 +353,8 @@ uint16_t render_textures_len(void){
   return tex_length();
 }
 void render_textures_reset(uint16_t len){
-  printf("%s %d\n", __FUNCTION__ , len);
+  LOGD("%s %d\n", __FUNCTION__ , len);
   tex_reset(len);
   render_vdp1_clear();
 }
-void render_textures_dump(const char *path){printf("%s\n", __FUNCTION__); }
+void render_textures_dump(const char *path){LOGD("%s\n", __FUNCTION__); }

@@ -81,7 +81,7 @@ void vdp1_init(void)
 
 void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
 {
-  printf(
+  LOGD(
     "vdp1 add %dx%d %dx%d %dx%d %dx%d\n",
     (int32_t)quad->vertices[0].pos.x,
     (int32_t)quad->vertices[0].pos.y,
@@ -94,11 +94,11 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
   );
 
   if (nbCommand >= cmdt_max-2) {
-    printf("Too much command - Shall flush\n");
+    LOGD("Too much command - Shall flush\n");
     render_vdp1_flush();
   }
   if (canAllocateVdp1(texture_index, id, quad) == 0) {
-    printf("can not allocate - Shall flush\n");
+    LOGD("can not allocate - Shall flush\n");
     render_vdp1_flush();
   }
 
@@ -122,7 +122,7 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
 
   vec2i_t size;
   uint16_t*character = getVdp1VramAddress(texture_index, id, quad, &size); //a revoir parce qu'il ne faut copier suivant le UV
-  printf(
+  LOGD(
     "after %dx%d %dx%d %dx%d %dx%d\n",
     (int32_t)quad->vertices[0].pos.x,
     (int32_t)quad->vertices[0].pos.y,
@@ -165,7 +165,7 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
   cmd->cmd_xd = (uint32_t)quad->vertices[3].pos.x;
   cmd->cmd_yd = (uint32_t)quad->vertices[3].pos.y;
 
-  printf("####Add CMD########\n");
+  LOGD("####Add CMD########\n");
 
   nbCommand++;
 }
@@ -175,7 +175,7 @@ void render_vdp1_flush(void) {
   //Set the last command as end
   if (nbCommand > 0) vdp1_cmdt_end_set(&cmdts[nbCommand]);
   cmdt_list->count = nbCommand+3;
-  printf("List count = %d\n", cmdt_list->count);
+  LOGD("List count = %d\n", cmdt_list->count);
   vdp1_sync_cmdt_list_put(cmdt_list, 0);
   id = (id+1)%2;
   reset_vdp1_pool(id);

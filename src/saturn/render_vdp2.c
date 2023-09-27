@@ -113,7 +113,7 @@ static void vdp2_output_video() {
 
 void vdp2_init(void)
 {
-  printf("Setup vdp2\n");
+  LOGD("Setup vdp2\n");
   vdp_sync_vblank_in_set(_vblank_in_handler, NULL);
   setup_vdp2(NBG0);
   drawVdp2_splash(NBG0);
@@ -139,7 +139,7 @@ static void _vblank_in_handler(void *work __unused)
     if (ctrl->dirty != 0) {
       render_texture_t* src = get_tex(ctrl->texture);
       volatile rgb1555_t *dst = ctrl->format.bitmap_base + ctrl->pos.y*512+ ctrl->pos.x;
-      printf("&&&&&&&&&&&&&&& Texture vdp2!!!!!!!!!!!!!!!!ééééééééé\n");
+      LOGD("&&&&&&&&&&&&&&& Texture vdp2!!!!!!!!!!!!!!!!ééééééééé\n");
       for (int32_t i = 0; i< src->size.y; i++) {
         memcpy((void *)&(dst[512*i]), &src->pixels[i*src->size.x], src->size.x*sizeof(rgb1555_t));
       }

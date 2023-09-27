@@ -54,7 +54,9 @@ include $(YAUL_INSTALL_ROOT)/share/build.pre.mk
 
 ifeq ($(DEBUG), ON)
 NO_SFX=ON
-USER_CFLAGS += -DDEBUG_PRINT
+USER_CFLAGS += -DDEBUG_PRINT -DLOGD="printf"
+else
+USER_CFLAGS += -DLOGD=""
 endif
 
 SH_LIBRARIES:=

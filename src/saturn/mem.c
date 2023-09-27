@@ -37,7 +37,7 @@ void *mem_bump(uint32_t size) {
 	memset(p, 0, size);
   if (max_mem < bump_len) {
     max_mem = bump_len;
-    printf("%d Persistent Mem => %d kB\n",__LINE__, max_mem/1024);
+    LOGD("%d Persistent Mem => %d kB\n",__LINE__, max_mem/1024);
   }
 	return p;
 }
@@ -48,7 +48,7 @@ void mem_reset(void *p) {
 	bump_len = offset;
   if (max_mem < bump_len) {
     max_mem = bump_len;
-    printf("%d Persistent Mem => %d kB\n",__LINE__, max_mem/1024);
+    LOGD("%d Persistent Mem => %d kB\n",__LINE__, max_mem/1024);
   }
 }
 
@@ -70,7 +70,7 @@ void *mem_temp_alloc(uint32_t size) {
 	temp_objects[temp_objects_len++] = temp_len;
   if (max_mem < temp_len) {
     max_mem = temp_len;
-    printf("%d temp Mem => %d kB\n",__LINE__, max_mem/1024);
+    LOGD("%d temp Mem => %d kB\n",__LINE__, max_mem/1024);
   }
 	return p;
 }
@@ -94,7 +94,7 @@ void mem_temp_free(void *p) {
 	temp_len = remaining_max;
   if (max_mem < temp_len) {
     max_mem = temp_len;
-    printf("%d temp Mem => %d kB\n",__LINE__, max_mem/1024);
+    LOGD("%d temp Mem => %d kB\n",__LINE__, max_mem/1024);
   }
 }
 
