@@ -13,6 +13,10 @@ extern void mem_init(void);
 
 static cdfs_filelist_t _filelist;
 
+static double framenb = 0;
+
+static double fps = 59.94;
+
 static void setup_fs(void) {
   cdfs_filelist_entry_t * const filelist_entries = cdfs_entries_alloc(-1);
   assert(filelist_entries != NULL);
@@ -66,6 +70,7 @@ void main(void) {
 
 static void _vblank_out_handler(void *work __unused)
 {
+    framenb++;
     smpc_peripheral_process(); //A chaque process
 }
 
@@ -101,14 +106,7 @@ vec2i_t platform_screen_size(void) {
 }
 
 double platform_now(void) {
-  const smpc_time_t * const time = smpc_rtc_time_get();
-  smpc_time_dec_t time_dec;
-  smpc_peripheral_process(); //A chaque process
-  smpc_rtc_time_bcd_from(time, &time_dec);
-  uint32_t current = ((uint32_t)time_dec.hours * 3600UL) + ((uint32_t)time_dec.minutes * 60UL) + (uint32_t)time_dec.seconds;
-  /* Use SMPC RTC date as a 32-bit seed for the default PRNG */
-  LOGD("Return time %d\n", current);
-  return current;
+  return framenb/fps;
 }
 
 bool platform_get_fullscreen(void){
