@@ -11,7 +11,6 @@ typedef struct {
 	vec2_t uv[4];
 	rgb1555_t *pixels;
 	uint8_t used;
-	rgba_t color;
 } vdp1_texture_t;
 
 static vdp1_texture_t textures[2][VDP1_TEXTURES_MAX];
@@ -63,7 +62,7 @@ static uint8_t isSameColor(rgba_t a, rgba_t b) {
 }
 
 
-uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *quad, rgba_t color, vec2i_t *size) {
+uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *quad, vec2i_t *size) {
 	render_texture_t* src = get_tex(texture_index);
 	int orig_w = quad->vertices[1].uv.x - quad->vertices[0].uv.x;
 	int h = quad->vertices[3].uv.y - quad->vertices[0].uv.y;
@@ -97,32 +96,14 @@ uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *quad, 
 		textures[id][textures_len[id]].uv[i].y = quad->vertices[i].uv.y;
 	}
   textures[id][textures_len[id]].index = texture_index;
-	textures[id][textures_len[id]].color = color;
   textures[id][textures_len[id]].size = *size;
   textures[id][textures_len[id]].pixels = vdp1_tex_bump(length, id);
 	rgb1555_t *src_buf = &src->pixels[(int32_t)quad->vertices[0].uv.y * src->size.x + (int32_t)quad->vertices[0].uv.x];
 	printf("&&&&&&&&&&&&&&& Texture vdp1!!!!!!!!!!!!!!!!ééééééééé\n");
-	// if (((color.r>>3) == 0)&&((color.g>>3) == 0)&&((color.b>>3) == 0)) {
-		// for (int i = 0; i<h; i++) {
-		// 	memcpy(&textures[id][textures_len[id]].pixels[i*w], &src_buf[i*src->size.x], orig_w*sizeof(rgb1555_t));
-		// 	memset(&textures[id][textures_len[id]].pixels[i*w+orig_w], 0, (w-orig_w)*sizeof(rgb1555_t));
-		// }
-	// } else {
-		for (int i = 0; i<h; i++) {
-			for (int j = 0; j<orig_w; j++) {
-				rgb1555_t *dst = &textures[id][textures_len[id]].pixels[i*w+j];
-				*dst = src_buf[i*src->size.x+j];
-				// if ((dst->msb != 0) || (dst->r != 0) || (dst->g!=0) || (dst->b != 0)) {
-				// 	dst->r *= (color.r/255.0)*2.0;
-				// 	dst->g *= (color.g/255.0)*2.0;
-				// 	dst->b *= (color.b/255.0)*2.0;
-				// }
-			}
-			for (int j = orig_w; j<w; j++) {
-				textures[id][textures_len[id]].pixels[i*w+j] = (rgb1555_t){.msb=0,.r=0,.g=0,.b=0};
-			}
-		}
-	// }
+	for (int i = 0; i<h; i++) {
+		memcpy(&textures[id][textures_len[id]].pixels[i*w], &src_buf[i*src->size.x], orig_w*sizeof(rgb1555_t));
+		memset(&textures[id][textures_len[id]].pixels[i*w+orig_w], 0, (w-orig_w)*sizeof(rgb1555_t));
+	}
   return textures[id][textures_len[id]++].pixels;
 }
 

@@ -108,12 +108,20 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
           .pre_clipping_disable = true,
           .end_code_disable     = false
   };
+  const vdp1_cmdt_draw_mode_t draw_mode_gouraud = {
+          .color_mode           = VDP1_CMDT_CM_RGB_32768,
+          .trans_pixel_disable  = true,
+          .pre_clipping_disable = true,
+          .end_code_disable     = false,
+          .cc_mode              = VDP1_CMDT_CC_GOURAUD
+  };
+
 
   vdp1_cmdt_t *cmd = &cmdts[nbCommand];
   memset(cmd, 0x0, sizeof(vdp1_cmdt_t));
 
   vec2i_t size;
-  uint16_t*character = getVdp1VramAddress(texture_index, id, quad, color, &size); //a revoir parce qu'il ne faut copier suivant le UV
+  uint16_t*character = getVdp1VramAddress(texture_index, id, quad, &size); //a revoir parce qu'il ne faut copier suivant le UV
   printf(
     "after %dx%d %dx%d %dx%d %dx%d\n",
     (int32_t)quad->vertices[0].pos.x,
@@ -133,16 +141,17 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
   vdp1_cmdt_char_size_set(cmd, size.x, size.y);
   vdp1_cmdt_char_base_set(cmd, character);
 
-  if ((color.r != 0) || (color.g != 0) || (color.b != 0)) {
+  rgb1555_t gouraud = RGB1555(1, color.r>>3,  color.g>>3,  color.b>>3);
+  if ((gouraud.r != 0x10) || (gouraud.g != 0x10) || (gouraud.b != 0x10)) {
     //apply gouraud
     vdp1_gouraud_table_t *gouraud_base;
-    rgb1555_t gouraud = RGB1555(1, color.r,  color.g,  color.b);
     gouraud_base = &_vdp1_vram_partitions.gouraud_base[gouraud_cmd];
     gouraud_base->colors[0] = gouraud;
     gouraud_base->colors[1] = gouraud;
     gouraud_base->colors[2] = gouraud;
     gouraud_base->colors[3] = gouraud;
     gouraud_cmd++;
+    vdp1_cmdt_draw_mode_set(cmd, draw_mode_gouraud);
 
    vdp1_cmdt_gouraud_base_set(cmd, (uint32_t)gouraud_base);
   }
