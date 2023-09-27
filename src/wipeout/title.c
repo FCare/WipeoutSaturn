@@ -7,9 +7,12 @@
 #include "image.h"
 #include "game.h"
 
+extern bool blink(void);
+
 static uint16_t title_image;
 static float start_time;
 static bool has_shown_attract = false;
+
 
 void title_init(void) {
 	title_image = image_get_texture("wipeout/textures/wiptitle.tim");
@@ -20,12 +23,16 @@ void title_init(void) {
 void title_update(void) {
 	render_set_view_2d();
 	render_push_2d(vec2i(0, 0), render_size(), rgba(128, 128, 128, 255), title_image);
-	ui_draw_text_centered("PRESS START", ui_scaled_pos(UI_POS_BOTTOM | UI_POS_CENTER, vec2i(0, -40)), UI_SIZE_8, UI_COLOR_DEFAULT);
 
+	rgba_t text_color = UI_COLOR_DEFAULT;
 
 	if (input_pressed(A_MENU_SELECT) || input_pressed(A_MENU_START)) {
 		sfx_play(SFX_MENU_SELECT);
 		game_set_scene(GAME_SCENE_MAIN_MENU);
+		ui_draw_text_centered("LOADING", ui_scaled_pos(UI_POS_BOTTOM | UI_POS_CENTER, vec2i(0, -40)), UI_SIZE_8, text_color);
+	} else {
+		if (blink()) text_color = UI_COLOR_ACCENT;
+		ui_draw_text_centered("PRESS START", ui_scaled_pos(UI_POS_BOTTOM | UI_POS_CENTER, vec2i(0, -40)), UI_SIZE_8, text_color);
 	}
 
 	float duration = system_time() - start_time;
