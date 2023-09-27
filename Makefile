@@ -30,6 +30,7 @@ SFX_SRC= 	src/wipeout/sfx.c
 ifeq ($(PORT), Saturn)
 # DEBUG=ON PORT=Saturn make -j16 -C ..
 DEBUG?=OFF
+ERROR_MSG?=OFF
 
 NO_SFX?=OFF
 
@@ -52,10 +53,14 @@ SH_SPECS:= yaul.specs yaul-main.specs src/saturn/wipeout.specs
 
 include $(YAUL_INSTALL_ROOT)/share/build.pre.mk
 
+
 ifeq ($(DEBUG), ON)
 NO_SFX=ON
 USER_CFLAGS += -DDEBUG_PRINT -DLOGD="printf"
 else
+ifeq ($(ERROR_MSG), ON)
+USER_CFLAGS += -DDEBUG_PRINT
+endif
 USER_CFLAGS += -DLOGD=""
 endif
 

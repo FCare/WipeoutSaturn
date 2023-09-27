@@ -469,7 +469,6 @@ void object_draw(Object *object, mat4_t *mat) {
 		int coord1;
 		int coord2;
 		int coord3;
-		printf("Render type %d\n", poly.primitive->type);
 		switch (poly.primitive->type) {
 		case PRM_TYPE_GT3:
 			coord0 = poly.gt3->coords[0];
