@@ -186,3 +186,7 @@ void render_vdp1_flush(void) {
   vdp1_sync();
   vdp1_sync_wait();
 }
+
+void render_vdp1_clear(void) {
+  clear_vdp1_pool();
+}

@@ -355,5 +355,6 @@ uint16_t render_textures_len(void){
 void render_textures_reset(uint16_t len){
   printf("%s %d\n", __FUNCTION__ , len);
   tex_reset(len);
+  render_vdp1_clear();
 }
 void render_textures_dump(const char *path){printf("%s\n", __FUNCTION__); }

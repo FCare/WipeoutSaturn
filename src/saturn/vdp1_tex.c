@@ -144,3 +144,13 @@ void reset_vdp1_pool(uint8_t id) {
 		tex_len[id] = (uint32_t)(&textures[id][id_reset].pixels[textures[id][id_reset].size.x*textures[id][id_reset].size.y] - &textures[id][0].pixels[0]);
 	}
 }
+
+void clear_vdp1_pool(void) {
+	for (int id = 0; id < 2; id++){
+		for (int i = 0; i<textures_len[id]; i++) {
+			textures[id][i].used = 0;
+		}
+		textures_len[id] = 0;
+		tex_len[id] = 0;
+	}
+}
