@@ -24,8 +24,9 @@ void tex_reset(uint16_t len) {
 	tex_len = 0;
 	if (len != 0) {
 		error_if((len > textures_len) || (len > MEM_HUNK_BYTES), "Invalid tex reset");
-		rgb1555_t *new_end = (rgb1555_t *)&textures[len].pixels[textures[len-1].size.x*textures[len].size.y];
-		tex_len = (uint16_t)((uint32_t)new_end - (uint32_t)&tex[0]);
+		render_texture_t * last_texture = &textures[len-1];
+		rgb1555_t *new_end = (rgb1555_t *)&last_texture->pixels[last_texture->size.x*last_texture->size.y];
+		tex_len = (uint32_t)new_end - (uint32_t)&tex[0];
 	}
 	textures_len = len;
 }
