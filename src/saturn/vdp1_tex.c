@@ -67,8 +67,12 @@ uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *quad, 
 	int orig_w = quad->vertices[1].uv.x - quad->vertices[0].uv.x;
 	int h = quad->vertices[3].uv.y - quad->vertices[0].uv.y;
 
+	assert(orig_w >= 0);
+	assert(h >= 0);
 	//workaround. need to find a fix
 	int w = (orig_w+7) & ~0x7; //Align on upper 8
+
+	uint32_t length = w*h*sizeof(rgb1555_t);
 
 	*size = vec2i(w,h);
 
@@ -80,16 +84,15 @@ uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *quad, 
 		quad->vertices[2].pos.x += (quad->vertices[2].pos.x - quad->vertices[0].pos.x)*ratioX;
 	}
 
-  // for (uint16_t i=0; i<textures_len[id]; i++) {
-  //   if ((textures[id][i].index == texture_index) && isSameUv(textures[id][i].uv, quad))
-	// 	{
-	// 		textures[id][i].used = 1;
-	// 			printf("&&&&&&&&&&&&&&& Texture vdp1 reused :-) :-) :-)\n");
-  //     return textures[id][i].pixels;
-  //   }
-  // }
+  for (uint16_t i=0; i<textures_len[id]; i++) {
+    if ((textures[id][i].index == texture_index) && isSameUv(textures[id][i].uv, quad))
+		{
+			textures[id][i].used = 1;
+				printf("&&&&&&&&&&&&&&& Texture vdp1 reused :-) :-) :-)\n");
+      return textures[id][i].pixels;
+    }
+  }
   //Not found, bump a new one
-  uint32_t length = w*h*sizeof(rgb1555_t);
 	textures[id][textures_len[id]].used = 1;
 	for (int i = 0; i<4; i++) {
 		textures[id][textures_len[id]].uv[i].x = quad->vertices[i].uv.x;
