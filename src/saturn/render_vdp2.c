@@ -83,22 +83,34 @@ void set_vdp2_texture(uint16_t texture_index, vec2i_t pos, vec2i_t size, vdp2_la
      (layer_ctrl[layer].pos.x != pos.x) ||
      (layer_ctrl[layer].pos.y != pos.y) ||
      (layer_ctrl[layer].size.x != size.x) ||
-     (layer_ctrl[layer].size.y != size.y)) {
+     (layer_ctrl[layer].size.y != size.y))
+     {
        layer_ctrl[layer].texture = texture_index;
        layer_ctrl[layer].pos = pos;
        layer_ctrl[layer].size = size;
        layer_ctrl[layer].dirty = 1;
      }
+  printf("Layer %d is used\n", layer);
   layer_ctrl[layer].enable = 1;
 }
 
-static void drawVdp2_splash(vdp2_layer_t layer) {
-  uint16_t title_image = image_get_texture("wipeout/textures/wiptitle.tim");
-  render_texture_t* src = get_tex(title_image);
+void render_vdp2_clear(void) {
+  for (int layer = 0; layer< LAYER_NB; layer++) {
+    layer_ctrl[layer].texture = 0xFFFF;
+  }
+}
+
+static void updateLayerImage(uint16_t texture, vdp2_layer_t layer) {
+  render_texture_t* src = get_tex(texture);
   volatile rgb1555_t *dst = layer_ctrl[layer].format.bitmap_base;
   for (int32_t i = 0; i< src->size.y; i++) {
     memcpy((void *)&(dst[512*i]), &src->pixels[i*src->size.x], src->size.x*sizeof(rgb1555_t));
   }
+}
+
+static void drawVdp2_splash(vdp2_layer_t layer) {
+  uint16_t title_image = image_get_texture("wipeout/textures/wiptitle.tim");
+  updateLayerImage(title_image, layer);
   layer_ctrl[layer].enable = 1;
   layer_ctrl[layer].dirty = 0;
 }
@@ -137,12 +149,7 @@ static void _vblank_in_handler(void *work __unused)
     layer_ctrl_t* ctrl = &layer_ctrl[i];
     val &= ~ctrl->format.scroll_screen;
     if (ctrl->dirty != 0) {
-      render_texture_t* src = get_tex(ctrl->texture);
-      volatile rgb1555_t *dst = ctrl->format.bitmap_base + ctrl->pos.y*512+ ctrl->pos.x;
-      LOGD("&&&&&&&&&&&&&&& Texture vdp2!!!!!!!!!!!!!!!!ééééééééé\n");
-      for (int32_t i = 0; i< src->size.y; i++) {
-        memcpy((void *)&(dst[512*i]), &src->pixels[i*src->size.x], src->size.x*sizeof(rgb1555_t));
-      }
+      updateLayerImage(ctrl->texture, i);
       ctrl->dirty = 0;
     }
     if (ctrl->enable != 0) {

@@ -526,7 +526,7 @@ void game_init(void) {
 	ui_load(); //used everywhere. Better to get them in persistent memory
 	sfx_load();
 	// hud_load();
-	// ships_load();
+	ships_load();
 	// droid_load();
 	// particles_load();
 	// weapons_load();

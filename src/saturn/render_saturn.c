@@ -356,5 +356,6 @@ void render_textures_reset(uint16_t len){
   LOGD("%s %d\n", __FUNCTION__ , len);
   tex_reset(len);
   render_vdp1_clear();
+  render_vdp2_clear();
 }
 void render_textures_dump(const char *path){LOGD("%s\n", __FUNCTION__); }
