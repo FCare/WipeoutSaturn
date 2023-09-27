@@ -20,26 +20,27 @@ static void setup_fs(void) {
 }
 
 static void controller_update(void) {
+  smpc_peripheral_digital_t ctrl_state;
   LOGD("Update Controller\n");
-  smpc_peripheral_digital_t _digital;
-  smpc_peripheral_process(); //A chaque process
-  smpc_peripheral_digital_port(1, &_digital);
+  smpc_peripheral_digital_port(1, &ctrl_state);
+  smpc_peripheral_intback_issue();
 
-  if(_digital.held.button.start) LOGD("START\n");
-  if(_digital.held.button.up) LOGD("UP\n");
-  if(_digital.held.button.down) LOGD("DOWN\n");
+  if(ctrl_state.pressed.button.start) LOGD("START\n");
+  if(ctrl_state.pressed.button.up) LOGD("UP\n");
+  if(ctrl_state.pressed.button.down) LOGD("DOWN\n");
 
-  input_set_button_state(INPUT_GAMEPAD_DPAD_UP, _digital.held.button.up);
-  input_set_button_state(INPUT_GAMEPAD_DPAD_DOWN, _digital.held.button.down);
-  input_set_button_state(INPUT_GAMEPAD_DPAD_LEFT, _digital.held.button.left);
-  input_set_button_state(INPUT_GAMEPAD_DPAD_RIGHT, _digital.held.button.right);
-  input_set_button_state(INPUT_GAMEPAD_START, _digital.held.button.start);
-  input_set_button_state(INPUT_GAMEPAD_A, _digital.held.button.b);
-  input_set_button_state(INPUT_GAMEPAD_B, _digital.held.button.a);
-  input_set_button_state(INPUT_GAMEPAD_X, _digital.held.button.y);
-  input_set_button_state(INPUT_GAMEPAD_Y, _digital.held.button.x);
-  input_set_button_state(INPUT_GAMEPAD_L_SHOULDER, _digital.held.button.l);
-  input_set_button_state(INPUT_GAMEPAD_R_SHOULDER, _digital.held.button.r);
+  input_set_button_state(INPUT_GAMEPAD_DPAD_UP, ctrl_state.pressed.button.up);
+  input_set_button_state(INPUT_GAMEPAD_DPAD_DOWN, ctrl_state.pressed.button.down);
+  input_set_button_state(INPUT_GAMEPAD_DPAD_LEFT, ctrl_state.pressed.button.left);
+  input_set_button_state(INPUT_GAMEPAD_DPAD_RIGHT, ctrl_state.pressed.button.right);
+  input_set_button_state(INPUT_GAMEPAD_START, ctrl_state.pressed.button.start);
+  input_set_button_state(INPUT_GAMEPAD_A, ctrl_state.pressed.button.b);
+  input_set_button_state(INPUT_GAMEPAD_B, ctrl_state.pressed.button.a);
+  input_set_button_state(INPUT_GAMEPAD_X, ctrl_state.pressed.button.y);
+  input_set_button_state(INPUT_GAMEPAD_Y, ctrl_state.pressed.button.x);
+  input_set_button_state(INPUT_GAMEPAD_L_SHOULDER, ctrl_state.pressed.button.l);
+  input_set_button_state(INPUT_GAMEPAD_R_SHOULDER, ctrl_state.pressed.button.r);
+
 }
 
 void main(void) {
@@ -65,7 +66,7 @@ void main(void) {
 
 static void _vblank_out_handler(void *work __unused)
 {
-  smpc_peripheral_intback_issue();
+    smpc_peripheral_process(); //A chaque process
 }
 
 void user_init(void)
