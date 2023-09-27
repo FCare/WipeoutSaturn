@@ -48,15 +48,6 @@ static uint8_t isSameUv(vec2_t *uv, quads_t *q) {
 	return 1;
 }
 
-static uint8_t isSameColor(rgba_t a, rgba_t b) {
-	if (a.r != b.r) return 0;
-	if (a.g != b.g) return 0;
-	if (a.b != b.b) return 0;
-	if (a.a != b.a) return 0;
-	return 1;
-}
-
-
 uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *quad, vec2i_t *size) {
 	render_texture_t* src = get_tex(texture_index);
 	int orig_w = quad->vertices[1].uv.x - quad->vertices[0].uv.x;
@@ -83,10 +74,11 @@ uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *quad, 
     if ((textures[id][i].index == texture_index) && isSameUv(textures[id][i].uv, quad))
 		{
 			textures[id][i].used = 1;
-				printf("&&&&&&&&&&&&&&& Texture vdp1 reused :-) :-) :-)\n");
+				printf("&&&&&&&&&&&&&&& Texture vdp1 %d(0x%x) reused %dx%d => %dx%d:-) :-) :-)\n", i, textures[id][i].pixels, (int32_t)quad->vertices[0].uv.y, (int32_t)quad->vertices[0].uv.x, (int32_t)quad->vertices[3].uv.y, (int32_t)quad->vertices[3].uv.x);
       return textures[id][i].pixels;
     }
   }
+
   //Not found, bump a new one
 	textures[id][textures_len[id]].used = 1;
 	for (int i = 0; i<4; i++) {
@@ -97,7 +89,7 @@ uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *quad, 
   textures[id][textures_len[id]].size = *size;
   textures[id][textures_len[id]].pixels = vdp1_tex_bump(length, id);
 	rgb1555_t *src_buf = &src->pixels[(int32_t)quad->vertices[0].uv.y * src->size.x + (int32_t)quad->vertices[0].uv.x];
-	printf("&&&&&&&&&&&&&&& Texture vdp1!!!!!!!!!!!!!!!!ééééééééé\n");
+	printf("&&&&&&&&&&&&&&& Texture vdp1 from %d(0x%x) at %dx%d=>%dx%d!!!!!!!!!!!!!!!!ééééééééé\n", textures_len[id], textures[id][textures_len[id]].pixels, (int32_t)quad->vertices[0].uv.y, (int32_t)quad->vertices[0].uv.x, (int32_t)quad->vertices[3].uv.y, (int32_t)quad->vertices[3].uv.x);
 	for (int i = 0; i<h; i++) {
 		memcpy(&textures[id][textures_len[id]].pixels[i*w], &src_buf[i*src->size.x], orig_w*sizeof(rgb1555_t));
 		memset(&textures[id][textures_len[id]].pixels[i*w+orig_w], 0, (w-orig_w)*sizeof(rgb1555_t));
