@@ -128,10 +128,16 @@ void reset_vdp1_pool(uint8_t id) {
 	for (int i = 0; i<textures_len[id]; i++) {
 		textures[id][i].used = 0;
 	}
-	LOGD("reset[%d] to %d\n", id, id_reset);
-	if (textures_len[id] != id_reset) {
+	LOGD("reset[%d] to %d vs %d\n", id, id_reset, textures_len[id]);
+	if (textures_len[id] < id_reset){
 		textures_len[id] = id_reset;
-		tex_len[id] = (uint32_t)(&textures[id][id_reset].pixels[textures[id][id_reset].size.x*textures[id][id_reset].size.y] - &textures[id][0].pixels[0]);
+		if (id_reset != 0) {
+			vdp1_texture_t *first = &textures[id][0];
+			vdp1_texture_t *last = &textures[id][id_reset];
+			tex_len[id] = (uint32_t)(&last->pixels[0] - &(first->pixels[0]));
+		} else {
+			tex_len[id] = 0;
+		}
 	}
 }
 
