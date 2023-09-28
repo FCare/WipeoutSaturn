@@ -119,9 +119,9 @@ void menu_update(menu_t *menu) {
 		selected_data = page->entries[page->index].data;
 	}
 
-	// if (page->draw_func) {
-	// 	page->draw_func(menu, selected_data);
-	// }
+	if (page->draw_func) {
+		page->draw_func(menu, selected_data);
+	}
 
 	render_set_view_2d();
 
