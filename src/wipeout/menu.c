@@ -8,8 +8,12 @@
 #include "sfx.h"
 
 bool blink(void) {
+#ifdef RENDERER_GL
 	// blink 30 times per second
 	return fmod(system_cycle_time(), 1.0/15.0) < 1.0/30.0;
+#else
+	return fmod(system_cycle_time(), 1.0/2.0) < 1.0/4.0;
+#endif
 }
 
 void menu_reset(menu_t *menu) {
