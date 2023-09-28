@@ -9,6 +9,8 @@ extern int strcasecmp(const char *_l, const char *_r);
 #include "input.h"
 #include "render_vdp2.h"
 
+#define CPU_FRT_INTERRUPT_PRIORITY_LEVEL 8
+
 extern void mem_init(void);
 
 static cdfs_filelist_t _filelist;
@@ -16,6 +18,43 @@ static cdfs_filelist_t _filelist;
 static double framenb = 0;
 
 static double fps = 59.94;
+
+static double nb_ovf = 0;
+
+static void
+_frt_compare_output_handler(void)
+{
+        uint32_t frt_count;
+        frt_count = cpu_frt_count_get();
+
+        int32_t count_diff __unused;
+        count_diff = frt_count - (CPU_FRT_NTSC_320_128_COUNT_1MS*300);
+
+        if (count_diff >= 0) {
+                cpu_frt_count_set(count_diff);
+        }
+        nb_ovf++;
+}
+
+double platform_now(void) {
+  //Need to use th FRT
+  return nb_ovf*0,298368 + cpu_frt_count_get()*0.000004768;
+}
+
+static void timer_init(void)
+{
+  //Mode 0 26MHz  26.8465875 MHz (master clock x2, minus 3.579545/2) => 37 ns/Tick
+  //Mode 1 28MHz 28.63636 MHz (master clock x2)
+
+  //divider 128 => 4.768 µs/ticks
+  //CPU_FRT_NTSC_320_128_COUNT_1MS = 0xD2 => 210 ticks = 0,99456ms
+  nb_ovf = 0;
+  cpu_frt_init(CPU_FRT_CLOCK_DIV_128);
+  cpu_frt_oca_set(CPU_FRT_NTSC_320_128_COUNT_1MS*300, _frt_compare_output_handler);
+  //Will trigger every 0,99456ms * 300 = 0,298368s
+  cpu_frt_count_set(0);
+  cpu_frt_interrupt_priority_set(CPU_FRT_INTERRUPT_PRIORITY_LEVEL);
+}
 
 static void setup_fs(void) {
   cdfs_filelist_entry_t * const filelist_entries = cdfs_entries_alloc(-1);
@@ -49,6 +88,7 @@ static void controller_update(void) {
 
 void main(void) {
   //Init Saturn
+  timer_init();
   mem_init();
   LOGD("Init filesystem access\n");
   setup_fs();
@@ -103,10 +143,6 @@ vec2i_t platform_screen_size(void) {
       }
   }
   return ret;
-}
-
-double platform_now(void) {
-  return framenb/fps;
 }
 
 bool platform_get_fullscreen(void){
