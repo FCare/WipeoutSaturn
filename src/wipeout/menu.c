@@ -119,11 +119,17 @@ void menu_update(menu_t *menu) {
 		selected_data = page->entries[page->index].data;
 	}
 
-	if (page->draw_func) {
-		page->draw_func(menu, selected_data);
-	}
+	// if (page->draw_func) {
+	// 	page->draw_func(menu, selected_data);
+	// }
 
 	render_set_view_2d();
+
+	// Framerate
+	if (save.show_fps) {
+		ui_draw_text("FPS", ui_scaled(vec2i(16, 78)), UI_SIZE_8, UI_COLOR_ACCENT);
+		ui_draw_number((int)(g.frame_rate), ui_scaled(vec2i(16, 90)), UI_SIZE_8, UI_COLOR_DEFAULT);
+	}
 
 	// Draw Horizontal (confirm)
 	if (flags_is(page->layout_flags, MENU_HORIZONTAL)) {
