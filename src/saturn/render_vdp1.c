@@ -134,7 +134,6 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
     (int32_t)quad->vertices[3].pos.y
   );
   //Donc il faut transformer le UV en rectangle
-  render_texture_t* src = get_tex(texture_index);
   vdp1_cmdt_end_clear(cmd);
   vdp1_cmdt_distorted_sprite_set(cmd); //Use distorted by default but it can be normal or scaled
   vdp1_cmdt_draw_mode_set(cmd, draw_mode);
