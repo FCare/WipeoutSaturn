@@ -35,6 +35,7 @@ void title_update(void) {
 		ui_draw_text_centered("PRESS START", ui_scaled_pos(UI_POS_BOTTOM | UI_POS_CENTER, vec2i(0, -40)), UI_SIZE_8, text_color);
 	}
 
+#ifndef NO_ATTRACT_MODE
 	float duration = system_time() - start_time;
 	if (
 		(has_shown_attract && duration > 5) ||
@@ -49,4 +50,5 @@ void title_update(void) {
 		g.race_type = RACE_TYPE_SINGLE;
 		game_set_scene(GAME_SCENE_RACE);
 	}
+#endif
 }

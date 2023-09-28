@@ -76,6 +76,7 @@ SH_CFLAGS+= -O3 \
 						-Wno-unused-variable \
 						-DFIXED_MATH \
 						-DNO_QUIT \
+						-DNO_ATTRACT_MODE \
 						-DMEM_HUNK_BYTES=0x200000 \
 						$(USER_CFLAGS)
 
