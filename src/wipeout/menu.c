@@ -8,7 +8,7 @@
 #include "sfx.h"
 
 bool blink(void) {
-#ifdef RENDERER_GL
+#ifndef SATURN
 	// blink 30 times per second
 	return fmod(system_cycle_time(), 1.0/15.0) < 1.0/30.0;
 #else

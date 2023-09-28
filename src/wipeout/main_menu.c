@@ -124,14 +124,17 @@ static void page_options_draw(menu_t *menu, int data) {
 
 static void page_options_init(menu_t *menu) {
 	menu_page_t *page = menu_push(menu, "OPTIONS", page_options_draw);
+	int button_nb = 0;
 	flags_add(page->layout_flags, MENU_FIXED);
 	page->title_pos = vec2i(0, 30);
 	page->title_anchor = UI_POS_TOP | UI_POS_CENTER;
 	page->items_pos = vec2i(0, -110);
 	page->items_anchor = UI_POS_BOTTOM | UI_POS_CENTER;
-	menu_page_add_button(page, 0, "CONTROLS", button_controls);
-	menu_page_add_button(page, 1, "VIDEO", button_video);
-	menu_page_add_button(page, 2, "AUDIO", button_audio);
+#ifndef SATURN
+	menu_page_add_button(page, button_nb++, "CONTROLS", button_controls);
+#endif
+	menu_page_add_button(page, button_nb++, "VIDEO", button_video);
+	menu_page_add_button(page, button_nb++, "AUDIO", button_audio);
 }
 
 
@@ -300,13 +303,15 @@ static void page_options_video_init(menu_t *menu) {
 	page->block_width = 320;
 	page->items_anchor = UI_POS_MIDDLE | UI_POS_CENTER;
 
+#ifndef SATURN
 	#ifndef __EMSCRIPTEN__
 		menu_page_add_toggle(page, save.fullscreen, "FULLSCREEN", opts_off_on, len(opts_off_on), toggle_fullscreen);
 	#endif
 	menu_page_add_toggle(page, save.ui_scale, "UI SCALE", opts_ui_sizes, len(opts_ui_sizes), toggle_ui_scale);
-	menu_page_add_toggle(page, save.show_fps, "SHOW FPS", opts_off_on, len(opts_off_on), toggle_show_fps);
-	menu_page_add_toggle(page, save.screen_res, "SCREEN RESOLUTION", opts_res, len(opts_res), toggle_res);
 	menu_page_add_toggle(page, save.post_effect, "POST PROCESSING", opts_post, len(opts_post), toggle_post);
+	menu_page_add_toggle(page, save.screen_res, "SCREEN RESOLUTION", opts_res, len(opts_res), toggle_res);
+#endif
+	menu_page_add_toggle(page, save.show_fps, "SHOW FPS", opts_off_on, len(opts_off_on), toggle_show_fps);
 }
 
 // -----------------------------------------------------------------------------

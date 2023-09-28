@@ -75,6 +75,7 @@ SH_CFLAGS+= -O3 \
 						-Wall \
 						-Wno-unused-variable \
 						-DFIXED_MATH \
+						-DSATURN \
 						-DNO_QUIT \
 						-DNO_ATTRACT_MODE \
 						-DMEM_HUNK_BYTES=0x200000 \
