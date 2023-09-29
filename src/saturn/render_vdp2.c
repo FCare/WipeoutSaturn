@@ -104,7 +104,8 @@ static void updateLayerImage(uint16_t texture, vdp2_layer_t layer) {
   render_texture_t* src = get_tex(texture);
   volatile rgb1555_t *dst = layer_ctrl[layer].format.bitmap_base;
   for (int32_t i = 0; i< src->size.y; i++) {
-    memcpy((void *)&(dst[512*i]), &src->pixels[i*src->size.x], src->size.x*sizeof(rgb1555_t));
+    scu_dma_transfer(0, (void *)&(dst[512*i]), &src->pixels[i*src->size.x], src->size.x*sizeof(rgb1555_t));
+    scu_dma_transfer_wait(0);
   }
 }
 
