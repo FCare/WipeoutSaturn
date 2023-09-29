@@ -134,8 +134,6 @@ void vdp2_init(void)
 
 void vdp2_video_sync(void) {
   //Wait VblankIn
-  vdp2_sync();
-  vdp2_sync_wait();
   for (int i = 0; i< LAYER_NB; i++) {
     layer_ctrl[i].enable = 0;
   }

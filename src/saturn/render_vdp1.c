@@ -181,9 +181,6 @@ void render_vdp1_flush(void) {
   nbCommand = 0;
   gouraud_cmd = 0;
   vdp1_sync_render();
-
-  vdp1_sync();
-  vdp1_sync_wait();
 }
 
 void render_vdp1_clear(void) {

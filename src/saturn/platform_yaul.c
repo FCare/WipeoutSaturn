@@ -102,6 +102,11 @@ void main(void) {
 
     LOGD("Update Game\n");
     system_update();
+
+    vdp2_sync();
+    vdp1_sync();
+    vdp2_sync_wait();
+    vdp1_sync_wait();
     vdp2_video_sync();
   }
 
