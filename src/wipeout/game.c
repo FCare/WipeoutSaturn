@@ -624,12 +624,14 @@ void game_update(void) {
 		game_scenes[scene_current].update();
 	}
 
+#ifndef SATURN
 	// Fullscreen might have been toggled through alt+enter
 	bool fullscreen = platform_get_fullscreen();
 	if (fullscreen != save.fullscreen) {
 		save.fullscreen = fullscreen;
 		save.is_dirty = true;
 	}
+#endif
 
 	if (save.is_dirty) {
 		// FIXME: use a text based format?
