@@ -93,14 +93,8 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
     (int32_t)quad->vertices[3].pos.y
   );
 
-  if (nbCommand >= cmdt_max-2) {
-    LOGD("Too much command - Shall flush\n");
-    render_vdp1_flush();
-  }
-  if (canAllocateVdp1(texture_index, id, quad) == 0) {
-    LOGD("can not allocate - Shall flush\n");
-    render_vdp1_flush();
-  }
+  assert (nbCommand < cmdt_max-2);
+  assert(canAllocateVdp1(texture_index, id, quad) != 0);
 
   const vdp1_cmdt_draw_mode_t draw_mode = {
           .color_mode           = VDP1_CMDT_CM_RGB_32768,
