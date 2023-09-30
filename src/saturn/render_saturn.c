@@ -24,22 +24,22 @@ static mat4_t sprite_mat = mat4_identity();
 
 static void print_mat(mat4_t *m) {
   LOGD("\t[%d %d %d %d]\n\t[%d %d %d %d]\n\t[%d %d %d %d]\n\t[%d %d %d %d]\n",
-  (int32_t)(m->m[0]*1000.0),
-  (int32_t)(m->m[1]*1000.0),
-  (int32_t)(m->m[2]*1000.0),
-  (int32_t)(m->m[3]*1000.0),
-  (int32_t)(m->m[4]*1000.0),
-  (int32_t)(m->m[5]*1000.0),
-  (int32_t)(m->m[6]*1000.0),
-  (int32_t)(m->m[7]*1000.0),
-  (int32_t)(m->m[8]*1000.0),
-  (int32_t)(m->m[9]*1000.0),
-  (int32_t)(m->m[10]*1000.0),
-  (int32_t)(m->m[11]*1000.0),
-  (int32_t)(m->m[12]*1000.0),
-  (int32_t)(m->m[13]*1000.0),
-  (int32_t)(m->m[14]*1000.0),
-  (int32_t)(m->m[15]*1000.0)
+  (m->arr[0]),
+  (m->arr[1]),
+  (m->arr[2]),
+  (m->arr[3]),
+  (m->arr[4]),
+  (m->arr[5]),
+  (m->arr[6]),
+  (m->arr[7]),
+  (m->arr[8]),
+  (m->arr[9]),
+  (m->arr[10]),
+  (m->arr[11]),
+  (m->arr[12]),
+  (m->arr[13]),
+  (m->arr[14]),
+  (m->arr[15])
   );
 }
 
@@ -60,22 +60,26 @@ void render_init(vec2i_t size) {
 void render_cleanup(void){}
 
 void render_set_screen_size(vec2i_t size){
+  LOGD("%s\n", __FUNCTION__);
+  LOGD("Screen %dx%d\n", screen_size.x, screen_size.y);
   //Screen is always same size on saturn port
-  float near = -1.0f;
-  float far = 1.0f;
-  float left = 0.0f;
-  float right = (float)screen_size.x;
-  float bottom = (float)screen_size.y;
-  float top = 0.0f;
-  float lr = 1.0f / (left - right);
-  float bt = 1.0f / (bottom - top);
-  float nf = 1.0f / (near - far);
+  fix16_t near = -FIX16_ONE;
+  fix16_t far = FIX16_ONE;
+  fix16_t left = FIX16_ZERO;
+  fix16_t right = FIX16(screen_size.x);
+  fix16_t bottom = FIX16(screen_size.y);
+  fix16_t top = FIX16_ZERO;
+  fix16_t lr = fix16_div(FIX16_ONE, (left - right));
+  fix16_t bt = fix16_div(FIX16_ONE, (bottom - top));
+  fix16_t nf = fix16_div(FIX16_ONE, (near - far));
   projection_mat = mat4(
-    -2.0f * lr,  0.0f,  0.0f,  0.0f,
-    0.0f,  -2.0f * bt,  0.0f,  0.0f,
-    0.0f,        0.0f,  2.0f * nf,    0.0f,
-    (left + right) * lr, (top + bottom) * bt, (far + near) * nf, 1.0f
+    fix16_mul(lr, FIX16(-2.0f)),  FIX16_ZERO,  FIX16_ZERO,  FIX16_ZERO,
+    FIX16_ZERO,  fix16_mul(bt, FIX16(-2.0f)),  FIX16_ZERO,  FIX16_ZERO,
+    FIX16_ZERO,  FIX16_ZERO,  fix16_mul(nf, FIX16(2.0f)),   FIX16_ZERO,
+    fix16_mul((left + right), lr), fix16_mul((top + bottom), bt), fix16_mul((far + near), nf), FIX16_ONE
   );
+  LOGD("Proj Mat= \n");
+  print_mat(&projection_mat);
 }
 void render_set_resolution(render_resolution_t res){
   //Resolution is always same size on saturn port
@@ -102,9 +106,12 @@ void render_set_view(vec3_t pos, vec3_t angles){
     LOGD("%s\n", __FUNCTION__);
   view_mat = mat4_identity();
   mat4_set_translation(&view_mat, vec3(0, 0, 0));
-  mat4_set_roll_pitch_yaw(&view_mat, vec3(angles.x, -angles.y + M_PI, angles.z + M_PI));
+  mat4_set_roll_pitch_yaw(&view_mat, vec3(angles.x, -angles.y + PLATFORM_PI, angles.z + PLATFORM_PI));
   mat4_translate(&view_mat, vec3_inv(pos));
-  mat4_set_yaw_pitch_roll(&sprite_mat, vec3(-angles.x, angles.y - M_PI, 0));
+  mat4_set_yaw_pitch_roll(&sprite_mat, vec3(-angles.x, angles.y - PLATFORM_PI, 0));
+
+  LOGD("View Mat= \n");
+  print_mat(&view_mat);
 
   render_set_model_mat(&mat4_identity());
 }
@@ -115,13 +122,19 @@ void render_set_view_2d(void){
 void render_set_model_mat(mat4_t *m){
     LOGD("%s\n", __FUNCTION__);
   mat4_t vm_mat;
+  LOGD("M Mat= \n");
+  print_mat(m);
+  LOGD("View Mat= \n");
+  print_mat(&view_mat);
 	mat4_mul(&vm_mat, &view_mat, m);
+  LOGD("Result= \n");
+  print_mat(&vm_mat);
 	mat4_mul(&mvp_mat, &projection_mat, &vm_mat);
 }
 
 void render_set_depth_write(bool enabled){}
 void render_set_depth_test(bool enabled){}
-void render_set_depth_offset(float offset){}
+void render_set_depth_offset(fix16_t offset){}
 void render_set_screen_position(vec2_t pos){
 
 }
@@ -133,8 +146,8 @@ vec3_t render_transform(vec3_t pos){
 }
 
 static void render_push_native_quads(quads_t *quad, rgba_t color, uint16_t texture_index) {
-  float w2 = screen_size.x * 0.5;
-  float h2 = screen_size.y * 0.5;
+  fix16_t w2 = fix16_mul(FIX16(screen_size.x), FIX16(0.5));
+  fix16_t h2 = fix16_mul(FIX16(screen_size.y), FIX16(0.5));
   nb_planes++;
   LOGD("MVP =\n");
   print_mat(&mvp_mat);
@@ -142,13 +155,13 @@ static void render_push_native_quads(quads_t *quad, rgba_t color, uint16_t textu
     // quad->vertices[i].pos.x += w2;
     // quad->vertices[i].pos.y += h2;
     quad->vertices[i].pos = vec3_transform(quad->vertices[i].pos, &mvp_mat);
-    //Z-clamp
-    if (quad->vertices[i].pos.z >= 1.0) {
+    //Z-clampq
+    if (quad->vertices[i].pos.z >= FIX16_ONE) {
       LOGD("discard due to Z=%d\n", (uint32_t)quad->vertices[i].pos.z);
       return;
     }
-    quad->vertices[i].pos.x = quad->vertices[i].pos.x * w2 + w2;
-    quad->vertices[i].pos.y = h2 - quad->vertices[i].pos.y * h2;
+    quad->vertices[i].pos.x = fix16_mul(quad->vertices[i].pos.x, w2) + w2;
+    quad->vertices[i].pos.y = h2 - fix16_mul(quad->vertices[i].pos.y, h2);
   }
   //Add a quad to the vdp1 list v0,v1,v2,v3
   render_vdp1_add(quad, color, texture_index);
@@ -180,21 +193,21 @@ void render_push_tris(tris_t tris, uint16_t texture_index){
   LOGD("%s\n", __FUNCTION__);
   LOGD(
     " pos %dx%d %dx%d %dx%d\n",
-    (int32_t)tris.vertices[0].pos.x,
-    (int32_t)tris.vertices[0].pos.y,
-    (int32_t)tris.vertices[1].pos.x,
-    (int32_t)tris.vertices[1].pos.y,
-    (int32_t)tris.vertices[2].pos.x,
-    (int32_t)tris.vertices[2].pos.y
+    fix16_int32_to(tris.vertices[0].pos.x),
+    fix16_int32_to(tris.vertices[0].pos.y),
+    fix16_int32_to(tris.vertices[1].pos.x),
+    fix16_int32_to(tris.vertices[1].pos.y),
+    fix16_int32_to(tris.vertices[2].pos.x),
+    fix16_int32_to(tris.vertices[2].pos.y)
   );
   LOGD(
     " uv %dx%d %dx%d %dx%d\n",
-    (int32_t)tris.vertices[0].uv.x,
-    (int32_t)tris.vertices[0].uv.y,
-    (int32_t)tris.vertices[1].uv.x,
-    (int32_t)tris.vertices[1].uv.y,
-    (int32_t)tris.vertices[2].uv.x,
-    (int32_t)tris.vertices[2].uv.y
+    (uint32_t)tris.vertices[0].uv.x,
+    (uint32_t)tris.vertices[0].uv.y,
+    (uint32_t)tris.vertices[1].uv.x,
+    (uint32_t)tris.vertices[1].uv.y,
+    (uint32_t)tris.vertices[2].uv.x,
+    (uint32_t)tris.vertices[2].uv.y
   );
   quads_t q= (quads_t){
     .vertices = {
@@ -204,18 +217,18 @@ void render_push_tris(tris_t tris, uint16_t texture_index){
 
   LOGD(
     " pos %dx%dx%d %dx%dx%d %dx%dx%d %dx%dx%d\n",
-    (int32_t)q.vertices[0].pos.x,
-    (int32_t)q.vertices[0].pos.y,
-    (int32_t)q.vertices[0].pos.z,
-    (int32_t)q.vertices[1].pos.x,
-    (int32_t)q.vertices[1].pos.y,
-    (int32_t)q.vertices[1].pos.z,
-    (int32_t)q.vertices[2].pos.x,
-    (int32_t)q.vertices[2].pos.y,
-    (int32_t)q.vertices[2].pos.z,
-    (int32_t)q.vertices[3].pos.x,
-    (int32_t)q.vertices[3].pos.y,
-    (int32_t)q.vertices[3].pos.z
+    fix16_int32_to(q.vertices[0].pos.x),
+    fix16_int32_to(q.vertices[0].pos.y),
+    fix16_int32_to(q.vertices[0].pos.z),
+    fix16_int32_to(q.vertices[1].pos.x),
+    fix16_int32_to(q.vertices[1].pos.y),
+    fix16_int32_to(q.vertices[1].pos.z),
+    fix16_int32_to(q.vertices[2].pos.x),
+    fix16_int32_to(q.vertices[2].pos.y),
+    fix16_int32_to(q.vertices[2].pos.z),
+    fix16_int32_to(q.vertices[3].pos.x),
+    fix16_int32_to(q.vertices[3].pos.y),
+    fix16_int32_to(q.vertices[3].pos.z)
   );
   LOGD(
     " uv %dx%d %dx%d %dx%d %dx%d\n",
@@ -267,25 +280,27 @@ void render_push_2d(vec2i_t pos, vec2i_t size, rgba_t color, uint16_t texture){
 void render_push_2d_tile(vec2i_t pos, vec2i_t uv_offset, vec2i_t uv_size, vec2i_t size, rgba_t color, uint16_t texture_index){
   LOGD("%s\n", __FUNCTION__);
   //toujours des scaled_sprites
+  vec2_t p = vec2(pos.x, pos.y);
+  vec2_t s = vec2(size.x, size.y);
   quads_t q = (quads_t){
 		.vertices = {
       {
-        .pos = {.x=pos.x, .y=pos.y, .z=0},
+        .pos = {.x=p.x, .y=p.y, .z=FIX16_ZERO},
         .uv = {.x=uv_offset.x , .y=uv_offset.y},
         .color = color
       },
       {
-        .pos = {.x=pos.x + size.x, .y=pos.y, .z=0},
+        .pos = {.x=p.x + s.x, .y=p.y, .z=FIX16_ZERO},
         .uv = {.x=uv_offset.x +  uv_size.x, .y=uv_offset.y},
         .color = color
       },
       {
-        .pos = {.x=pos.x + size.x, .y=pos.y + size.y, .z=0},
+        .pos = {.x=p.x + s.x, .y=p.y + s.y, .z=FIX16_ZERO},
         .uv = {.x=uv_offset.x + uv_size.x, .y=uv_offset.y + uv_size.y},
         .color = color
       },
       {
-        .pos = {.x=pos.x, .y=pos.y + size.y, .z=0},
+        .pos = {.x=p.x, .y=p.y + s.y, .z=FIX16_ZERO},
         .uv = {.x=uv_offset.x , .y=uv_offset.y + uv_size.y},
         .color = color
       },
@@ -293,25 +308,25 @@ void render_push_2d_tile(vec2i_t pos, vec2i_t uv_offset, vec2i_t uv_size, vec2i_
 	};
   LOGD(
     " pos %dx%d %dx%d %dx%d %dx%d\n",
-    (int32_t)q.vertices[0].pos.x,
-    (int32_t)q.vertices[0].pos.y,
-    (int32_t)q.vertices[1].pos.x,
-    (int32_t)q.vertices[1].pos.y,
-    (int32_t)q.vertices[2].pos.x,
-    (int32_t)q.vertices[2].pos.y,
-    (int32_t)q.vertices[3].pos.x,
-    (int32_t)q.vertices[3].pos.y
+    fix16_int32_to(q.vertices[0].pos.x),
+    fix16_int32_to(q.vertices[0].pos.y),
+    fix16_int32_to(q.vertices[1].pos.x),
+    fix16_int32_to(q.vertices[1].pos.y),
+    fix16_int32_to(q.vertices[2].pos.x),
+    fix16_int32_to(q.vertices[2].pos.y),
+    fix16_int32_to(q.vertices[3].pos.x),
+    fix16_int32_to(q.vertices[3].pos.y)
   );
   LOGD(
     " uv %dx%d %dx%d %dx%d %dx%d\n",
-    (int32_t)q.vertices[0].uv.x,
-    (int32_t)q.vertices[0].uv.y,
-    (int32_t)q.vertices[1].uv.x,
-    (int32_t)q.vertices[1].uv.y,
-    (int32_t)q.vertices[2].uv.x,
-    (int32_t)q.vertices[2].uv.y,
-    (int32_t)q.vertices[3].uv.x,
-    (int32_t)q.vertices[3].uv.y
+    (uint32_t)q.vertices[0].uv.x,
+    (uint32_t)q.vertices[0].uv.y,
+    (uint32_t)q.vertices[1].uv.x,
+    (uint32_t)q.vertices[1].uv.y,
+    (uint32_t)q.vertices[2].uv.x,
+    (uint32_t)q.vertices[2].uv.y,
+    (uint32_t)q.vertices[3].uv.x,
+    (uint32_t)q.vertices[3].uv.y
   );
   render_push_native_quads(&q, color, texture_index);
 }

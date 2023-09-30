@@ -13,7 +13,7 @@ typedef struct camera_t {
 	vec3_t real_velocity;
 	section_t *section;
 	bool has_initial_section;
-	float update_timer;
+	fix16_t update_timer;
 	void (*update_func)(struct camera_t *, ship_t *, droid_t *);
 } camera_t;
 

@@ -26,7 +26,7 @@
 static bool is_paused = false;
 static bool menu_is_scroll_text = false;
 static bool has_show_credits = false;
-static float attract_start_time;
+static fix16_t attract_start_time;
 static menu_t *active_menu = NULL;
 
 void race_init(void) {
@@ -91,7 +91,7 @@ void race_update(void) {
 			if (input_pressed(A_MENU_START) || input_pressed(A_MENU_SELECT)) {
 				game_set_scene(GAME_SCENE_MAIN_MENU);
 			}
-			float duration = system_time() - attract_start_time;
+			fix16_t duration = system_time() - attract_start_time;
 			if ((!active_menu && duration > 30) || duration > 120) {
 				game_set_scene(GAME_SCENE_TITLE);
 			}

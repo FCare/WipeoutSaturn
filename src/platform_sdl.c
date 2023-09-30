@@ -11,7 +11,7 @@ static bool wants_to_exit = false;
 static SDL_Window *window;
 static SDL_AudioDeviceID audio_device;
 static SDL_GameController *gamepad;
-static void (*audio_callback)(float *buffer, uint32_t len) = NULL;
+static void (*audio_callback)(fix16_t *buffer, uint32_t len) = NULL;
 static char *path_assets = "";
 static char *path_userdata = "";
 static char *temp_path = NULL;
@@ -78,7 +78,7 @@ void platform_pump_events(void) {
 		// Input Keyboard
 		else if (ev.type == SDL_KEYDOWN || ev.type == SDL_KEYUP) {
 			int code = ev.key.keysym.scancode;
-			float state = ev.type == SDL_KEYDOWN ? 1.0 : 0.0;
+			fix16_t state = ev.type == SDL_KEYDOWN ? 1.0 : 0.0;
 			if (code >= SDL_SCANCODE_LCTRL && code <= SDL_SCANCODE_RALT) {
 				int code_internal = code - SDL_SCANCODE_LCTRL + INPUT_KEY_LCTRL;
 				input_set_button_state(code_internal, state);
@@ -111,7 +111,7 @@ void platform_pump_events(void) {
 			if (ev.cbutton.button < SDL_CONTROLLER_BUTTON_MAX) {
 				button_t button = platform_sdl_gamepad_map[ev.cbutton.button];
 				if (button != INPUT_INVALID) {
-					float state = ev.type == SDL_CONTROLLERBUTTONDOWN ? 1.0 : 0.0;
+					fix16_t state = ev.type == SDL_CONTROLLERBUTTONDOWN ? 1.0 : 0.0;
 					input_set_button_state(button, state);
 				}
 			}
@@ -119,7 +119,7 @@ void platform_pump_events(void) {
 
 		// Input Gamepad Axis
 		else if (ev.type == SDL_CONTROLLERAXISMOTION) {
-			float state = (float)ev.caxis.value / 32767.0;
+			fix16_t state = (fix16_t)ev.caxis.value / 32767.0;
 
 			if (ev.caxis.axis < SDL_CONTROLLER_AXIS_MAX) {
 				int code = platform_sdl_axis_map[ev.caxis.axis];
@@ -153,7 +153,7 @@ void platform_pump_events(void) {
 				default: break;
 			}
 			if (button != INPUT_BUTTON_NONE) {
-				float state = ev.type == SDL_MOUSEBUTTONDOWN ? 1.0 : 0.0;
+				fix16_t state = ev.type == SDL_MOUSEBUTTONDOWN ? 1.0 : 0.0;
 				input_set_button_state(button, state);
 			}
 		}
@@ -215,14 +215,14 @@ void platform_set_fullscreen(bool fullscreen) {
 
 void platform_audio_callback(void* userdata, uint8_t* stream, int len) {
 	if (audio_callback) {
-		audio_callback((float *)stream, len/sizeof(float));
+		audio_callback((fix16_t *)stream, len/sizeof(fix16_t));
 	}
 	else {
 		memset(stream, 0, len);
 	}
 }
 
-void platform_set_audio_mix_cb(void (*cb)(float *buffer, uint32_t len)) {
+void platform_set_audio_mix_cb(void (*cb)(fix16_t *buffer, uint32_t len)) {
 	audio_callback = cb;
 	SDL_PauseAudioDevice(audio_device, 0);
 }
@@ -329,7 +329,7 @@ uint32_t platform_store_userdata(const char *name, void *bytes, int32_t len) {
 		int width, height;
 		SDL_GetWindowSize(window, &width, &height);
 
-		// float aspect = (float)width / (float)height;
+		// fix16_t aspect = (fix16_t)width / (fix16_t)height;
 		// screen_size = vec2i(240 * aspect, 240);
 		screen_size = vec2i(width, height);
 		return screen_size;

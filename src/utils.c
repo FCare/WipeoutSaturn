@@ -59,8 +59,8 @@ bool str_starts_with(const char *haystack, const char *needle) {
 	return (strncmp(haystack, needle, strlen(needle)) == 0);
 }
 
-float rand_float(float min, float max) {
-	return min + ((float)rand() / (float)RAND_MAX) * (max - min);
+fix16_t rand_fix16_t(fix16_t min, fix16_t max) {
+	return min + ((fix16_t)rand() / (fix16_t)RAND_MAX) * (max - min);
 }
 
 int32_t rand_int(int32_t min, int32_t max) {

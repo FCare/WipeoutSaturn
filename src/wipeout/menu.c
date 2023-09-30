@@ -12,7 +12,7 @@ bool blink(void) {
 	// blink 30 times per second
 	return fmod(system_cycle_time(), 1.0/15.0) < 1.0/30.0;
 #else
-	return fmod(system_cycle_time(), 1.0/2.0) < 1.0/4.0;
+	return fmod(system_cycle_time(), FIX16(1.0/10.0)) < FIX16(1.0/20.0);
 #endif
 }
 
@@ -119,16 +119,17 @@ void menu_update(menu_t *menu) {
 		selected_data = page->entries[page->index].data;
 	}
 
-	if (page->draw_func) {
-		page->draw_func(menu, selected_data);
-	}
+	// if (page->draw_func) {
+	// 	page->draw_func(menu, selected_data);
+	// }
 
 	render_set_view_2d();
 
 	// Framerate
 	if (save.show_fps) {
 		ui_draw_text("FPS", ui_scaled(vec2i(16, 78)), UI_SIZE_8, UI_COLOR_ACCENT);
-		ui_draw_number((int)(g.frame_rate), ui_scaled(vec2i(16, 90)), UI_SIZE_8, UI_COLOR_DEFAULT);
+		ui_draw_number(fix16_int32_to(g.frame_rate), ui_scaled(vec2i(16, 90)), UI_SIZE_8, UI_COLOR_DEFAULT);
+		printf("fps %d\n", fix16_int32_to(g.frame_rate));
 	}
 
 	// Draw Horizontal (confirm)

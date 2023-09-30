@@ -19,8 +19,8 @@ typedef struct droid_t {
 	vec3_t angle;
 	vec3_t angular_velocity;
 	bool siren_started;
-	float cycle_timer;
-	float update_timer;
+	fix16_t cycle_timer;
+	fix16_t update_timer;
 	void (*update_func)(struct droid_t *, ship_t *);
 	mat4_t mat;
 	Object *model;

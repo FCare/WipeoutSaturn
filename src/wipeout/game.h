@@ -43,8 +43,12 @@ typedef enum {
 
 
 typedef enum {
-	GAME_SCENE_INTRO,
+#ifndef SATURN
+	GAME_SCENE_INTRO = 0,
 	GAME_SCENE_TITLE,
+#else
+	GAME_SCENE_TITLE = 0,
+#endif
 	GAME_SCENE_MAIN_MENU,
 	GAME_SCENE_HIGHSCORES,
 	GAME_SCENE_RACE,
@@ -121,18 +125,18 @@ typedef struct {
 } pilot_t;
 
 typedef struct {
-	float thrust_max;
-	float thrust_magnitude;
+	fix16_t thrust_max;
+	fix16_t thrust_magnitude;
 	bool fight_back;
 } ai_setting_t;
 
 typedef struct {
-	float mass;
-	float thrust_max;
-	float resistance;
-	float turn_rate;
-	float turn_rate_max;
-	float skid;
+	fix16_t mass;
+	fix16_t thrust_max;
+	fix16_t resistance;
+	fix16_t turn_rate;
+	fix16_t turn_rate_max;
+	fix16_t skid;
 } team_attributes_t;
 
 typedef struct {
@@ -144,11 +148,11 @@ typedef struct {
 
 typedef struct {
 	char *path;
-	float start_line_pos;
-	float behind_speed;
-	float spread_base;
-	float spread_factor;
-	float sky_y_offset;
+	fix16_t start_line_pos;
+	fix16_t behind_speed;
+	fix16_t spread_base;
+	fix16_t spread_factor;
+	fix16_t sky_y_offset;
 } circut_settings_t;
 
 typedef struct {
@@ -191,9 +195,9 @@ typedef struct {
 } pilot_points_t;
 
 typedef struct {
-	float frame_time;
-	float frame_rate;
-	
+	fix16_t frame_time;
+	fix16_t frame_rate;
+
 	int race_class;
 	int race_type;
 	int highscore_tab;
@@ -205,12 +209,12 @@ typedef struct {
 
 	bool is_new_lap_record;
 	bool is_new_race_record;
-	float best_lap;
-	float race_time;
+	fix16_t best_lap;
+	fix16_t race_time;
 	int lives;
 	int race_position;
-	
-	float lap_times[NUM_PILOTS][NUM_LAPS];
+
+	fix16_t lap_times[NUM_PILOTS][NUM_LAPS];
 	pilot_points_t race_ranks[NUM_PILOTS];
 	pilot_points_t championship_ranks[NUM_PILOTS];
 
@@ -226,20 +230,20 @@ typedef struct {
 
 typedef struct {
 	char name[4];
-	float time;
+	fix16_t time;
 } highscores_entry_t;
 
 typedef struct {
 	highscores_entry_t entries[NUM_HIGHSCORES];
-	float lap_record;
+	fix16_t lap_record;
 } highscores_t;
 
 typedef struct {
 	uint32_t magic;
 	bool is_dirty;
 
-	float sfx_volume;
-	float music_volume;
+	fix16_t sfx_volume;
+	fix16_t music_volume;
 	uint8_t ui_scale;
 	bool show_fps;
 	bool fullscreen;
@@ -248,7 +252,7 @@ typedef struct {
 
 	uint32_t has_rapier_class;
 	uint32_t has_bonus_circuts;
-	
+
 	uint8_t buttons[NUM_GAME_ACTIONS][2];
 
 	char highscores_name[4];

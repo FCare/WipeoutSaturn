@@ -26,13 +26,13 @@ void *realloc_dummmy(void *p, size_t sz) {
 static plm_t *plm;
 static rgba_t *frame_buffer;
 static int16_t texture;
-static float *audio_buffer;
+static fix16_t *audio_buffer;
 static int audio_buffer_read_pos;
 static int audio_buffer_write_pos;
 
 static void video_cb(plm_t *plm, plm_frame_t *frame, void *user);
 static void audio_cb(plm_t *plm, plm_samples_t *samples, void *user);
-static void audio_mix(float *samples, uint32_t len);
+static void audio_mix(fix16_t *samples, uint32_t len);
 static void intro_end(void);
 
 void intro_init(void) {
@@ -43,7 +43,7 @@ void intro_init(void) {
 	}
 	plm_set_video_decode_callback(plm, video_cb, NULL);
 	plm_set_audio_decode_callback(plm, audio_cb, NULL);
-	
+
 	plm_set_loop(plm, false);
 	plm_set_audio_enabled(plm, true);
 	plm_set_audio_stream(plm, 0);
@@ -57,14 +57,14 @@ void intro_init(void) {
 	texture = render_texture_create(w, h, frame_buffer);
 
 	sfx_set_external_mix_cb(audio_mix);
-	audio_buffer = mem_bump(INTRO_AUDIO_BUFFER_LEN * sizeof(float) * 2);
+	audio_buffer = mem_bump(INTRO_AUDIO_BUFFER_LEN * sizeof(fix16_t) * 2);
 	audio_buffer_read_pos = 0;
 	audio_buffer_write_pos = 0;
 }
 
 static void intro_end(void) {
 	sfx_set_external_mix_cb(NULL);
-	game_set_scene(GAME_SCENE_TITLE);
+	game_set_scene(0);
 }
 
 void intro_update(void) {
@@ -87,7 +87,7 @@ static void audio_cb(plm_t *plm, plm_samples_t *samples, void *user) {
 	}
 }
 
-static void audio_mix(float *samples, uint32_t len) {
+static void audio_mix(fix16_t *samples, uint32_t len) {
 	int i;
 	for (i = 0; i < len && audio_buffer_read_pos < audio_buffer_write_pos; i++) {
 		samples[i] = audio_buffer[audio_buffer_read_pos % INTRO_AUDIO_BUFFER_LEN];

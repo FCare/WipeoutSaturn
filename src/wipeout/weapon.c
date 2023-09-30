@@ -15,7 +15,7 @@ extern int ctrlnearShip;
 int16_t Shielded = 0;
 
 typedef struct weapon_t {
-	float timer;
+	fix16_t timer;
 	ship_t *owner;
 	ship_t *target;
 	section_t *section;
@@ -25,14 +25,14 @@ typedef struct weapon_t {
 	int16_t trail_particle;
 	int16_t track_hit_particle;
 	int16_t ship_hit_particle;
-	float trail_spawn_timer;
+	fix16_t trail_spawn_timer;
 
 	int16_t type;
 	vec3_t acceleration;
 	vec3_t velocity;
 	vec3_t position;
 	vec3_t angle;
-	float drag;
+	fix16_t drag;
 
 	void (*update_func)(struct weapon_t *);
 } weapon_t;
@@ -120,10 +120,10 @@ weapon_t *weapon_init(ship_t *ship) {
 	weapon->owner = ship;
 	weapon->section = ship->section;
 	weapon->position = ship->position;
-	weapon->angle = ship->angle;	
-	weapon->acceleration = vec3(0, 0, 0);
-	weapon->velocity = vec3(0, 0, 0);
-	weapon->acceleration = vec3(0, 0, 0);
+	weapon->angle = ship->angle;
+	weapon->acceleration = vec3_fix16(0, 0, 0);
+	weapon->velocity = vec3_fix16(0, 0, 0);
+	weapon->acceleration = vec3_fix16(0, 0, 0);
 	weapon->target = NULL;
 	weapon->model = NULL;
 	weapon->active = true;
@@ -163,7 +163,7 @@ bool weapon_collides_with_track(weapon_t *self);
 void weapons_update(void) {
 	for (int i = 0; i < weapons_active; i++) {
 		weapon_t *weapon = &weapons[i];
-		
+
 		weapon->timer -= system_tick();
 		(weapon->update_func)(weapon);
 
@@ -177,7 +177,7 @@ void weapons_update(void) {
 			track_face_t *face = track_section_get_base_face(weapon->section);
 			vec3_t face_point = face->quad.vertices[0].pos;
 			vec3_t face_normal = face->normal;
-			float height = vec3_distance_to_plane(weapon->position, face_point, face_normal);
+			fix16_t height = vec3_distance_to_plane(weapon->position, face_point, face_normal);
 
 			if (height < 2000) {
 				weapon->position = vec3_add(weapon->position, vec3_mulf(face_normal, (200 - height) * 30 * system_tick()));
@@ -188,7 +188,7 @@ void weapons_update(void) {
 				weapon->trail_spawn_timer += system_tick();
 				while (weapon->trail_spawn_timer > 0) {
 					vec3_t pos = vec3_sub(weapon->position, vec3_mulf(weapon->velocity, 30 * system_tick() * weapon->trail_spawn_timer));
-					vec3_t velocity = vec3(rand_float(-128, 128), rand_float(-128, 128), rand_float(-128, 128));
+					vec3_t velocity = vec3_fix16(rand_fix16_t(-128, 128), rand_fix16_t(-128, 128), rand_fix16_t(-128, 128));
 					particles_spawn(pos, weapon->trail_particle, velocity, 128);
 					weapon->trail_spawn_timer -= WEAPON_PARTICLE_SPAWN_RATE;
 				}
@@ -198,10 +198,10 @@ void weapons_update(void) {
 			weapon->section = track_nearest_section(weapon->position, weapon->section, NULL);
 			if (weapon_collides_with_track(weapon)) {
 				for (int p = 0; p < 32; p++) {
-					vec3_t velocity = vec3(rand_float(-512, 512), rand_float(-512, 512), rand_float(-512, 512));
+					vec3_t velocity = vec3_fix16(rand_fix16_t(-512, 512), rand_fix16_t(-512, 512), rand_fix16_t(-512, 512));
 					particles_spawn(weapon->position, weapon->track_hit_particle, velocity, 256);
 				}
-				sfx_play_at(SFX_EXPLOSION_2, weapon->position, vec3(0,0,0), 1);
+				sfx_play_at(SFX_EXPLOSION_2, weapon->position, vec3_fix16(0,0,0), 1);
 				weapon->active = false;
 			}
 		}
@@ -237,10 +237,10 @@ void weapon_set_trajectory(weapon_t *self) {
 
 	vec3_t face_point = face->quad.vertices[0].pos;
 	vec3_t target = vec3_add(ship->position, vec3_mulf(ship->dir_forward, 64));
-	float target_height = vec3_distance_to_plane(target, face_point, face->normal);
-	float ship_height = vec3_distance_to_plane(target, face_point, face->normal);
+	fix16_t target_height = vec3_distance_to_plane(target, face_point, face->normal);
+	fix16_t ship_height = vec3_distance_to_plane(target, face_point, face->normal);
 
-	float nudge = target_height * 0.95 - ship_height;
+	fix16_t nudge = target_height * 0.95 - ship_height;
 
 	self->acceleration = vec3_sub(vec3_sub(target, vec3_mulf(face->normal, nudge)), ship->position);
 	self->velocity = vec3_mulf(ship->velocity, 0.015625);
@@ -248,10 +248,10 @@ void weapon_set_trajectory(weapon_t *self) {
 }
 
 void weapon_follow_target(weapon_t *self) {
-	vec3_t angular_velocity = vec3(0, 0, 0);
+	vec3_t angular_velocity = vec3_fix16(0, 0, 0);
 	if (self->target) {
 		vec3_t dir = vec3_mulf(vec3_sub(self->target->position, self->position), 0.125 * 30 * system_tick());
-		float height = sqrt(dir.x * dir.x + dir.z * dir.z);
+		fix16_t height = sqrt(dir.x * dir.x + dir.z * dir.z);
 		angular_velocity.y = -atan2(dir.x, dir.z) - self->angle.y;
 		angular_velocity.x = -atan2(dir.y, height) - self->angle.x;
 	}
@@ -272,10 +272,10 @@ ship_t *weapon_collides_with_ship(weapon_t *self) {
 			continue;
 		}
 
-		float distance = vec3_len(vec3_sub(ship->position, self->position));
+		fix16_t distance = vec3_len(vec3_sub(ship->position, self->position));
 		if (distance < 512) {
 			for (int p = 0; p < 32; p++) {
-				vec3_t velocity = vec3(rand_float(-512, 512), rand_float(-512, 512), rand_float(-512, 512));
+				vec3_t velocity = vec3_fix16(rand_fix16_t(-512, 512), rand_fix16_t(-512, 512), rand_fix16_t(-512, 512));
 				velocity = vec3_add(velocity, vec3_mulf(ship->velocity, 0.25));
 				particles_spawn(self->position, self->ship_hit_particle, velocity, 256);
 			}
@@ -295,7 +295,7 @@ bool weapon_collides_with_track(weapon_t *self) {
 	track_face_t *face = g.track.faces + self->section->face_start;
 	for (int i = 0; i < self->section->face_count; i++) {
 		vec3_t face_point = face->quad.vertices[0].pos;
-		float distance = vec3_distance_to_plane(self->position, face_point, face->normal);
+		fix16_t distance = vec3_distance_to_plane(self->position, face_point, face->normal);
 		if (distance < 0) {
 			return true;
 		}
@@ -314,7 +314,7 @@ void weapon_update_wait_for_delay(weapon_t *self) {
 
 
 void weapon_fire_mine(ship_t *ship) {
-	float timer = 0;
+	fix16_t timer = 0;
 	for (int i = 0; i < WEAPON_MINE_COUNT; i++) {
 		weapon_t *self = weapon_init(ship);
 		if (!self) {
@@ -334,7 +334,7 @@ void weapon_update_mine_wait_for_release(weapon_t *self) {
 		self->update_func = weapon_update_mine;
 		self->model = weapon_assets.mine;
 		self->position = self->owner->position;
-		self->angle.y = rand_float(0, M_PI * 2);
+		self->angle.y = rand_fix16_t(0, PLATFORM_PI * 2);
 
 		self->trail_particle = PARTICLE_TYPE_NONE;
 		self->track_hit_particle = PARTICLE_TYPE_NONE;
@@ -349,7 +349,7 @@ void weapon_update_mine_wait_for_release(weapon_t *self) {
 void weapon_update_mine_lights(weapon_t *self, int index) {
 	Prm prm = {.primitive = self->model->primitives};
 
-	uint8_t r = sin(system_cycle_time() * M_PI * 2 + index * 0.66) * 128 + 128;
+	uint8_t r = sin(system_cycle_time() * PLATFORM_PI * 2 + index * 0.66) * 128 + 128;
 	for (int i = 0; i < 8; i++) {
 		switch (prm.primitive->type) {
 		case PRM_TYPE_GT3:
@@ -379,7 +379,7 @@ void weapon_update_mine(weapon_t *self) {
 
 	ship_t *ship = weapon_collides_with_ship(self);
 	if (ship) {
-		sfx_play_at(SFX_EXPLOSION_1, self->position, vec3(0,0,0), 1);
+		sfx_play_at(SFX_EXPLOSION_1, self->position, vec3_fix16(0,0,0), 1);
 		self->active = false;
 		if (flags_not(ship->flags, SHIP_SHIELDED)) {
 			if (ship->pilot == g.pilot) {
@@ -390,7 +390,7 @@ void weapon_update_mine(weapon_t *self) {
 				ship->speed = ship->speed * 0.125;
 			}
 		}
-	}	
+	}
 }
 
 
@@ -426,20 +426,20 @@ void weapon_update_missile(weapon_t *self) {
 	// Collision with other ships
 	ship_t *ship = weapon_collides_with_ship(self);
 	if (ship) {
-		sfx_play_at(SFX_EXPLOSION_1, self->position, vec3(0,0,0), 1);
+		sfx_play_at(SFX_EXPLOSION_1, self->position, vec3_fix16(0,0,0), 1);
 		self->active = false;
 
 		if (flags_not(ship->flags, SHIP_SHIELDED)) {
 			if (ship->pilot == g.pilot) {
 				ship->velocity = vec3_sub(ship->velocity, vec3_mulf(ship->velocity, 0.75));
-				ship->angular_velocity.z += rand_float(-0.1, 0.1);
-				ship->turn_rate_from_hit = rand_float(-0.1, 0.1);
+				ship->angular_velocity.z += rand_fix16_t(-0.1, 0.1);
+				ship->turn_rate_from_hit = rand_fix16_t(-0.1, 0.1);
 				// SetShake(20);  // FIXME
 			}
 			else {
 				ship->speed = ship->speed * 0.03125;
-				ship->angular_velocity.z += 10 * M_PI;
-				ship->turn_rate_from_hit = rand_float(-M_PI, M_PI);
+				ship->angular_velocity.z += 10 * PLATFORM_PI;
+				ship->turn_rate_from_hit = rand_fix16_t(-PLATFORM_PI, PLATFORM_PI);
 			}
 		}
 	}
@@ -474,20 +474,20 @@ void weapon_update_rocket(weapon_t *self) {
 	// Collision with other ships
 	ship_t *ship = weapon_collides_with_ship(self);
 	if (ship) {
-		sfx_play_at(SFX_EXPLOSION_1, self->position, vec3(0,0,0), 1);
+		sfx_play_at(SFX_EXPLOSION_1, self->position, vec3_fix16(0,0,0), 1);
 		self->active = false;
 
 		if (flags_not(ship->flags, SHIP_SHIELDED)) {
 			if (ship->pilot == g.pilot) {
 				ship->velocity = vec3_sub(ship->velocity, vec3_mulf(ship->velocity, 0.75));
-				ship->angular_velocity.z += rand_float(-0.1, 0.1);;
-				ship->turn_rate_from_hit = rand_float(-0.1, 0.1);;
+				ship->angular_velocity.z += rand_fix16_t(-0.1, 0.1);;
+				ship->turn_rate_from_hit = rand_fix16_t(-0.1, 0.1);;
 				// SetShake(20);  // FIXME
 			}
 			else {
 				ship->speed = ship->speed * 0.03125;
-				ship->angular_velocity.z += 10 * M_PI;
-				ship->turn_rate_from_hit = rand_float(-M_PI, M_PI);
+				ship->angular_velocity.z += 10 * PLATFORM_PI;
+				ship->turn_rate_from_hit = rand_fix16_t(-PLATFORM_PI, PLATFORM_PI);
 			}
 		}
 	}
@@ -526,7 +526,7 @@ void weapon_update_ebolt(weapon_t *self) {
 	// Collision with other ships
 	ship_t *ship = weapon_collides_with_ship(self);
 	if (ship) {
-		sfx_play_at(SFX_EXPLOSION_1, self->position, vec3(0,0,0), 1);
+		sfx_play_at(SFX_EXPLOSION_1, self->position, vec3_fix16(0,0,0), 1);
 		self->active = false;
 
 		if (flags_not(ship->flags, SHIP_SHIELDED)) {
@@ -575,7 +575,7 @@ void weapon_update_shield(weapon_t *self) {
 	uint8_t shield_alpha = 48;
 
 	// FIXME: this looks kinda close to the PSX original!?
-	float color_timer = self->timer * 0.05;
+	fix16_t color_timer = self->timer * 0.05;
 	for (int k = 0; k < primitives_len; k++) {
 		switch (poly.primitive->type) {
 		case PRM_TYPE_G3 :
@@ -638,7 +638,7 @@ void weapon_update_shield(weapon_t *self) {
 
 void weapon_fire_turbo(ship_t *ship) {
 	ship->velocity = vec3_add(ship->velocity, vec3_mulf(ship->dir_forward, 39321)); // unitVecNose.vx) << 3) * FR60) / 50
-	
+
 	if (ship->pilot == g.pilot) {
 		sfx_t *sfx = sfx_play(SFX_MISSILE_FIRE);
 		sfx->pitch = 0.25;
@@ -667,7 +667,7 @@ int weapon_get_random_type(int type_class) {
 			return WEAPON_TYPE_EBOLT;
 		}
 	}
-	else if (type_class == WEAPON_CLASS_PROJECTILE) { 
+	else if (type_class == WEAPON_CLASS_PROJECTILE) {
 		int index = rand_int(0, 60);
 		if (index < 27) {
 			return WEAPON_TYPE_ROCKET;

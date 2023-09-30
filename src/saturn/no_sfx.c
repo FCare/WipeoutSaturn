@@ -27,7 +27,7 @@ sfx_t *sfx_play(sfx_source_t source_index) {
 	return NULL;
 }
 
-sfx_t *sfx_play_at(sfx_source_t source_index, vec3_t pos, vec3_t vel, float volume) {
+sfx_t *sfx_play_at(sfx_source_t source_index, vec3_t pos, vec3_t vel, fix16_t volume) {
 	return NULL;
 }
 
@@ -35,7 +35,7 @@ sfx_t *sfx_reserve_loop(sfx_source_t source_index) {
 	return NULL;
 }
 
-void sfx_set_position(sfx_t *sfx, vec3_t pos, vec3_t vel, float volume) {
+void sfx_set_position(sfx_t *sfx, vec3_t pos, vec3_t vel, fix16_t volume) {
 }
 
 // Music
@@ -59,8 +59,8 @@ void sfx_music_mode(sfx_music_mode_t mode) {
 
 // Mixing
 
-void sfx_set_external_mix_cb(void (*cb)(float *, uint32_t len)) {
+void sfx_set_external_mix_cb(void (*cb)(fix16_t *, uint32_t len)) {
 }
 
-void sfx_stero_mix(float *buffer, uint32_t len) {
+void sfx_stero_mix(fix16_t *buffer, uint32_t len) {
 }

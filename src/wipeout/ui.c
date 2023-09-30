@@ -149,7 +149,7 @@ int ui_number_width(int num, ui_text_size_t size) {
 	return ui_text_width(text_buffer + i, size);
 }
 
-void ui_draw_time(float time, vec2i_t pos, ui_text_size_t size, rgba_t color) {
+void ui_draw_time(fix16_t time, vec2i_t pos, ui_text_size_t size, rgba_t color) {
 	int msec = time * 1000;
 	int tenths = (msec / 100) % 10;
 	int secs = (msec / 1000) % 60;

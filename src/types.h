@@ -7,28 +7,21 @@
 #include <stdlib.h>
 #include "platform_math.h"
 
-typedef struct rgba_t {
-	uint8_t r, g, b, a;
-} rgba_t;
-
-typedef struct {
-	float x, y;
-} vec2_t;
-
-
 typedef struct {
 	int32_t x, y;
 } vec2i_t;
 
+typedef struct rgba_t {
+	uint8_t r, g, b, a;
+} rgba_t;
 
-typedef struct {
-	float x, y, z;
-} vec3_t;
+typedef fix16_vec2_t vec2_t;
 
-typedef union {
-	float m[16];
-	float cols[4][4];
-} mat4_t;
+typedef fix16_vec3_t vec3_t;
+
+typedef fix16_vec4_t vec4_t;
+
+typedef fix16_mat44_t mat4_t;
 
 typedef struct {
 	vec3_t pos;
@@ -46,42 +39,62 @@ typedef struct {
 
 
 #define rgba(R, G, B, A) ((rgba_t){.r = R, .g = G, .b = B, .a = A})
-#define vec2(X, Y) ((vec2_t){.x = X, .y = Y})
-#define vec3(X, Y, Z) ((vec3_t){.x = X, .y = Y, .z = Z})
+#define vec2(X, Y) ((vec2_t){.x = FIX16(X), .y = FIX16(Y)})
+#define vec2_fix16(X, Y) ((vec2_t){.x = X, .y = Y})
+#define vec3(X, Y, Z) ((vec3_t){.x = FIX16(X), .y = FIX16(Y), .z = FIX16(Z)})
+#define vec3_fix16(X, Y, Z) ((vec3_t){.x = X, .y = Y, .z = Z})
 #define vec2i(X, Y) ((vec2i_t){.x = X, .y = Y})
+#define vec4(X, Y, Z, W) ((vec4_t){.x = FIX16(X), .y = FIX16(Y), .z = FIX16(Z), .w = FIX16(W)})
+#define vec4_fix16(X, Y, Z, W) ((vec4_t){.x = X, .y = Y, .z = Z, .w = W})
 
 #define mat4(m0,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12,m13,m14,m15) \
-	(mat4_t){.m = { \
+	(mat4_t){.arr = { \
 		m0,   m1,  m2,  m3, \
 		m4,   m5,  m6,  m7, \
 		m8,   m9, m10, m11, \
 		m12, m13, m14, m15  \
 	}}
 
-#define mat4_identity() mat4( \
-		1.0f, 0.0f, 0.0f, 0.0f, \
-		0.0f, 1.0f, 0.0f, 0.0f, \
-		0.0f, 0.0f, 1.0f, 0.0f, \
-		0.0f, 0.0f, 0.0f, 1.0f \
-	)
+#define mat4_identity() \
+	(mat4_t){   \
+		.comp = { \
+			.m00 = FIX16_ONE,  \
+			.m01 = FIX16_ZERO, \
+			.m02 = FIX16_ZERO, \
+			.m03 = FIX16_ZERO, \
+			.m10 = FIX16_ZERO, \
+			.m11 = FIX16_ONE,  \
+			.m12 = FIX16_ZERO, \
+			.m13 = FIX16_ZERO, \
+			.m20 = FIX16_ZERO, \
+			.m21 = FIX16_ZERO, \
+			.m22 = FIX16_ONE,  \
+			.m23 = FIX16_ZERO, \
+			.m30 = FIX16_ZERO, \
+			.m31 = FIX16_ZERO, \
+			.m32 = FIX16_ZERO, \
+			.m33 = FIX16_ONE   \
+		} \
+	}
 
-static inline vec2_t vec2_mulf(vec2_t a, float f) {
-	return vec2(
-		a.x * f,
-		a.y * f
+
+static inline vec2_t vec2_mulf(vec2_t a, fix16_t f) {
+	return vec2_fix16(
+		fix16_mul(a.x, f),
+		fix16_mul(a.y, f)
 	);
 }
 
-static inline vec2i_t vec2i_mulf(vec2i_t a, float f) {
+static inline vec2i_t vec2i_mulf(vec2i_t a, fix16_t f) {
 	return vec2i(
-		a.x * f,
-		a.y * f
+		fix16_int32_to(fix16_int32_from(a.x) * f),
+		fix16_int32_to(fix16_int32_from(a.y) * f)
 	);
 }
 
 
 static inline vec3_t vec3_add(vec3_t a, vec3_t b) {
-	return vec3(
+	return vec3_fix16(
 		a.x + b.x,
 		a.y + b.y,
 		a.z + b.z
@@ -89,7 +102,7 @@ static inline vec3_t vec3_add(vec3_t a, vec3_t b) {
 }
 
 static inline vec3_t vec3_sub(vec3_t a, vec3_t b) {
-	return vec3(
+	return vec3_fix16(
 		a.x - b.x,
 		a.y - b.y,
 		a.z - b.z
@@ -97,83 +110,80 @@ static inline vec3_t vec3_sub(vec3_t a, vec3_t b) {
 }
 
 static inline vec3_t vec3_mul(vec3_t a, vec3_t b) {
-	return vec3(
-		a.x * b.x,
-		a.y * b.y,
-		a.z * b.z
+	return vec3_fix16(
+		fix16_mul(a.x, b.x),
+		fix16_mul(a.y, b.y),
+		fix16_mul(a.z, b.z)
 	);
 }
 
-static inline vec3_t vec3_mulf(vec3_t a, float f) {
-	return vec3(
-		a.x * f,
-		a.y * f,
-		a.z * f
+static inline vec3_t vec3_mulf(vec3_t a, fix16_t f) {
+	return vec3_fix16(
+		fix16_mul(a.x, f),
+		fix16_mul(a.y, f),
+		fix16_mul(a.z, f)
 	);
 }
 
 static inline vec3_t vec3_inv(vec3_t a) {
-	return vec3(-a.x, -a.y, -a.z);
+	return vec3_fix16(-a.x, -a.y, -a.z);
 }
 
-static inline vec3_t vec3_divf(vec3_t a, float f) {
-	return vec3(
-		a.x / f,
-		a.y / f,
-		a.z / f
+static inline vec3_t vec3_divf(vec3_t a, fix16_t f) {
+	return vec3_fix16(
+		fix16_div(a.x, f),
+		fix16_div(a.y, f),
+		fix16_div(a.z, f)
 	);
 }
 
-static inline float vec3_len(vec3_t a) {
-	return sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+static inline fix16_t vec3_len(vec3_t a) {
+	return fix16_vec3_length(&a);
 }
 
 static inline vec3_t vec3_cross(vec3_t a, vec3_t b) {
-	return vec3(
-		a.y * b.z - a.z * b.y,
-		a.z * b.x - a.x * b.z,
-		a.x * b.y - a.y * b.x
+	return vec3_fix16(
+		fix16_mul(a.y, b.z) - fix16_mul(a.z, b.y),
+		fix16_mul(a.z, b.x) - fix16_mul(a.x, b.z),
+		fix16_mul(a.x, b.y) - fix16_mul(a.y, b.x)
 	);
 }
 
-static inline float vec3_dot(vec3_t a, vec3_t b) {
-	return a.x * b.x + a.y * b.y + a.z * b.z;
+static inline fix16_t vec3_dot(vec3_t a, vec3_t b) {
+	return fix16_vec3_dot(&a, &b);
 }
 
-static inline vec3_t vec3_lerp(vec3_t a, vec3_t b, float t) {
-	return vec3(
-		a.x + t * (b.x - a.x),
-		a.y + t * (b.y - a.y),
-		a.z + t * (b.z - a.z)
+static inline vec3_t vec3_lerp(vec3_t a, vec3_t b, fix16_t t) {
+	return vec3_fix16(
+		a.x + fix16_mul(t, (b.x - a.x)),
+		a.y + fix16_mul(t, (b.y - a.y)),
+		a.z + fix16_mul(t, (b.z - a.z))
 	);
 }
 
 static inline vec3_t vec3_normalize(vec3_t a) {
-	float length = vec3_len(a);
-	return vec3(
-		a.x / length,
-		a.y / length,
-		a.z / length
-	);
+	vec3_t res;
+	fix16_vec3_normalized(&a, &res);
+	return res;
 }
 
-static inline float wrap_angle(float a) {
-	a = fmod(a + M_PI, M_PI * 2);
-	if (a < 0) {
-		a += M_PI * 2;
+static inline fix16_t wrap_angle(fix16_t a) {
+	a = fmod(a + PLATFORM_PI, fix16_mul(PLATFORM_PI, FIX16(2)));
+	if (a < FIX16(0)) {
+		a += fix16_mul(PLATFORM_PI, FIX16(2));
 	}
-	return a - M_PI;
+	return a - FIX16(PLATFORM_PI);
 }
 
 rgba_t rgba_from_u32(uint32_t v);
-float vec3_angle(vec3_t a, vec3_t b);
+fix16_t vec3_angle(vec3_t a, vec3_t b);
 vec3_t vec3_wrap_angle(vec3_t a);
 vec3_t vec3_normalize(vec3_t a);
 vec3_t vec3_project_to_ray(vec3_t p, vec3_t r0, vec3_t r1);
-float vec3_distance_to_plane(vec3_t p, vec3_t plane_pos, vec3_t plane_normal);
-vec3_t vec3_reflect(vec3_t incidence, vec3_t normal, float f);
+fix16_t vec3_distance_to_plane(vec3_t p, vec3_t plane_pos, vec3_t plane_normal);
+vec3_t vec3_reflect(vec3_t incidence, vec3_t normal, fix16_t f);
 
-float wrap_angle(float a);
+fix16_t wrap_angle(fix16_t a);
 
 vec3_t vec3_transform(vec3_t a, mat4_t *mat);
 void mat4_set_translation(mat4_t *mat, vec3_t pos);

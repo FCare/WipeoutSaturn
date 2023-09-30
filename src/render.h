@@ -43,7 +43,7 @@ void render_set_view_2d(void);
 void render_set_model_mat(mat4_t *m);
 void render_set_depth_write(bool enabled);
 void render_set_depth_test(bool enabled);
-void render_set_depth_offset(float offset);
+void render_set_depth_offset(fix16_t offset);
 void render_set_screen_position(vec2_t pos);
 void render_set_blend_mode(render_blend_mode_t mode);
 void render_set_cull_backface(bool enabled);

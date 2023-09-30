@@ -1,20 +1,23 @@
 #ifndef __FIXED_MATH_H__
 #define __FIXED_MATH_H__
 
-#define M_PI       (3.14159265358979323846f) /* pi */
-#define M_PI_2     (1.57079632679489661923f) /* pi/2 */
-#define M_PI_4     (0.78539816339744830962f) /* pi/4 */
+#include <yaul.h>
+#include "fix16_mat44.h"
 
-extern float sqrt(float x);
-extern float sin(float x);
-extern float cos(float x);
-extern float tan(float x);
-extern float acos(float x);
-extern float fmod(float x, float y);
-extern float atan2(float x, float y);
-extern float fabsf(float x);
-extern float floor(float x);
-extern float ceil(float x);
+#define PLATFORM_PI       FIX16_PI /* pi */
+#define PLATFORM_PI_2     FIX16_PI_2 /* pi/2 */
+#define PLATFORM_PI_4     FIX16_PI_4 /* pi/4 */
+
+extern fix16_t sqrt(fix16_t x);
+extern fix16_t sin(fix16_t x);
+extern fix16_t cos(fix16_t x);
+extern fix16_t tan(fix16_t x);
+extern fix16_t acos(fix16_t x);
+extern fix16_t fmod(fix16_t x, fix16_t y);
+extern fix16_t atan2(fix16_t x, fix16_t y);
+extern fix16_t fabsf(fix16_t x);
+extern fix16_t floor(fix16_t x);
+extern fix16_t ceil(fix16_t x);
 
 #undef min
 #undef max

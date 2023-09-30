@@ -18,7 +18,7 @@ typedef struct particle_t {
 	vec3_t velocity;
 	vec2i_t size;
 	rgba_t color;
-	float timer;
+	fix16_t timer;
 	uint16_t type;
 	uint16_t texture;
 } particle_t;

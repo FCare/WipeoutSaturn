@@ -857,7 +857,7 @@ void object_draw(Object *object, mat4_t *mat) {
 			coord0 = poly.spr->coord;
 
 			render_push_sprite(
-				vec3(
+				vec3_fix16(
 					vertex[coord0].x,
 					vertex[coord0].y + ((poly.primitive->type == PRM_TYPE_TSPR ? poly.spr->height : -poly.spr->height) >> 1),
 					vertex[coord0].z

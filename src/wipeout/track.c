@@ -161,9 +161,9 @@ void track_load_faces(char *file_name, vec3_t *vertices) {
 		vec3_t v1 = vertices[get_i16(bytes, &p)];
 		vec3_t v2 = vertices[get_i16(bytes, &p)];
 		vec3_t v3 = vertices[get_i16(bytes, &p)];
-		tf->normal.x = (float)get_i16(bytes, &p) / 4096.0;
-		tf->normal.y = (float)get_i16(bytes, &p) / 4096.0;
-		tf->normal.z = (float)get_i16(bytes, &p) / 4096.0;
+		tf->normal.x = (fix16_t)get_i16(bytes, &p) / 4096.0;
+		tf->normal.y = (fix16_t)get_i16(bytes, &p) / 4096.0;
+		tf->normal.z = (fix16_t)get_i16(bytes, &p) / 4096.0;
 
 		tf->texture = get_i8(bytes, &p);
 		tf->flags = get_i8(bytes, &p);
@@ -264,8 +264,8 @@ void track_draw(camera_t *camera) {
 	for(int32_t i = 0; i < g.track.section_count; i++) {
 		section_t *s = &g.track.sections[i];
 		vec3_t diff = vec3_sub(cam_pos, s->center);
-		float cam_dot = vec3_dot(diff, cam_dir);
-		float dist_sq = vec3_dot(diff, diff);
+		fix16_t cam_dot = vec3_dot(diff, cam_dir);
+		fix16_t dist_sq = vec3_dot(diff, diff);
 		if (
 			cam_dot < 2048 && // FIXME: should use the bounding radius of the section
 			dist_sq < (RENDER_FADEOUT_FAR * RENDER_FADEOUT_FAR)
@@ -276,7 +276,7 @@ void track_draw(camera_t *camera) {
 }
 
 void track_cycle_pickups(void) {
-	float pickup_cycle_time = 1.5 * system_cycle_time();
+	fix16_t pickup_cycle_time = 1.5 * system_cycle_time();
 
 	for (int i = 0; i < g.track.pickups_len; i++) {
 		if (flags_is(g.track.pickups[i].face->flags, FACE_PICKUP_COLLECTED)) {
@@ -313,7 +313,7 @@ track_face_t *track_section_get_base_face(section_t *section) {
 	return face;
 }
 
-section_t *track_nearest_section(vec3_t pos, section_t *section, float *distance) {
+section_t *track_nearest_section(vec3_t pos, section_t *section, fix16_t *distance) {
 	// Start search several sections before current section
 
 	for (int i = 0; i < TRACK_SEARCH_LOOK_BACK; i++) {
@@ -322,7 +322,7 @@ section_t *track_nearest_section(vec3_t pos, section_t *section, float *distance
 
 	// Find vector from ship center to track section under
 	// consideration
-	float shortest_distance = 1000000000.0;
+	fix16_t shortest_distance = 1000000000.0;
 	section_t *nearest_section = section;
 	section_t *junction = NULL;
 	for (int i = 0; i < TRACK_SEARCH_LOOK_AHEAD; i++) {
@@ -330,7 +330,7 @@ section_t *track_nearest_section(vec3_t pos, section_t *section, float *distance
 			junction = section->junction;
 		}
 
-		float d = vec3_len(vec3_sub(pos, section->center));
+		fix16_t d = vec3_len(vec3_sub(pos, section->center));
 		if (d < shortest_distance) {
 			shortest_distance = d;
 			nearest_section = section;
@@ -342,7 +342,7 @@ section_t *track_nearest_section(vec3_t pos, section_t *section, float *distance
 	if (junction) {
 		section = junction;
 		for (int i = 0; i < TRACK_SEARCH_LOOK_AHEAD; i++) {
-			float d = vec3_len(vec3_sub(pos, section->center));
+			fix16_t d = vec3_len(vec3_sub(pos, section->center));
 			if (d < shortest_distance) {
 				shortest_distance = d;
 				nearest_section = section;

@@ -15,19 +15,15 @@ extern void mem_init(void);
 
 static cdfs_filelist_t _filelist;
 
-static double framenb = 0;
-
-static double fps = 59.94;
-
-static double nb_ovf = 0;
+static int16_t nb_ovf = 0;
+static fix16_t ovf_time_step;
 
 static void
 _frt_compare_output_handler(void)
 {
-        uint32_t frt_count;
-        frt_count = cpu_frt_count_get();
+        uint16_t frt_count = cpu_frt_count_get();
 
-        int32_t count_diff __unused;
+        int16_t count_diff __unused;
         count_diff = frt_count - (CPU_FRT_NTSC_320_128_COUNT_1MS*300);
 
         if (count_diff >= 0) {
@@ -36,9 +32,12 @@ _frt_compare_output_handler(void)
         nb_ovf++;
 }
 
-double platform_now(void) {
+fix16_t platform_now(void) {
   //Need to use th FRT
-  return nb_ovf*0,298368 + cpu_frt_count_get()*0.000004768;
+  // 0.000004768 * 16 /
+  // At div 128, FRT is 0.000004768×16 = 5 in FIX16 So lets use a div of 16 for counter
+  uint16_t frt_count = cpu_frt_count_get();
+  return fix16_int16_mul(ovf_time_step, nb_ovf) + (cpu_frt_count_get()>>4)*5;
 }
 
 static void timer_init(void)
@@ -48,12 +47,13 @@ static void timer_init(void)
 
   //divider 128 => 4.768 µs/ticks
   //CPU_FRT_NTSC_320_128_COUNT_1MS = 0xD2 => 210 ticks = 0,99456ms
-  nb_ovf = 0;
+  nb_ovf = FIX16_ZERO;
   cpu_frt_init(CPU_FRT_CLOCK_DIV_128);
   cpu_frt_oca_set(CPU_FRT_NTSC_320_128_COUNT_1MS*300, _frt_compare_output_handler);
   //Will trigger every 0,99456ms * 300 = 0,298368s
   cpu_frt_count_set(0);
   cpu_frt_interrupt_priority_set(CPU_FRT_INTERRUPT_PRIORITY_LEVEL);
+  ovf_time_step = FIX16(0.298368);
 }
 
 static void setup_fs(void) {
@@ -115,7 +115,6 @@ void main(void) {
 
 static void _vblank_out_handler(void *work __unused)
 {
-    framenb++;
     smpc_peripheral_process(); //A chaque process
 }
 
@@ -138,6 +137,7 @@ vec2i_t platform_screen_size(void) {
         ret.x = 352;
         ret.y = 240;
       }
+      break;
     case VDP2_TVMD_HORZ_NORMAL_A:
     default:
       switch(SCREEN_SIZE) {
@@ -146,6 +146,7 @@ vec2i_t platform_screen_size(void) {
         ret.x = 320;
         ret.y = 240;
       }
+      break;
   }
   return ret;
 }
@@ -159,7 +160,7 @@ void platform_set_fullscreen(bool fullscreen __attribute__((unused))) {
   LOGD("Set fullscreen\n");
 };
 
-void platform_set_audio_mix_cb(void (*cb)(float *buffer, uint32_t len)) {
+void platform_set_audio_mix_cb(void (*cb)(fix16_t *buffer, uint32_t len)) {
 //TODO
 }
 

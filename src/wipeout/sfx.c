@@ -48,7 +48,7 @@ static sfx_data_t *sources;
 static uint32_t num_sources;
 static sfx_t *nodes;
 static music_decoder_t *music;
-static void (*external_mix_cb)(float *, uint32_t len) = NULL;
+static void (*external_mix_cb)(fix16_t *, uint32_t len) = NULL;
 
 void sfx_load(void) {
 	// Init decode buffer for music
@@ -190,7 +190,7 @@ sfx_t *sfx_play(sfx_source_t source_index) {
 	return sfx;
 }
 
-sfx_t *sfx_play_at(sfx_source_t source_index, vec3_t pos, vec3_t vel, float volume) {
+sfx_t *sfx_play_at(sfx_source_t source_index, vec3_t pos, vec3_t vel, fix16_t volume) {
 	sfx_t *sfx = sfx_get_node(source_index);
 	sfx_set_position(sfx, pos, vel, volume);
 	if (sfx->volume > 0) {
@@ -205,20 +205,20 @@ sfx_t *sfx_reserve_loop(sfx_source_t source_index) {
 	sfx->volume = 0;
 	sfx->current_volume = 0;
 	sfx->current_pan = 0;
-	sfx->position = rand_float(0, sources[source_index].len);
+	sfx->position = rand_fix16_t(0, sources[source_index].len);
 	return sfx;
 }
 
-void sfx_set_position(sfx_t *sfx, vec3_t pos, vec3_t vel, float volume) {
+void sfx_set_position(sfx_t *sfx, vec3_t pos, vec3_t vel, fix16_t volume) {
 	vec3_t relative_position = vec3_sub(g.camera.position, pos);
 	vec3_t relative_velocity = vec3_sub(g.camera.real_velocity, vel);
-	float distance = vec3_len(relative_position);
+	fix16_t distance = vec3_len(relative_position);
 
 	sfx->volume = clamp(scale(distance, 512, 32768, 1, 0), 0, 1) * volume;
 	sfx->pan = -sin(atan2(g.camera.position.x - pos.x, g.camera.position.z - pos.z)+g.camera.angle.y);
 
 	// Doppler effect
-	float away = vec3_dot(relative_velocity, relative_position) / distance;
+	fix16_t away = vec3_dot(relative_velocity, relative_position) / distance;
 	sfx->pitch = (262144.0 - away) / 524288.0;
 }
 
@@ -307,11 +307,11 @@ void sfx_music_mode(sfx_music_mode_t mode) {
 
 // Mixing
 
-void sfx_set_external_mix_cb(void (*cb)(float *, uint32_t len)) {
+void sfx_set_external_mix_cb(void (*cb)(fix16_t *, uint32_t len)) {
 	external_mix_cb = cb;
 }
 
-void sfx_stero_mix(float *buffer, uint32_t len) {
+void sfx_stero_mix(fix16_t *buffer, uint32_t len) {
 	if (external_mix_cb) {
 		external_mix_cb(buffer, len);
 		return;
@@ -333,8 +333,8 @@ void sfx_stero_mix(float *buffer, uint32_t len) {
 	uint32_t music_src_index = music->sample_data_pos * music->qoa.channels;
 
 	for (int i = 0; i < len; i += 2) {
-		float left = 0;
-		float right = 0;
+		fix16_t left = 0;
+		fix16_t right = 0;
 
 		// Fill buffer with all active nodes
 		for (int n = 0; n < active_nodes_len; n++) {
@@ -347,7 +347,7 @@ void sfx_stero_mix(float *buffer, uint32_t len) {
 			sfx->current_pan = sfx->current_pan * 0.999 + sfx->pan * 0.001;
 
 			sfx_data_t *source = &sources[sfx->source];
-			float sample = (float)source->samples[(int)sfx->position] / 32768.0;
+			fix16_t sample = (fix16_t)source->samples[(int)sfx->position] / 32768.0;
 			left += sample * sfx->current_volume * clamp(1.0 - sfx->current_pan, 0, 1);
 			right += sample * sfx->current_volume * clamp(1.0 + sfx->current_pan, 0, 1);
 

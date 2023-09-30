@@ -32,8 +32,8 @@ FILE __stderr_FILE = {
     .buf_size = 0,
 };
 
-float rand_float(float min, float max) {
-	return min + ((float)rand() * (max - min))/ (float)RAND_MAX;
+fix16_t rand_fix16_t(fix16_t min, fix16_t max) {
+	return min + ((fix16_t)rand() * (max - min))/ (fix16_t)RAND_MAX;
 }
 
 int32_t rand_int(int32_t min, int32_t max) {

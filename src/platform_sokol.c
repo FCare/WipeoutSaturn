@@ -159,7 +159,7 @@ static const uint8_t keyboard_map[] = {
 };
 
 
-static void (*audio_callback)(float *buffer, uint32_t len) = NULL;
+static void (*audio_callback)(fix16_t *buffer, uint32_t len) = NULL;
 
 void platform_exit(void) {
 	sapp_quit();
@@ -198,7 +198,7 @@ void platform_handle_event(const sapp_event* ev) {
 
 	// Input Keyboard
 	else if (ev->type == SAPP_EVENTTYPE_KEY_DOWN || ev->type == SAPP_EVENTTYPE_KEY_UP) {
-		float state = ev->type == SAPP_EVENTTYPE_KEY_DOWN ? 1.0 : 0.0;
+		fix16_t state = ev->type == SAPP_EVENTTYPE_KEY_DOWN ? 1.0 : 0.0;
 		if (ev->key_code > 0 && ev->key_code < sizeof(keyboard_map)) {
 			int code = keyboard_map[ev->key_code];
 			input_set_button_state(code, state);
@@ -226,7 +226,7 @@ void platform_handle_event(const sapp_event* ev) {
 			default: break;
 		}
 		if (button != INPUT_BUTTON_NONE) {
-			float state = ev->type == SAPP_EVENTTYPE_MOUSE_DOWN ? 1.0 : 0.0;
+			fix16_t state = ev->type == SAPP_EVENTTYPE_MOUSE_DOWN ? 1.0 : 0.0;
 			input_set_button_state(button, state);
 		}
 	}
@@ -251,16 +251,16 @@ void platform_handle_event(const sapp_event* ev) {
 	}
 }
 
-void platform_audio_callback(float* buffer, int num_frames, int num_channels) {
+void platform_audio_callback(fix16_t* buffer, int num_frames, int num_channels) {
 	if (audio_callback) {
 		audio_callback(buffer, num_frames * num_channels);
 	}
 	else {
-		memset(buffer, 0, num_frames * sizeof(float));
+		memset(buffer, 0, num_frames * sizeof(fix16_t));
 	}
 }
 
-void platform_set_audio_mix_cb(void (*cb)(float *buffer, uint32_t len)) {
+void platform_set_audio_mix_cb(void (*cb)(fix16_t *buffer, uint32_t len)) {
 	audio_callback = cb;
 }
 

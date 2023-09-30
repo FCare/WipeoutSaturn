@@ -166,13 +166,13 @@ void input_unbind_all(input_layer_t layer);
 
 uint8_t input_bound_to_action(button_t button);
 
-void input_set_button_state(button_t button, float state);
+void input_set_button_state(button_t button, fix16_t state);
 void input_set_mouse_pos(int32_t x, int32_t y);
 void input_textinput(int32_t ascii_char);
 
 void input_capture(input_capture_callback_t cb, void *user);
 
-float input_state(uint8_t action);
+fix16_t input_state(uint8_t action);
 bool input_pressed(uint8_t action);
 bool input_released(uint8_t action);
 vec2_t input_mouse_pos(void);

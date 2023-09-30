@@ -51,12 +51,12 @@ static uint8_t isSameUv(vec2_t *uv, quads_t *q) {
 uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *quad, vec2i_t *size) {
 	render_texture_t* src = get_tex(texture_index);
 	int orig_w = quad->vertices[1].uv.x - quad->vertices[0].uv.x;
-	int h = quad->vertices[3].uv.y - quad->vertices[0].uv.y;
+	int h = quad->vertices[3].uv.y - quad->vertices[0].uv.y; //Here uv are simple uint32_t
 
 	assert(orig_w >= 0);
 	assert(h >= 0);
 	//workaround. need to find a fix
-	int w = (orig_w+7) & ~0x7; //Align on upper 8
+	uint32_t w = (orig_w+7) & ~0x7; //Align on upper 8
 
 	uint32_t length = w*h*sizeof(rgb1555_t);
 
@@ -64,10 +64,10 @@ uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *quad, 
 
 	if (w != orig_w) {
 		LOGD("Need extend for %d to %d\n", orig_w, w);
-		float ratioX = ((float)w-(float)orig_w)/(float)orig_w;
+		fix16_t ratioX = fix16_div(FIX16(w - orig_w),FIX16(orig_w));
 		//extend the quad to fit the uv
-		quad->vertices[1].pos.x += (quad->vertices[1].pos.x - quad->vertices[0].pos.x)*ratioX;
-		quad->vertices[2].pos.x += (quad->vertices[2].pos.x - quad->vertices[0].pos.x)*ratioX;
+		quad->vertices[1].pos.x += fix16_mul((quad->vertices[1].pos.x - quad->vertices[0].pos.x),ratioX);
+		quad->vertices[2].pos.x += fix16_mul((quad->vertices[2].pos.x - quad->vertices[0].pos.x),ratioX);
 	}
 
   for (uint16_t i=0; i<textures_len[id]; i++) {

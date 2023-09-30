@@ -63,7 +63,7 @@ void particles_spawn(vec3_t position, uint16_t type, vec3_t velocity, int size) 
 	p->texture = texture_from_list(particle_textures, type);
 	p->position = position;
 	p->velocity = velocity;
-	p->timer = rand_float(0.75, 1.0);
+	p->timer = rand_fix16_t(0.75, 1.0);
 	p->size.x = size;
 	p->size.y = size;
 }

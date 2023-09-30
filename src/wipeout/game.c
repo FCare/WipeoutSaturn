@@ -21,8 +21,8 @@
 #include "title.h"
 #include "intro.h"
 
-#define TURN_ACCEL(V) NTSC_ACCELERATION(ANGLE_NORM_TO_RADIAN(FIXED_TO_FLOAT(YAW_VELOCITY(V))))
-#define TURN_VEL(V)   NTSC_VELOCITY(ANGLE_NORM_TO_RADIAN(FIXED_TO_FLOAT(YAW_VELOCITY(V))))
+#define TURN_ACCEL(V) NTSC_ACCELERATION(ANGLE_NORM_TO_RADIAN(FIXED_TO_fix16_t(YAW_VELOCITY(V))))
+#define TURN_VEL(V)   NTSC_VELOCITY(ANGLE_NORM_TO_RADIAN(FIXED_TO_fix16_t(YAW_VELOCITY(V))))
 
 const game_def_t def = {
 	.race_classes = {
@@ -397,7 +397,7 @@ save_t save = {
 	.sfx_volume = 0.6,
 	.music_volume = 0.5,
 	.ui_scale = 0,
-	.show_fps = false,
+	.show_fps = true,
 	.fullscreen = false,
 	.screen_res = 0,
 	.post_effect = 0,
@@ -490,7 +490,9 @@ struct {
 	void (*init)(void);
 	void (*update)(void);
 } game_scenes[] = {
+#ifndef SATURN
 	[GAME_SCENE_INTRO] = {intro_init, intro_update},
+#endif
 	[GAME_SCENE_TITLE] = {title_init, title_update},
 	[GAME_SCENE_MAIN_MENU] = {main_menu_init, main_menu_update},
 	[GAME_SCENE_RACE] = {race_init, race_update},
@@ -581,7 +583,7 @@ void game_init(void) {
 		}
 	}
 
-	game_set_scene(GAME_SCENE_TITLE);
+	game_set_scene(0);
 }
 
 void game_set_scene(game_scene_t scene) {
@@ -598,7 +600,7 @@ void game_reset_championship(void) {
 }
 
 void game_update(void) {
-	double frame_start_time = platform_now();
+	fix16_t frame_start_time = platform_now();
 
 	int sh = render_size().y;
 	int scale = 1; //max(1, sh >=  720 ? sh / 360 : sh / 240);
@@ -641,10 +643,11 @@ void game_update(void) {
 		printf("wrote save.dat\n");
 	}
 
-	double now = platform_now();
+	fix16_t now = platform_now();
 	g.frame_time = now - frame_start_time;
-	if (g.frame_time > 0) {
-		g.frame_rate = ((double)g.frame_rate * 0.95) + (1.0/g.frame_time) * 0.05;
+	if (g.frame_time > FIX16_ZERO) {
+		// g.frame_rate = ((double)g.frame_rate * 0.95) + (1.0/g.frame_time) * 0.05;
+		g.frame_rate = fix16_div(FIX16_ONE,g.frame_time);
 	}
 }
 

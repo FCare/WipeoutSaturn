@@ -46,7 +46,7 @@ int ui_text_width(const char *text, ui_text_size_t size);
 int ui_number_width(int num, ui_text_size_t size);
 
 void ui_draw_text(const char *text, vec2i_t pos, ui_text_size_t size, rgba_t color);
-void ui_draw_time(float time, vec2i_t pos, ui_text_size_t size, rgba_t color);
+void ui_draw_time(fix16_t time, vec2i_t pos, ui_text_size_t size, rgba_t color);
 void ui_draw_number(int num, vec2i_t pos, ui_text_size_t size, rgba_t color);
 
 void ui_draw_image(vec2i_t pos, uint16_t texture);

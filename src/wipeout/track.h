@@ -61,7 +61,7 @@ typedef struct section_t {
 
 typedef struct {
 	track_face_t *face;
-	float cooldown_timer;
+	fix16_t cooldown_timer;
 } track_pickup_t;
 
 typedef struct track_t {
@@ -86,7 +86,7 @@ void track_load_sections(char *file);
 bool track_collect_pickups(track_face_t *face);
 void track_face_set_color(track_face_t *face, rgba_t color);
 track_face_t *track_section_get_base_face(section_t *section);
-section_t *track_nearest_section(vec3_t pos, section_t *section, float *distance);
+section_t *track_nearest_section(vec3_t pos, section_t *section, fix16_t *distance);
 
 struct camera_t;
 void track_draw(struct camera_t *camera);

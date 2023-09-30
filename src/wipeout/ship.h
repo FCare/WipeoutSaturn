@@ -37,8 +37,8 @@
 
 // Physics conversion
 
-#define FIXED_TO_FLOAT(V) ((V) * (1.0/4096.0))
-#define ANGLE_NORM_TO_RADIAN(V) ((V) * M_PI * 2.0)
+#define FIXED_TO_fix16_t(V) ((V) * (1.0/4096.0))
+#define ANGLE_NORM_TO_RADIAN(V) ((V) * PLATFORM_PI * 2.0)
 #define NTSC_STEP_TO_RATE_PER_SECOND(V) ((V) * 30.0)
 #define NTSC_ACCELERATION(V) NTSC_STEP_TO_RATE_PER_SECOND(NTSC_STEP_TO_RATE_PER_SECOND(V))
 #define NTSC_VELOCITY(V) NTSC_STEP_TO_RATE_PER_SECOND(V)
@@ -47,15 +47,15 @@
 #define YAW_VELOCITY(V) ((V) * (1.0/64.0))
 #define ROLL_VELOCITY(V) ((V) * (1.0))
 
-#define SHIP_FLYING_GRAVITY   80000.0
-#define SHIP_ON_TRACK_GRAVITY 30000.0
+#define SHIP_FLYING_GRAVITY   FIX16(80000.0)
+#define SHIP_ON_TRACK_GRAVITY FIX16(30000.0)
 #define SHIP_MIN_RESISTANCE 	20	 // 12
 #define SHIP_MAX_RESISTANCE 	74
 #define SHIP_VELOCITY_SHIFT 	6
 #define SHIP_TRACK_MAGNET		64	// 64
-#define SHIP_TRACK_FLOAT 	256
+#define SHIP_TRACK_fix16_t 	256
 
-#define SHIP_PITCH_ACCEL    NTSC_ACCELERATION(ANGLE_NORM_TO_RADIAN(FIXED_TO_FLOAT(PITCH_VELOCITY(30))))
+#define SHIP_PITCH_ACCEL    NTSC_ACCELERATION(ANGLE_NORM_TO_RADIAN(FIXED_TO_fix16_t(PITCH_VELOCITY(30))))
 #define SHIP_THRUST_RATE    NTSC_VELOCITY(16)
 #define SHIP_THRUST_FALLOFF NTSC_VELOCITY(8)
 #define SHIP_BRAKE_RATE     NTSC_VELOCITY(32)
@@ -80,50 +80,50 @@ typedef struct ship_t {
 	vec3_t angular_acceleration;
 
 	vec3_t temp_target; // used for start position and rescue target
-	
-	float turn_rate;
-	float turn_rate_max;
-	float turn_rate_from_hit;
 
-	float mass;
-	float thrust_mag;
-	float thrust_max;
-	float current_thrust_max;
-	float speed;
-	float brake_left;
-	float brake_right;
+	fix16_t turn_rate;
+	fix16_t turn_rate_max;
+	fix16_t turn_rate_from_hit;
 
-	float resistance;
-	float skid;
+	fix16_t mass;
+	fix16_t thrust_mag;
+	fix16_t thrust_max;
+	fix16_t current_thrust_max;
+	fix16_t speed;
+	fix16_t brake_left;
+	fix16_t brake_right;
 
-	float remote_thrust_mag;
-	float remote_thrust_max;
+	fix16_t resistance;
+	fix16_t skid;
+
+	fix16_t remote_thrust_mag;
+	fix16_t remote_thrust_max;
 
 	// Remote Ship Attributes
 	int16_t fight_back;
-	float start_accelerate_timer;
+	fix16_t start_accelerate_timer;
 
 	// Weapon Attributes
 	uint8_t weapon_type;
 	struct ship_t *weapon_target;
 
-	float ebolt_timer;
-	float ebolt_effect_timer;
-	float revcon_timer;
-	float special_timer;
+	fix16_t ebolt_timer;
+	fix16_t ebolt_effect_timer;
+	fix16_t revcon_timer;
+	fix16_t special_timer;
 
 	// Race Control Attributes
 	int position_rank;
 	int lap;
 	int max_lap;
-	float lap_time;
+	fix16_t lap_time;
 
 	int16_t section_num;
 	int16_t prev_section_num;
 	int16_t total_section_num;
 
-	float update_timer;
-	float last_impact_time;
+	fix16_t update_timer;
+	fix16_t last_impact_time;
 
 	mat4_t mat;
 	Object *model;

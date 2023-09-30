@@ -56,7 +56,7 @@ void hud_load(void) {
 	weapon_icon_textures = image_get_compressed_textures("wipeout/common/wicons.cmp");
 }
 
-static void hud_draw_speedo_bar(vec2i_t *pos, const speedo_bar_t *a, const speedo_bar_t *b, float f, rgba_t color_override) {
+static void hud_draw_speedo_bar(vec2i_t *pos, const speedo_bar_t *a, const speedo_bar_t *b, fix16_t f, rgba_t color_override) {
 	rgba_t left_color, right_color;
 	if (color_override.a > 0) {
 		left_color = color_override;
@@ -72,7 +72,7 @@ static void hud_draw_speedo_bar(vec2i_t *pos, const speedo_bar_t *a, const speed
 		);
 	}
 
-	float right_h = lerp(a->height, b->height, f);
+	fix16_t right_h = lerp(a->height, b->height, f);
 	vec2i_t top_left     = vec2i(a->offset.x + 1, a->offset.y);
 	vec2i_t bottom_left  = vec2i(a->offset.x + 1 - a->height / speedo.skew, a->offset.y + a->height);
 	vec2i_t top_right    = vec2i(lerp(a->offset.x + 1, b->offset.x, f), lerp(a->offset.y, b->offset.y, f));
@@ -149,7 +149,7 @@ static void hud_draw_speedo_bar(vec2i_t *pos, const speedo_bar_t *a, const speed
 	// }, RENDER_NO_TEXTURE);
 }
 
-static void hud_draw_speedo_bars(vec2i_t *pos, float f, rgba_t color_override) {
+static void hud_draw_speedo_bars(vec2i_t *pos, fix16_t f, rgba_t color_override) {
 	if (f <= 0) {
 		return;
 	}
@@ -170,7 +170,7 @@ static void hud_draw_speedo_bars(vec2i_t *pos, float f, rgba_t color_override) {
 		return;
 	}
 
-	float last_bar_fraction = f - bars + 0.1;
+	fix16_t last_bar_fraction = f - bars + 0.1;
 	if (last_bar_fraction <= 0) {
 		return;
 	}
@@ -238,7 +238,7 @@ void hud_draw(ship_t *ship) {
 	// Framerate
 	if (save.show_fps) {
 		ui_draw_text("FPS", ui_scaled(vec2i(16, 78)), UI_SIZE_8, UI_COLOR_ACCENT);
-		ui_draw_number((int)(g.frame_rate), ui_scaled(vec2i(16, 90)), UI_SIZE_8, UI_COLOR_DEFAULT);
+		ui_draw_number(fix16_int32_to(g.frame_rate), ui_scaled(vec2i(16, 90)), UI_SIZE_8, UI_COLOR_DEFAULT);
 	}
 
 	// Lap Record

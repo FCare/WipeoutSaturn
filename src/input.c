@@ -146,7 +146,7 @@ static const char *button_names[] = {
 	[INPUT_MOUSE_WHEEL_DOWN] = "MWDOWN",
 };
 
-static float actions_state[INPUT_ACTION_MAX];
+static fix16_t actions_state[INPUT_ACTION_MAX];
 static bool actions_pressed[INPUT_ACTION_MAX];
 static bool actions_released[INPUT_ACTION_MAX];
 
@@ -173,7 +173,7 @@ void input_clear(void) {
 	clear(actions_released);
 }
 
-void input_set_layer_button_state(input_layer_t layer, button_t button, float state) {
+void input_set_layer_button_state(input_layer_t layer, button_t button, fix16_t state) {
 	error_if(layer < 0 || layer >= INPUT_LAYER_MAX, "Invalid input layer %d", layer);
 
 	uint8_t action = bindings[layer][button];
@@ -197,7 +197,7 @@ void input_set_layer_button_state(input_layer_t layer, button_t button, float st
 	}
 }
 
-void input_set_button_state(button_t button, float state) {
+void input_set_button_state(button_t button, fix16_t state) {
 	error_if(button < 0 || button >= INPUT_BUTTON_MAX, "Invalid input button %d", button);
 
 	input_set_layer_button_state(INPUT_LAYER_SYSTEM, button, state);
@@ -257,7 +257,7 @@ void input_unbind_all(input_layer_t layer) {
 }
 
 
-float input_state(uint8_t action) {
+fix16_t input_state(uint8_t action) {
 	error_if(action < 0 || action >= INPUT_ACTION_MAX, "Invalid input action %d", action);
 	return actions_state[action];
 }

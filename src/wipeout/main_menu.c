@@ -39,12 +39,12 @@ static struct {
 	Object *controller;
 } models;
 
-static void draw_model(Object *model, vec2_t offset, vec3_t pos, float rotation) {
-	render_set_view(vec3(0,0,0), vec3(0, -M_PI, -M_PI));
+static void draw_model(Object *model, vec2_t offset, vec3_t pos, fix16_t rotation) {
+	render_set_view(vec3(0,0,0), vec3_fix16(0, -PLATFORM_PI, -PLATFORM_PI));
 	render_set_screen_position(offset);
 	mat4_t mat = mat4_identity();
 	mat4_set_translation(&mat, pos);
-	mat4_set_yaw_pitch_roll(&mat, vec3(0, rotation, M_PI));
+	mat4_set_yaw_pitch_roll(&mat, vec3_fix16(0, rotation, PLATFORM_PI));
 	object_draw(model, &mat);
 	render_set_screen_position(vec2(0, 0));
 }
@@ -143,7 +143,7 @@ static void page_options_init(menu_t *menu) {
 
 static const char *button_names[NUM_GAME_ACTIONS][2] = {};
 static int control_current_action;
-static float await_input_deadline;
+static fix16_t await_input_deadline;
 
 void button_capture(void *user, button_t button, int32_t ascii_char) {
 	if (button == INPUT_INVALID) {
@@ -173,7 +173,7 @@ void button_capture(void *user, button_t button, int32_t ascii_char) {
 }
 
 static void page_options_control_set_draw(menu_t *menu, int data) {
-	float remaining = await_input_deadline - platform_now();
+	fix16_t remaining = await_input_deadline - platform_now();
 
 	menu_page_t *page = &menu->pages[menu->index];
 	char remaining_text[2] = { '0' + (uint8_t)clamp(remaining + 1, 0, 3), '\0'};
@@ -295,7 +295,7 @@ static const char *opts_res[] = {"NATIVE", "240P", "480P"};
 static const char *opts_post[] = {"NONE", "CRT EFFECT"};
 
 static void page_options_video_init(menu_t *menu) {
-	menu_page_t *page = menu_push(menu, "VIDEO OPTIONS", NULL);
+	menu_page_t *page = menu_push(menu, "VIDEO", NULL);
 	flags_set(page->layout_flags, MENU_VERTICAL | MENU_FIXED);
 	page->title_pos = vec2i(-160, -100);
 	page->title_anchor = UI_POS_MIDDLE | UI_POS_CENTER;
@@ -318,19 +318,19 @@ static void page_options_video_init(menu_t *menu) {
 // Options Audio
 
 static void toggle_music_volume(menu_t *menu, int data) {
-	save.music_volume = (float)data * 0.1;
+	save.music_volume = (fix16_t)data * 0.1;
 	save.is_dirty = true;
 }
 
 static void toggle_sfx_volume(menu_t *menu, int data) {
-	save.sfx_volume = (float)data * 0.1;
+	save.sfx_volume = (fix16_t)data * 0.1;
 	save.is_dirty = true;
 }
 
 static const char *opts_volume[] = {"0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"};
 
 static void page_options_audio_init(menu_t *menu) {
-	menu_page_t *page = menu_push(menu, "AUDIO OPTIONS", NULL);
+	menu_page_t *page = menu_push(menu, "AUDIO", NULL);
 
 	flags_set(page->layout_flags, MENU_VERTICAL | MENU_FIXED);
 	page->title_pos = vec2i(-160, -100);
@@ -340,7 +340,7 @@ static void page_options_audio_init(menu_t *menu) {
 	page->items_anchor = UI_POS_MIDDLE | UI_POS_CENTER;
 
 	menu_page_add_toggle(page, save.music_volume * 10, "MUSIC VOLUME", opts_volume, len(opts_volume), toggle_music_volume);
-	menu_page_add_toggle(page, save.sfx_volume * 10, "SOUND EFFECTS VOLUME", opts_volume, len(opts_volume), toggle_sfx_volume);
+	menu_page_add_toggle(page, save.sfx_volume * 10, "SFX VOLUME", opts_volume, len(opts_volume), toggle_sfx_volume);
 }
 
 
@@ -548,7 +548,6 @@ void main_menu_init(void) {
 void main_menu_update(void) {
 	render_set_view_2d();
 	render_push_2d(vec2i(0, 0), render_size(), rgba(128, 128, 128, 255), background);
-	printf("Update menu\n");
 	menu_update(main_menu);
 }
 

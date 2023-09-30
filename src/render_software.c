@@ -48,10 +48,10 @@ void render_cleanup(void) {}
 void render_set_screen_size(vec2i_t size) {
 	screen_size = size;
 
-	float aspect = (float)size.x / (float)size.y;
-	float fov = (73.75 / 180.0) * 3.14159265358;
-	float f = 1.0 / tan(fov / 2);
-	float nf = 1.0 / (NEAR_PLANE - FAR_PLANE);
+	fix16_t aspect = (fix16_t)size.x / (fix16_t)size.y;
+	fix16_t fov = (73.75 / 180.0) * 3.14159265358;
+	fix16_t f = 1.0 / tan(fov / 2);
+	fix16_t nf = 1.0 / (NEAR_PLANE - FAR_PLANE);
 	projection_mat = mat4(
 		f / aspect, 0, 0, 0,
 		0, f, 0, 0,
@@ -93,15 +93,15 @@ void render_set_view(vec3_t pos, vec3_t angles) {
 }
 
 void render_set_view_2d(void) {
-	float near = -1;
-	float far = 1;
-	float left = 0;
-	float right = screen_size.x;
-	float bottom = screen_size.y;
-	float top = 0;
-	float lr = 1 / (left - right);
-	float bt = 1 / (bottom - top);
-	float nf = 1 / (near - far);
+	fix16_t near = -1;
+	fix16_t far = 1;
+	fix16_t left = 0;
+	fix16_t right = screen_size.x;
+	fix16_t bottom = screen_size.y;
+	fix16_t top = 0;
+	fix16_t lr = 1 / (left - right);
+	fix16_t bt = 1 / (bottom - top);
+	fix16_t nf = 1 / (near - far);
 	mvp_mat = mat4(
 		-2 * lr,  0,  0,  0,
 		0,  -2 * bt,  0,  0,
@@ -118,7 +118,7 @@ void render_set_model_mat(mat4_t *m) {
 
 void render_set_depth_write(bool enabled) {}
 void render_set_depth_test(bool enabled) {}
-void render_set_depth_offset(float offset) {}
+void render_set_depth_offset(fix16_t offset) {}
 void render_set_screen_position(vec2_t pos) {}
 void render_set_blend_mode(render_blend_mode_t mode) {}
 void render_set_cull_backface(bool enabled) {}
@@ -128,8 +128,8 @@ vec3_t render_transform(vec3_t pos) {
 }
 
 void render_push_tris(tris_t tris, uint16_t texture_index) {
-	float w2 = screen_size.x * 0.5;
-	float h2 = screen_size.y * 0.5;
+	fix16_t w2 = screen_size.x * 0.5;
+	fix16_t h2 = screen_size.y * 0.5;
 
 	vec3_t p0 = vec3_transform(tris.vertices[0].pos, &mvp_mat);
 	vec3_t p1 = vec3_transform(tris.vertices[1].pos, &mvp_mat);

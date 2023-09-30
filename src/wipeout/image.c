@@ -29,7 +29,7 @@ static inline rgba_t tim_16bit_to_rgba(uint16_t c, bool transparent_bit) {
 		((c >>  0) & 0x1f) << 3,
 		((c >>  5) & 0x1f) << 3,
 		((c >> 10) & 0x1f) << 3,
-		(c == 0 
+		(c == 0
 			? 0x00
 			: transparent_bit && (c & 0x7fff) == 0 ? 0x00 : 0xff
 		)
@@ -264,7 +264,7 @@ uint16_t image_get_texture(char *name) {
 	uint32_t size;
 	uint8_t *bytes = platform_load_asset(name, &size);
 	image_t *image = image_load_from_bytes(bytes, false);
-	uint32_t texture_index = render_texture_create(image->width, image->height, image->pixels);
+	uint16_t texture_index = render_texture_create(image->width, image->height, image->pixels);
 	mem_temp_free(image);
 	mem_temp_free(bytes);
 
@@ -276,7 +276,7 @@ uint16_t image_get_texture_semi_trans(char *name) {
 	uint32_t size;
 	uint8_t *bytes = platform_load_asset(name, &size);
 	image_t *image = image_load_from_bytes(bytes, true);
-	uint32_t texture_index = render_texture_create(image->width, image->height, image->pixels);
+	uint16_t texture_index = render_texture_create(image->width, image->height, image->pixels);
 	mem_temp_free(image);
 	mem_temp_free(bytes);
 

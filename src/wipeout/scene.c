@@ -42,20 +42,20 @@ static struct {
 	bool enabled;
 	GT4	*primitives[80];
 	int16_t *coords[80];
-	int16_t grey_coords[80];	
+	int16_t grey_coords[80];
 } aurora_borealis;
 
 void scene_pulsate_red_light(Object *obj);
 void scene_move_oil_pump(Object *obj);
 void scene_update_aurora_borealis(void);
 
-void scene_load(const char *base_path, float sky_y_offset) {
+void scene_load(const char *base_path, fix16_t sky_y_offset) {
 	texture_list_t scene_textures = image_get_compressed_textures(get_path(base_path, "scene.cmp"));
 	scene_objects = objects_load(get_path(base_path, "scene.prm"), scene_textures);
-	
+
 	texture_list_t sky_textures = image_get_compressed_textures(get_path(base_path, "sky.cmp"));
 	sky_object = objects_load(get_path(base_path, "sky.prm") , sky_textures);
-	sky_offset = vec3(0, sky_y_offset, 0);
+	sky_offset = vec3_fix16(0, sky_y_offset, 0);
 
 	// Collect all objects that need to be updated each frame
 	start_booms_len = 0;
@@ -80,7 +80,7 @@ void scene_load(const char *base_path, float sky_y_offset) {
 			oil_pumps[oil_pumps_len++] = obj;
 		}
 		else if (
-			str_starts_with(obj->name, "lostad") || 
+			str_starts_with(obj->name, "lostad") ||
 			str_starts_with(obj->name, "stad_") ||
 			str_starts_with(obj->name, "newstad_")
 		) {
@@ -108,7 +108,7 @@ void scene_update(void) {
 		scene_move_oil_pump(oil_pumps[i]);
 	}
 	for (int i = 0; i < stands_len; i++) {
-		sfx_set_position(stands[i].sfx, stands[i].pos, vec3(0, 0, 0), 0.4);
+		sfx_set_position(stands[i].sfx, stands[i].pos, vec3_fix16(0, 0, 0), 0.4);
 	}
 
 	if (aurora_borealis.enabled) {
@@ -130,13 +130,13 @@ void scene_draw(camera_t *camera) {
 	vec3_t cam_pos = camera->position;
 	vec3_t cam_dir = camera_forward(camera);
 	Object *object = scene_objects;
-	
+
 	while (object) {
 		vec3_t diff = vec3_sub(cam_pos, object->origin);
-		float cam_dot = vec3_dot(diff, cam_dir);
-		float dist_sq = vec3_dot(diff, diff);
+		fix16_t cam_dot = vec3_dot(diff, cam_dir);
+		fix16_t dist_sq = vec3_dot(diff, diff);
 		if (
-			cam_dot < object->radius && 
+			cam_dot < object->radius &&
 			dist_sq < (RENDER_FADEOUT_FAR * RENDER_FADEOUT_FAR)
 		) {
 			object_draw(object, &object->mat);
@@ -146,7 +146,7 @@ void scene_draw(camera_t *camera) {
 }
 
 void scene_set_start_booms(int light_index) {
-	
+
 	int lights_len = 1;
 	rgba_t color = rgba(0, 0, 0, 0);
 
@@ -184,7 +184,7 @@ void scene_set_start_booms(int light_index) {
 
 
 void scene_pulsate_red_light(Object *obj) {
-	uint8_t r = clamp(sin(system_cycle_time() * M_PI * 2) * 128 + 128, 0, 255);
+	uint8_t r = clamp(sin(system_cycle_time() * PLATFORM_PI * 2) * 128 + 128, 0, 255);
 	Prm libPoly = {.primitive = obj->primitives};
 
 	for (int v = 0; v < 4; v++) {
@@ -195,7 +195,7 @@ void scene_pulsate_red_light(Object *obj) {
 }
 
 void scene_move_oil_pump(Object *pump) {
-	mat4_set_yaw_pitch_roll(&pump->mat, vec3(sin(system_cycle_time() * 0.125 * M_PI * 2), 0, 0));
+	mat4_set_yaw_pitch_roll(&pump->mat, vec3_fix16(sin(system_cycle_time() * 0.125 * PLATFORM_PI * 2), 0, 0));
 }
 
 void scene_init_aurora_borealis(void) {
@@ -204,7 +204,7 @@ void scene_init_aurora_borealis(void) {
 
 	int count = 0;
 	int16_t *coords;
-	float y;
+	fix16_t y;
 
 	Prm poly = {.primitive = sky_object->primitives};
 	for (int i = 0; i < sky_object->primitives_len; i++) {
@@ -237,7 +237,7 @@ void scene_init_aurora_borealis(void) {
 }
 
 void scene_update_aurora_borealis(void) {
-	float phase = system_time() / 30.0;
+	fix16_t phase = system_time() / 30.0;
 	for (int i = 0; i < 80; i++) {
 		int16_t *coords = aurora_borealis.coords[i];
 

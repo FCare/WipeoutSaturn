@@ -27,15 +27,15 @@
 #include "particle.h"
 
 void ship_player_update_sfx(ship_t *self) {
-	float speedf = self->speed * 0.000015;
+	fix16_t speedf = self->speed * 0.000015;
 	self->sfx_engine_intake->volume = clamp(speedf, 0, 0.5);
 	self->sfx_engine_intake->pitch = 0.5 + speedf * 1.25;
 
 	self->sfx_engine_thrust->volume = 0.05 + 0.025 * (self->thrust_mag / self->thrust_max);
 	self->sfx_engine_thrust->pitch = 0.2 + 0.5 * (self->thrust_mag / self->thrust_max) + speedf;
 
-	float brake_left = self->brake_left * 0.0035;
-	float brake_right = self->brake_right * 0.0035;
+	fix16_t brake_left = self->brake_left * 0.0035;
+	fix16_t brake_right = self->brake_right * 0.0035;
 	self->sfx_turbulence->volume = (speedf * brake_left + speedf * brake_right) * 0.5;
 	self->sfx_turbulence->pan = (brake_right - brake_left);
 
@@ -114,7 +114,7 @@ void ship_player_update_intro_await_go(ship_t *self) {
 
 void ship_player_update_intro_general(ship_t *self) {
 	self->update_timer -= system_tick();
-	self->position.y = self->temp_target.y + sin(self->update_timer * 80.0 * 30.0 * M_PI * 2.0 / 4096.0) * 32;
+	self->position.y = self->temp_target.y + sin(self->update_timer * 80.0 * 30.0 * PLATFORM_PI * 2.0 / 4096.0) * 32;
 
 	// Thrust
 	if (input_state(A_THRUST)) {
@@ -176,7 +176,7 @@ void ship_player_update_race(ship_t *self) {
 		// FIXME_PL: make sure revconned is honored
 	}
 
-	self->angular_acceleration = vec3(0, 0, 0);
+	self->angular_acceleration = vec3_fix16(0, 0, 0);
 
 	if (input_state(A_LEFT)) {
 		if (self->angular_velocity.y >= 0) {
@@ -202,7 +202,7 @@ void ship_player_update_race(ship_t *self) {
 			if (flags_is(self->flags, SHIP_VIEW_INTERNAL)) {
 				// SetShake(2); // FIXME
 			}
-			self->angular_velocity.y += rand_float(-0.5, 0.5); // FIXME: 60fps
+			self->angular_velocity.y += rand_fix16_t(-0.5, 0.5); // FIXME: 60fps
 			self->ebolt_effect_timer -= 0.1;
 		}
 	}
@@ -213,7 +213,7 @@ void ship_player_update_race(ship_t *self) {
 	// Handle Stall
 	if (self->update_timer > 0) {
 		if (self->current_thrust_max < 500) {
-			self->current_thrust_max += rand_float(0, 165) * system_tick();
+			self->current_thrust_max += rand_fix16_t(0, 165) * system_tick();
 		}
 		self->update_timer -= system_tick();
 	}
@@ -301,7 +301,7 @@ void ship_player_update_race(ship_t *self) {
 		// If it's less then M_PI*2 (minus a safety margin) we are flying!
 
 		vec3_t face_point = face->quad.vertices[0].pos;
-		float height = vec3_distance_to_plane(self->position, face_point,  face->normal);
+		fix16_t height = vec3_distance_to_plane(self->position, face_point,  face->normal);
 		vec3_t plane_point = vec3_sub(self->position, vec3_mulf(face->normal, height));
 
 		vec3_t vec0 = vec3_sub(plane_point, face->quad.vertices[1].pos);
@@ -310,12 +310,12 @@ void ship_player_update_race(ship_t *self) {
 		vec3_t vec2 = vec3_sub(plane_point, face->quad.vertices[0].pos);
 		vec3_t vec3 = vec3_sub(plane_point, face->quad.vertices[3].pos);
 
-		float angle =
+		fix16_t angle =
 			vec3_angle(vec0, vec2) +
 			vec3_angle(vec2, vec3) +
 			vec3_angle(vec3, vec1) +
 			vec3_angle(vec1, vec0);
-		if (angle < M_PI * 2 - 0.01) {
+		if (angle < PLATFORM_PI * 2 - 0.01) {
 			flags_add(self->flags, SHIP_FLYING);
 		}
 	}
@@ -336,13 +336,13 @@ void ship_player_update_race(ship_t *self) {
 		}
 
 		vec3_t face_point = face->quad.vertices[0].pos;
-		float height = vec3_distance_to_plane(self->position, face_point, face->normal);
+		fix16_t height = vec3_distance_to_plane(self->position, face_point, face->normal);
 
 		// Collision with floor
 		if (height <= 0) {
 			if (self->last_impact_time > 0.2) {
 				self->last_impact_time = 0;
-				sfx_play_at(SFX_IMPACT, self->position, vec3(0,0,0), 1);
+				sfx_play_at(SFX_IMPACT, self->position, vec3_fix16(0,0,0), 1);
 			}
 			self->velocity = vec3_reflect(self->velocity, face->normal, 2);
 			self->velocity = vec3_sub(self->velocity, vec3_mulf(self->velocity, 0.125));
@@ -357,11 +357,11 @@ void ship_player_update_race(ship_t *self) {
 		}
 
 		// Calculate acceleration
-		float brake = (self->brake_left + self->brake_right);
-		float resistance = (self->resistance * (SHIP_MAX_RESISTANCE - (brake * 0.125))) * 0.0078125;
+		fix16_t brake = (self->brake_left + self->brake_right);
+		fix16_t resistance = (self->resistance * (SHIP_MAX_RESISTANCE - (brake * 0.125))) * 0.0078125;
 
-		vec3_t force = vec3(0, SHIP_ON_TRACK_GRAVITY, 0);
-		force = vec3_add(force, vec3_mulf(vec3_mulf(face->normal, 4096), (SHIP_TRACK_MAGNET * SHIP_TRACK_FLOAT) / height));
+		vec3_t force = vec3_fix16(0, SHIP_ON_TRACK_GRAVITY, 0);
+		force = vec3_add(force, vec3_mulf(vec3_mulf(face->normal, 4096), (SHIP_TRACK_MAGNET * SHIP_TRACK_fix16_t) / height));
 		force = vec3_sub(force, vec3_mulf(vec3_mulf(face->normal, 4096), SHIP_TRACK_MAGNET));
 		force = vec3_add(force, self->thrust);
 
@@ -371,12 +371,12 @@ void ship_player_update_race(ship_t *self) {
 
 		// Burying the nose in the track? Move it out!
 		vec3_t nose_pos = vec3_add(self->position, vec3_mulf(self->dir_forward, 128));
-		float nose_height = vec3_distance_to_plane(nose_pos,face_point, face->normal);
+		fix16_t nose_height = vec3_distance_to_plane(nose_pos,face_point, face->normal);
 		if (nose_height < 600) {
-			self->angular_acceleration.x += NTSC_ACCELERATION(ANGLE_NORM_TO_RADIAN(FIXED_TO_FLOAT((height - nose_height + 5) * (1.0/16.0))));
+			self->angular_acceleration.x += NTSC_ACCELERATION(ANGLE_NORM_TO_RADIAN(FIXED_TO_fix16_t((height - nose_height + 5) * (1.0/16.0))));
 		}
 		else {
-			self->angular_acceleration.x += NTSC_ACCELERATION(ANGLE_NORM_TO_RADIAN(FIXED_TO_FLOAT(-50.0/16.0)));
+			self->angular_acceleration.x += NTSC_ACCELERATION(ANGLE_NORM_TO_RADIAN(FIXED_TO_fix16_t(-50.0/16.0)));
 		}
 	}
 
@@ -411,21 +411,21 @@ void ship_player_update_race(ship_t *self) {
 			self->section = landing;
 			self->temp_target = vec3_mulf(vec3_add(landing->center, landing->next->center), 0.5);
 			self->temp_target.y -= 2000;
-			self->velocity = vec3(0, 0, 0);
+			self->velocity = vec3_fix16(0, 0, 0);
 		}
 
 
-		float brake = (self->brake_left + self->brake_right);
-		float resistance = (self->resistance * (SHIP_MAX_RESISTANCE - (brake * 0.125))) * 0.0078125;
+		fix16_t brake = (self->brake_left + self->brake_right);
+		fix16_t resistance = (self->resistance * (SHIP_MAX_RESISTANCE - (brake * 0.125))) * 0.0078125;
 
-		vec3_t force = vec3(0, SHIP_FLYING_GRAVITY, 0);
+		vec3_t force = vec3_fix16(0, SHIP_FLYING_GRAVITY, 0);
 		force = vec3_add(force, self->thrust);
 
 		self->acceleration = vec3_divf(vec3_sub(forward_velocity, self->velocity), SHIP_MIN_RESISTANCE + brake * 4);
 		self->acceleration = vec3_add(self->acceleration, vec3_divf(force, self->mass));
 		self->acceleration = vec3_sub(self->acceleration, vec3_divf(self->velocity, resistance));
 
-		self->angular_acceleration.x += NTSC_ACCELERATION(ANGLE_NORM_TO_RADIAN(FIXED_TO_FLOAT(-50.0/16.0)));
+		self->angular_acceleration.x += NTSC_ACCELERATION(ANGLE_NORM_TO_RADIAN(FIXED_TO_fix16_t(-50.0/16.0)));
 	}
 
 	// Position
@@ -449,8 +449,8 @@ void ship_player_update_race(ship_t *self) {
 	self->angular_velocity = vec3_add(self->angular_velocity, vec3_mulf(self->angular_acceleration, system_tick()));
 	self->angular_velocity.y = clamp(self->angular_velocity.y, -self->turn_rate_max, self->turn_rate_max);
 
-	float brake_dir = (self->brake_left - self->brake_right) * (0.125 / 4096.0);
-	self->angle.y += brake_dir * self->speed * 0.000030517578125 * M_PI * 2 * 30 * system_tick();
+	fix16_t brake_dir = (self->brake_left - self->brake_right) * (0.125 / 4096.0);
+	self->angle.y += brake_dir * self->speed * 0.000030517578125 * PLATFORM_PI * 2 * 30 * system_tick();
 
 	self->angle = vec3_add(self->angle, vec3_mulf(self->angular_velocity, system_tick()));
 	self->angle.z -= self->angle.z * 0.125 * 30 * system_tick();
@@ -487,7 +487,7 @@ void ship_player_update_rescue(ship_t *self) {
 
 
 	// Are we done being rescued?
-	float distance = vec3_len(vec3_sub(self->position, self->temp_target));
+	fix16_t distance = vec3_len(vec3_sub(self->position, self->temp_target));
 	if (flags_is(self->flags, SHIP_IN_TOW) && distance < 800) {
 		self->update_func = ship_player_update_race;
 		self->update_timer = 0;

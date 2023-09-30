@@ -29,11 +29,11 @@ void droid_init(droid_t *droid, ship_t *ship) {
 		droid->section = droid->section->next;
 	}
 
-	droid->position = vec3_add(ship->position, vec3(0, -200, 0));
-	droid->velocity = vec3(0, 0, 0);
-	droid->acceleration = vec3(0, 0, 0);
-	droid->angle = vec3(0, 0, 0);
-	droid->angular_velocity = vec3(0, 0, 0);
+	droid->position = vec3_add(ship->position, vec3_fix16(0, FIX16(-200), 0));
+	droid->velocity = vec3_fix16(0, 0, 0);
+	droid->acceleration = vec3_fix16(0, 0, 0);
+	droid->angle = vec3_fix16(0, 0, 0);
+	droid->angular_velocity = vec3_fix16(0, 0, 0);
 	droid->update_timer = DROID_UPDATE_TIME_INITIAL;
 	droid->mat = mat4_identity();
 
@@ -45,7 +45,7 @@ void droid_init(droid_t *droid, ship_t *ship) {
 }
 
 void droid_draw(droid_t *droid) {
-	droid->cycle_timer += system_tick() * M_PI * 2;
+	droid->cycle_timer += system_tick() * PLATFORM_PI * 2;
 
 	Prm prm = {.primitive = droid_model->primitives};
 	int rf = sin(droid->cycle_timer) * 127 + 128;
@@ -121,7 +121,7 @@ void droid_update(droid_t *droid, ship_t *ship) {
 	droid->position = vec3_add(droid->position, vec3_mulf(droid->velocity, 0.015625 * 30 * system_tick()));
 	droid->angle = vec3_add(droid->angle, vec3_mulf(droid->angular_velocity, system_tick()));
 	droid->angle = vec3_wrap_angle(droid->angle);
-	
+
 	if (flags_is(droid->sfx_tractor->flags, SFX_PLAY)) {
 		sfx_set_position(droid->sfx_tractor, droid->position, droid->velocity, 0.5);
 	}
@@ -141,12 +141,12 @@ void droid_update_intro(droid_t *droid, ship_t *ship) {
 		droid->acceleration.x = (-sin(droid->angle.y) * cos(droid->angle.x)) * 0.125 * 4096.0;
 		droid->acceleration.y = -140;
 		droid->acceleration.z = (cos(droid->angle.y) * cos(droid->angle.x)) * 0.125 * 4096.0;
-		droid->angular_velocity.y = (-8.0 / 4096.0) * M_PI * 2 * 30;
+		droid->angular_velocity.y = (-8.0 / 4096.0) * PLATFORM_PI * 2 * 30;
 	}
 
 	else if (droid->update_timer < DROID_UPDATE_TIME_INTRO_1) {
 		droid->acceleration.y -= 90 * system_tick();
-		droid->angular_velocity.y = (8.0 / 4096.0) * M_PI * 2 * 30;
+		droid->angular_velocity.y = (8.0 / 4096.0) * PLATFORM_PI * 2 * 30;
 	}
 
 	if (droid->update_timer <= 0) {
@@ -161,7 +161,7 @@ void droid_update_intro(droid_t *droid, ship_t *ship) {
 void droid_update_idle(droid_t *droid, ship_t *ship) {
 	section_t *next = droid->section->next;
 
-	vec3_t target = vec3(
+	vec3_t target = vec3_fix16(
 		(droid->section->center.x + next->center.x) * 0.5,
 		droid->section->center.y - 3000,
 		(droid->section->center.z + next->center.z) * 0.5
@@ -169,14 +169,14 @@ void droid_update_idle(droid_t *droid, ship_t *ship) {
 
 	vec3_t target_vector = vec3_sub(target, droid->position);
 
-	float target_heading = -atan2(target_vector.x, target_vector.z);
-	float quickest_turn = target_heading - droid->angle.y;
-	float turn;
+	fix16_t target_heading = -atan2(target_vector.x, target_vector.z);
+	fix16_t quickest_turn = target_heading - droid->angle.y;
+	fix16_t turn;
 	if (droid->angle.y < 0) {
-		turn = target_heading - (droid->angle.y + M_PI*2);
+		turn = target_heading - (droid->angle.y + PLATFORM_PI*2);
 	}
 	else {
-		turn = target_heading - (droid->angle.y - M_PI*2);
+		turn = target_heading - (droid->angle.y - PLATFORM_PI*2);
 	}
 
 	if (fabsf(turn) < fabsf(quickest_turn)) {
@@ -215,8 +215,8 @@ void droid_update_idle(droid_t *droid, ship_t *ship) {
 			droid->position.z = (droid->section->center.z + next->center.z) * 0.5;
 		}
 		flags_rm(ship->flags, SHIP_IN_TOW);
-		droid->velocity = vec3(0,0,0);
-		droid->acceleration = vec3(0,0,0);
+		droid->velocity = vec3_fix16(0,0,0);
+		droid->acceleration = vec3_fix16(0,0,0);
 	}
 
 	// AdjustDirectionalNote(START_SIREN, 0, 0, (VECTOR){droid->position.x, droid->position.y, droid->position.z});
@@ -226,23 +226,23 @@ void droid_update_rescue(droid_t *droid, ship_t *ship) {
 	droid->angular_velocity.y = 0;
 	droid->angle.y = ship->angle.y;
 
-	vec3_t target = vec3(ship->position.x, ship->position.y - 350, ship->position.z);
+	vec3_t target = vec3_fix16(ship->position.x, ship->position.y - 350, ship->position.z);
 	vec3_t distance = vec3_sub(target, droid->position);
 
 
 	if (flags_is(ship->flags, SHIP_IN_TOW)) {
-		droid->velocity = vec3(0,0,0);
-		droid->acceleration = vec3(0,0,0);
+		droid->velocity = vec3_fix16(0,0,0);
+		droid->acceleration = vec3_fix16(0,0,0);
 		droid->position = target;
 	}
 	else if (vec3_len(distance) < 8) {
 		flags_add(ship->flags, SHIP_IN_TOW);
-		droid->velocity = vec3(0,0,0);
-		droid->acceleration = vec3(0,0,0);
+		droid->velocity = vec3_fix16(0,0,0);
+		droid->acceleration = vec3_fix16(0,0,0);
 		droid->position = target;
 	}
 	else {
-		droid->velocity = vec3_mulf(distance, 16);	
+		droid->velocity = vec3_mulf(distance, 16);
 	}
 
 

@@ -13,11 +13,11 @@ void system_cleanup(void);
 void system_exit(void);
 void system_resize(vec2i_t size);
 
-double system_time(void);
-double system_tick(void);
-double system_cycle_time(void);
+fix16_t system_time(void);
+fix16_t system_tick(void);
+fix16_t system_cycle_time(void);
 void system_reset_cycle_time(void);
-double system_time_scale_get(void);
-void system_time_scale_set(double ts);
+fix16_t system_time_scale_get(void);
+void system_time_scale_set(fix16_t ts);
 
 #endif

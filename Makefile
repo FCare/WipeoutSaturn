@@ -13,7 +13,6 @@ COMMON_SRC = \
 	src/wipeout/main_menu.c \
 	src/wipeout/ingame_menus.c \
 	src/wipeout/title.c \
-	src/wipeout/intro.c \
 	src/wipeout/scene.c \
 	src/wipeout/ship.c \
 	src/wipeout/ship_ai.c \
@@ -42,6 +41,7 @@ DEDICATED_SRC = \
 	src/saturn/render_vdp2.c \
 	src/saturn/utils.c \
 	src/saturn/tex.c \
+	src/saturn/fix16_mat44.c \
 	src/saturn/vdp1_tex.c
 
 ifeq ($(strip $(YAUL_INSTALL_ROOT)),)
@@ -80,7 +80,6 @@ SH_CFLAGS+= -O3 \
 						-std=gnu99 \
 						-Wall \
 						-Wno-unused-variable \
-						-DFIXED_MATH \
 						-DSATURN \
 						-DNO_QUIT \
 						-DNO_ATTRACT_MODE \
@@ -212,7 +211,8 @@ TARGET_WASM_MINIMAL ?= $(WASM_RELEASE_DIR)/wipeout-minimal.js
 
 DEDICATED_SRC = \
 	src/mem.c \
-	src/utils.c
+	src/utils.c \
+	src/wipeout/intro.c
 
 PORT_SRC= \
 	$(COMMON_SRC) \

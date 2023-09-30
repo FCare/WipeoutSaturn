@@ -10,7 +10,7 @@
 extern bool blink(void);
 
 static uint16_t title_image;
-static float start_time;
+static fix16_t start_time;
 static bool has_shown_attract = false;
 
 
@@ -21,8 +21,10 @@ void title_init(void) {
 }
 
 void title_update(void) {
+	printf("update\n");
 	render_set_view_2d();
 	render_push_2d(vec2i(0, 0), render_size(), rgba(128, 128, 128, 255), title_image);
+printf("push done\n");
 
 	rgba_t text_color = UI_COLOR_DEFAULT;
 
@@ -32,11 +34,12 @@ void title_update(void) {
 		ui_draw_text_centered("LOADING", ui_scaled_pos(UI_POS_BOTTOM | UI_POS_CENTER, vec2i(0, -40)), UI_SIZE_8, text_color);
 	} else {
 		if (blink()) text_color = UI_COLOR_ACCENT;
-		ui_draw_text_centered("PRESS START", ui_scaled_pos(UI_POS_BOTTOM | UI_POS_CENTER, vec2i(0, -40)), UI_SIZE_8, text_color);
+		vec2i_t pos = ui_scaled_pos(UI_POS_BOTTOM | UI_POS_CENTER, vec2i(0, -40));
+		ui_draw_text_centered("PRESS START", pos, UI_SIZE_8, text_color);
 	}
 
 #ifndef NO_ATTRACT_MODE
-	float duration = system_time() - start_time;
+	fix16_t duration = system_time() - start_time;
 	if (
 		(has_shown_attract && duration > 5) ||
 		(duration > 10)

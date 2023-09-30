@@ -3,6 +3,8 @@
 #include "platform.h"
 #include "tex.h"
 
+extern uint16_t image_get_texture(char *name);
+
 typedef struct {
   uint16_t texture;
   uint8_t enable:1;
@@ -90,7 +92,7 @@ void set_vdp2_texture(uint16_t texture_index, vec2i_t pos, vec2i_t size, vdp2_la
        layer_ctrl[layer].size = size;
        layer_ctrl[layer].dirty = 1;
      }
-  printf("Layer %d is used\n", layer);
+  LOGD("Layer %d is used\n", layer);
   layer_ctrl[layer].enable = 1;
 }
 
@@ -102,9 +104,11 @@ void render_vdp2_clear(void) {
 
 static void updateLayerImage(uint16_t texture, vdp2_layer_t layer) {
   render_texture_t* src = get_tex(texture);
-  volatile rgb1555_t *dst = layer_ctrl[layer].format.bitmap_base;
-  for (int32_t i = 0; i< src->size.y; i++) {
-    scu_dma_transfer(0, (void *)&(dst[512*i]), &src->pixels[i*src->size.x], src->size.x*sizeof(rgb1555_t));
+  rgb1555_t *dst = layer_ctrl[layer].format.bitmap_base;
+  uint32_t y = src->size.y;
+  uint32_t x = src->size.x;
+  for (int32_t i = 0; i< y; i++) {
+    scu_dma_transfer(0, (void *)&(dst[512*i]), &src->pixels[i*x], x*sizeof(rgb1555_t));
     scu_dma_transfer_wait(0);
   }
 }

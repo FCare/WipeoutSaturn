@@ -83,14 +83,14 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
 {
   LOGD(
     "vdp1 add %dx%d %dx%d %dx%d %dx%d\n",
-    (int32_t)quad->vertices[0].pos.x,
-    (int32_t)quad->vertices[0].pos.y,
-    (int32_t)quad->vertices[1].pos.x,
-    (int32_t)quad->vertices[1].pos.y,
-    (int32_t)quad->vertices[2].pos.x,
-    (int32_t)quad->vertices[2].pos.y,
-    (int32_t)quad->vertices[3].pos.x,
-    (int32_t)quad->vertices[3].pos.y
+    fix16_int32_to(quad->vertices[0].pos.x),
+    fix16_int32_to(quad->vertices[0].pos.y),
+    fix16_int32_to(quad->vertices[1].pos.x),
+    fix16_int32_to(quad->vertices[1].pos.y),
+    fix16_int32_to(quad->vertices[2].pos.x),
+    fix16_int32_to(quad->vertices[2].pos.y),
+    fix16_int32_to(quad->vertices[3].pos.x),
+    fix16_int32_to(quad->vertices[3].pos.y)
   );
 
   assert (nbCommand < cmdt_max-2);
@@ -118,21 +118,21 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
   uint16_t*character = getVdp1VramAddress(texture_index, id, quad, &size); //a revoir parce qu'il ne faut copier suivant le UV
   LOGD(
     "after %dx%d %dx%d %dx%d %dx%d\n",
-    (int32_t)quad->vertices[0].pos.x,
-    (int32_t)quad->vertices[0].pos.y,
-    (int32_t)quad->vertices[1].pos.x,
-    (int32_t)quad->vertices[1].pos.y,
-    (int32_t)quad->vertices[2].pos.x,
-    (int32_t)quad->vertices[2].pos.y,
-    (int32_t)quad->vertices[3].pos.x,
-    (int32_t)quad->vertices[3].pos.y
+    fix16_int32_to(quad->vertices[0].pos.x),
+    fix16_int32_to(quad->vertices[0].pos.y),
+    fix16_int32_to(quad->vertices[1].pos.x),
+    fix16_int32_to(quad->vertices[1].pos.y),
+    fix16_int32_to(quad->vertices[2].pos.x),
+    fix16_int32_to(quad->vertices[2].pos.y),
+    fix16_int32_to(quad->vertices[3].pos.x),
+    fix16_int32_to(quad->vertices[3].pos.y)
   );
   //Donc il faut transformer le UV en rectangle
   vdp1_cmdt_end_clear(cmd);
   vdp1_cmdt_distorted_sprite_set(cmd); //Use distorted by default but it can be normal or scaled
   vdp1_cmdt_draw_mode_set(cmd, draw_mode);
   vdp1_cmdt_char_size_set(cmd, size.x, size.y);
-  vdp1_cmdt_char_base_set(cmd, character);
+  vdp1_cmdt_char_base_set(cmd, (vdp1_vram_t)character);
 
   rgb1555_t gouraud = RGB1555(1, color.r>>3,  color.g>>3,  color.b>>3);
   if ((gouraud.r != 0x10) || (gouraud.g != 0x10) || (gouraud.b != 0x10)) {
@@ -149,14 +149,14 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
    vdp1_cmdt_gouraud_base_set(cmd, (uint32_t)gouraud_base);
   }
 
-  cmd->cmd_xa = (uint32_t)quad->vertices[0].pos.x;
-  cmd->cmd_ya = (uint32_t)quad->vertices[0].pos.y;
-  cmd->cmd_xb = (uint32_t)quad->vertices[1].pos.x;
-  cmd->cmd_yb = (uint32_t)quad->vertices[1].pos.y;
-  cmd->cmd_xc = (uint32_t)quad->vertices[2].pos.x;
-  cmd->cmd_yc = (uint32_t)quad->vertices[2].pos.y;
-  cmd->cmd_xd = (uint32_t)quad->vertices[3].pos.x;
-  cmd->cmd_yd = (uint32_t)quad->vertices[3].pos.y;
+  cmd->cmd_xa = fix16_int32_to(quad->vertices[0].pos.x);
+  cmd->cmd_ya = fix16_int32_to(quad->vertices[0].pos.y);
+  cmd->cmd_xb = fix16_int32_to(quad->vertices[1].pos.x);
+  cmd->cmd_yb = fix16_int32_to(quad->vertices[1].pos.y);
+  cmd->cmd_xc = fix16_int32_to(quad->vertices[2].pos.x);
+  cmd->cmd_yc = fix16_int32_to(quad->vertices[2].pos.y);
+  cmd->cmd_xd = fix16_int32_to(quad->vertices[3].pos.x);
+  cmd->cmd_yd = fix16_int32_to(quad->vertices[3].pos.y);
 
   LOGD("####Add CMD########\n");
 

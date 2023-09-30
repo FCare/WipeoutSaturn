@@ -47,28 +47,28 @@ typedef enum {
 typedef struct {
 	sfx_source_t source;
 	sfx_flags_t flags;
-	float pan;
-	float current_pan;
-	float volume;
-	float current_volume;
-	float pitch;
-	float position;
+	fix16_t pan;
+	fix16_t current_pan;
+	fix16_t volume;
+	fix16_t current_volume;
+	fix16_t pitch;
+	fix16_t position;
 } sfx_t;
 
 #define SFX_MAX 64
 #define SFX_MAX_ACTIVE 16
 
 void sfx_load(void);
-void sfx_stero_mix(float *buffer, uint32_t len);
-void sfx_set_external_mix_cb(void (*cb)(float *, uint32_t len));
+void sfx_stero_mix(fix16_t *buffer, uint32_t len);
+void sfx_set_external_mix_cb(void (*cb)(fix16_t *, uint32_t len));
 void sfx_reset(void);
 void sfx_pause(void);
 void sfx_unpause(void);
 
 sfx_t *sfx_play(sfx_source_t source_index);
-sfx_t *sfx_play_at(sfx_source_t source_index, vec3_t pos, vec3_t vel, float volume);
+sfx_t *sfx_play_at(sfx_source_t source_index, vec3_t pos, vec3_t vel, fix16_t volume);
 sfx_t *sfx_reserve_loop(sfx_source_t source_index);
-void sfx_set_position(sfx_t *sfx, vec3_t pos, vec3_t vel, float volume);
+void sfx_set_position(sfx_t *sfx, vec3_t pos, vec3_t vel, fix16_t volume);
 
 typedef enum {
 	SFX_MUSIC_PAUSED,

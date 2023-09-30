@@ -7,13 +7,15 @@
 
 #include "wipeout/game.h"
 
-static double time_real;
-static double time_scaled;
-static double time_scale = 1.0;
-static double tick_last;
-static double cycle_time = 0;
+static fix16_t time_real;
+static fix16_t time_scaled;
+static fix16_t time_scale = FIX16_ONE;
+static fix16_t tick_last;
+static fix16_t cycle_time = 0;
+static fix16_t pi_3600 = 0;
 
 void system_init(void) {
+	pi_3600 = fix16_int16_mul(PLATFORM_PI,3600);
 	time_real = platform_now();
 	input_init();
 	render_init(platform_screen_size());
@@ -30,17 +32,17 @@ void system_exit(void) {
 }
 
 void system_update(void) {
-	double time_real_now = platform_now();
-	double real_delta = time_real_now - time_real;
+	fix16_t time_real_now = platform_now();
+	fix16_t real_delta = time_real_now - time_real;
 	time_real = time_real_now;
-	tick_last = min(real_delta, 0.1) * time_scale;
+	tick_last = fix16_mul(fix16_min(real_delta, FIX16(0.1)), time_scale);
 	time_scaled += tick_last;
 
 	// FIXME: come up with a better way to wrap the cycle_time, so that it
 	// doesn't lose precission, but also doesn't jump upon reset.
 	cycle_time = time_scaled;
-	if (cycle_time > 3600 * M_PI) {
-		cycle_time -= 3600 * M_PI;
+	if (cycle_time > pi_3600) {
+		cycle_time -= pi_3600;
 	}
 
 	render_frame_prepare();
@@ -60,22 +62,22 @@ void system_resize(vec2i_t size) {
 	render_set_screen_size(size);
 }
 
-double system_time_scale_get(void) {
+fix16_t system_time_scale_get(void) {
 	return time_scale;
 }
 
-void system_time_scale_set(double scale) {
+void system_time_scale_set(fix16_t scale) {
 	time_scale = scale;
 }
 
-double system_tick(void) {
+fix16_t system_tick(void) {
 	return tick_last;
 }
 
-double system_time(void) {
+fix16_t system_time(void) {
 	return time_scaled;
 }
 
-double system_cycle_time(void) {
+fix16_t system_cycle_time(void) {
 	return cycle_time;
 }
