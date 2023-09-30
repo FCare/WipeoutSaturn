@@ -378,7 +378,7 @@ static void page_race_class_draw(menu_t *menu, int data) {
 }
 
 static void page_race_class_init(menu_t *menu) {
-	menu_page_t *page = menu_push(menu, "SELECT RACING CLASS", page_race_class_draw);
+	menu_page_t *page = menu_push(menu, "RACING CLASS", page_race_class_draw);
 	for (int i = 0; i < len(def.race_classes); i++) {
 		menu_page_add_button(page, i, def.race_classes[i].name, button_race_class_select);
 	}

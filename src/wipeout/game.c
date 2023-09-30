@@ -26,8 +26,8 @@
 
 const game_def_t def = {
 	.race_classes = {
-		[RACE_CLASS_VENOM] =  {.name = "VENOM CLASS"},
-		[RACE_CLASS_RAPIER] = {.name = "RAPIER CLASS"},
+		[RACE_CLASS_VENOM] =  {.name = "VENOM"},
+		[RACE_CLASS_RAPIER] = {.name = "RAPIER"},
 	},
 
 	.race_types = {
