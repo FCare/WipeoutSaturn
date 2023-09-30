@@ -463,16 +463,20 @@ int main(int argc, char *argv[]) {
         uint16_t w = (char_set[i].glyphs[j].width + 0x7) &~0x7; //align width to 8
         fwrite(&w, sizeof(w), 1, f);
         fwrite(&(char_set[i].height), sizeof(char_set[i].height), 1, f);
+        fwrite(&(char_set[i].glyphs[j].width), sizeof(char_set[i].glyphs[j].width), 1, f);
         rgb1555_t *rgb555 = malloc(w*char_set[i].glyphs[j].width*sizeof(rgb1555_t));
-        for (int k = 0; k<image->height; k++) {
+        for (int k = char_set[i].glyphs[j].offset.y;
+                  k<(char_set[i].glyphs[j].offset.y+char_set[i].height);
+                  k++) {
+          rgba_t* src =  &image->pixels[k*image->width+char_set[i].glyphs[j].offset.x];
           for (int l = 0; l<char_set[i].glyphs[j].width; l++) {
-            rgb555[l]= convert_to_rgb(image->pixels[l]);
+            rgb555[l]= convert_to_rgb(src[l]);
           }
           for (int l = char_set[i].glyphs[j].width; l<w; l++) {
             rgb555[l]= 0;
           }
         }
-        fwrite(rgb555, sizeof(rgb1555_t), w*image->height, f);
+        fwrite(rgb555, sizeof(rgb1555_t), w*char_set[i].height, f);
         fclose(f);
       }
     }
