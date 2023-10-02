@@ -63,20 +63,13 @@ void render_set_screen_size(vec2i_t size){
   LOGD("%s\n", __FUNCTION__);
   LOGD("Screen %dx%d\n", screen_size.x, screen_size.y);
   //Screen is always same size on saturn port
-  fix16_t near = -FIX16_ONE;
-  fix16_t far = FIX16_ONE;
-  fix16_t left = FIX16_ZERO;
-  fix16_t right = FIX16(screen_size.x);
-  fix16_t bottom = FIX16(screen_size.y);
-  fix16_t top = FIX16_ZERO;
-  fix16_t lr = fix16_div(FIX16_ONE, (left - right));
-  fix16_t bt = fix16_div(FIX16_ONE, (bottom - top));
-  fix16_t nf = fix16_div(FIX16_ONE, (near - far));
+  fix16_t lr = fix16_div(FIX16_ONE<<1, FIX16(screen_size.x));
+  fix16_t bt = -fix16_div(FIX16_ONE<<1, FIX16(screen_size.y));
   projection_mat = mat4(
-    fix16_mul(lr, FIX16(-2.0f)),  FIX16_ZERO,  FIX16_ZERO,  FIX16_ZERO,
-    FIX16_ZERO,  fix16_mul(bt, FIX16(-2.0f)),  FIX16_ZERO,  FIX16_ZERO,
-    FIX16_ZERO,  FIX16_ZERO,  fix16_mul(nf, FIX16(2.0f)),   FIX16_ZERO,
-    fix16_mul((left + right), lr), fix16_mul((top + bottom), bt), fix16_mul((far + near), nf), FIX16_ONE
+    lr,  FIX16_ZERO,  FIX16_ZERO,  FIX16_ZERO,
+    FIX16_ZERO,  bt,  FIX16_ZERO,  FIX16_ZERO,
+    FIX16_ZERO,  FIX16_ZERO,  -FIX16_ONE,   FIX16_ZERO,
+    -FIX16_ONE, FIX16_ONE, FIX16_ZERO, FIX16_ONE
   );
   LOGD("Proj Mat= \n");
   print_mat(&projection_mat);
