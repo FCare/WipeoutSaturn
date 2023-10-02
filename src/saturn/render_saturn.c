@@ -136,6 +136,7 @@ void render_set_view(vec3_t pos, vec3_t angles){
 }
 void render_set_view_2d(void){
   LOGD("%s\n", __FUNCTION__);
+  view_mat = mat4_identity();
   LOGD("View Mat= \n");
   print_mat(&view_mat);
   LOGD("Proj 2D= \n");
