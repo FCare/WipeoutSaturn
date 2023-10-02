@@ -226,23 +226,18 @@ void lzss_decompress(uint8_t *in_data, uint8_t *out_data) {
 }
 
 cmp_t *image_load_compressed(char *name) {
-	printf("load cmp %s\n", name);
 	uint32_t compressed_size;
 	uint8_t *compressed_bytes = platform_load_asset(name, &compressed_size);
-
 	uint32_t p = 0;
 	int32_t decompressed_size = 0;
 	int32_t image_count = get_i32_le(compressed_bytes, &p);
-
 	// Calculate the total uncompressed size
 	for (int i = 0; i < image_count; i++) {
 		decompressed_size += get_i32_le(compressed_bytes, &p);
 	}
-
 	uint32_t struct_size = sizeof(cmp_t) + sizeof(uint8_t *) * image_count;
 	cmp_t *cmp = mem_temp_alloc(struct_size + decompressed_size);
 	cmp->len = image_count;
-
 	uint8_t *decompressed_bytes = ((uint8_t *)cmp) + struct_size;
 
 	// Rewind and load all offsets
@@ -257,6 +252,11 @@ cmp_t *image_load_compressed(char *name) {
 	mem_temp_free(compressed_bytes);
 
 	return cmp;
+}
+
+uint8_t* image_get_saturn_texture(char *name) {
+	printf("load: %s\n", name);
+	return platform_load_saturn_asset(name);
 }
 
 uint16_t image_get_texture(char *name) {
@@ -298,7 +298,6 @@ texture_list_t image_get_compressed_textures(char *name) {
 		render_texture_create(image->width, image->height, image->pixels);
 		mem_temp_free(image);
 	}
-
 	mem_temp_free(cmp);
 	return list;
 }

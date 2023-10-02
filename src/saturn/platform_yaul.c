@@ -8,6 +8,7 @@ extern int strcasecmp(const char *_l, const char *_r);
 #include "mem.h"
 #include "input.h"
 #include "render_vdp2.h"
+#include "tex.h"
 
 #define CPU_FRT_INTERRUPT_PRIORITY_LEVEL 8
 
@@ -57,6 +58,7 @@ static void timer_init(void)
 }
 
 static void setup_fs(void) {
+  if (_filelist.entries != NULL) free(_filelist.entries);
   cdfs_filelist_entry_t * const filelist_entries = cdfs_entries_alloc(-1);
   assert(filelist_entries != NULL);
   cdfs_filelist_default_init(&_filelist, filelist_entries, -1);
@@ -90,8 +92,6 @@ void main(void) {
   //Init Saturn
   timer_init();
   mem_init();
-  LOGD("Init filesystem access\n");
-  setup_fs();
   //Init game engine
   LOGD("Init Game\n");
   system_init();
@@ -120,8 +120,9 @@ static void _vblank_out_handler(void *work __unused)
 
 void user_init(void)
 {
-        smpc_peripheral_init();
-        vdp_sync_vblank_out_set(_vblank_out_handler, NULL);
+  cd_block_init();
+  smpc_peripheral_init();
+  vdp_sync_vblank_out_set(_vblank_out_handler, NULL);
 }
 
 void platform_exit(void) {
@@ -190,6 +191,7 @@ static cdfs_filelist_entry_t *getFileEntry(const char *name, cdfs_filelist_t *fl
 static cdfs_filelist_entry_t* getEntry(const char *file) {
   char *path = NULL;
   char *name = NULL;
+  setup_fs();
   cdfs_filelist_entry_t *file_entry;
   cdfs_filelist_root_read(&_filelist);
   split_path_file(&path, &name, file);
@@ -211,10 +213,23 @@ static cdfs_filelist_entry_t* getEntry(const char *file) {
   return file_entry;
 }
 
+uint8_t *platform_load_saturn_asset(const char *name) {
+  int ret __unused;
+  cdfs_filelist_entry_t *file_entry = getEntry(name);
+  error_if(file_entry==NULL, "File not found\n");
+  printf("File size = %d\n", file_entry->size);
+  uint8_t *image = (uint8_t *)tex_bump(file_entry->size);
+  assert (image != NULL);
+  ret = cd_block_sectors_read(file_entry->starting_fad, (void *)image, file_entry->size);
+  assert(ret == 0);
+  return image;
+}
+
 uint8_t *platform_load_asset(const char *name, uint32_t *bytes_read) {
   LOGD("Load asset %s\n", name);
   int ret __unused;
   cdfs_filelist_entry_t *file_entry = getEntry(name);
+  error_if(file_entry==NULL, "File not found\n");
   uint8_t *bytes = (uint8_t *)mem_temp_alloc(file_entry->size);
   assert (bytes != NULL);
   ret = cd_block_sectors_read(file_entry->starting_fad, (void *)bytes, file_entry->size);

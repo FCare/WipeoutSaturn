@@ -343,7 +343,10 @@ static inline rgb1555_t convert_to_rgb(rgba_t val) {
 
 uint16_t render_texture_create(uint32_t width, uint32_t height, rgba_t *pixels){
   uint32_t byte_size = width * height * sizeof(rgb1555_t);
-  LOGD("Need %d kB\n", byte_size/1024);
+  if (byte_size < 4096)
+    LOGD("Need %d B\n", byte_size);
+  else
+    LOGD("Need %d kB\n", byte_size/1024);
   LOGD("Create Texture(%dx%d)\n", width, height);
   rgb1555_t *buffer = (rgb1555_t *)tex_bump(byte_size);
 
@@ -352,6 +355,10 @@ uint16_t render_texture_create(uint32_t width, uint32_t height, rgba_t *pixels){
   }
 
 	return allocate_tex(width, height, buffer);
+}
+
+uint16_t render_texture_create_555(uint32_t width, uint32_t height, rgb1555_t *pixels){
+    return allocate_tex(width, height, pixels);
 }
 vec2i_t render_texture_size(uint16_t texture){
   LOGD("%s\n", __FUNCTION__);

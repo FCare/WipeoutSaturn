@@ -117,7 +117,6 @@ static inline uint32_t get_u32_le(uint8_t *bytes, uint32_t *p) {
 #define get_i32(BYTES, P) ((int32_t)get_u32(BYTES, P))
 #define get_i32_le(BYTES, P) ((int32_t)get_u32_le(BYTES, P))
 
-
 image_t *image_load_from_bytes(uint8_t *bytes, bool transparent) {
 	uint32_t p = 0;
 
@@ -436,6 +435,21 @@ static const char letter[38] = {
   '0','1','2','3','4','5','6','7','8','9',':','.'
 };
 
+typedef struct {
+	uint16_t width;
+	uint16_t height;
+	uint16_t stride;
+	uint16_t offset;
+} character_t;
+
+typedef struct {
+	uint16_t format;
+	uint16_t nbQuads;
+	character_t character[38];
+} texture_t;
+
+#define SWAP(X) (((X&0xFF)<<8)|(X>>8))
+
 int main(int argc, char *argv[]) {
   if (argc != 2) return -1;
   cmp_t *cmp = image_load_compressed(argv[1]);
@@ -448,44 +462,77 @@ int main(int argc, char *argv[]) {
 
     if (i < UI_SIZE_MAX) {
       //fonts
+			texture_t out;
       char dir[30];
       struct stat st = {0};
-      snprintf(dir, 30, "./fonts/%d", char_set[i].height);
+      snprintf(dir, 30, "./output");
       if (stat(dir, &st) == -1) {
         mkdir(dir, 0777);
       }
+			char png_name[1024] = {0};
+			sprintf(png_name, "./fonts/fonts_%d.stf", char_set[i].height);
+			printf("extract %s\n", png_name);
+			FILE *f = fopen(png_name, "w+");
+			uint16_t offset = (sizeof(texture_t) + 0x7)&~0x7; //offset address shall start on an aligned address to 0x8
+			uint16_t current = 0; //offset address shall start on an aligned address to 0x8
+			out.format = format;
+			out.nbQuads = 38;
+
+			uint16_t format_s= SWAP(out.format);
+			uint16_t nbQuads_s= SWAP(out.nbQuads);
+			fwrite(&format_s, 1, sizeof(uint16_t), f); current +=sizeof(uint16_t);
+			fwrite(&nbQuads_s, 1, sizeof(uint16_t), f); current +=sizeof(uint16_t);
+
       for (int j=0; j<38; j++) {
-        char png_name[1024] = {0};
-        sprintf(png_name, "./fonts/%d/%d.raw", char_set[i].height, letter[j]);
-        printf("extract %s\n", png_name);
-        FILE *f = fopen(png_name, "w+");
-        fwrite(&format, sizeof(format), 1, f);
-        uint16_t w = (char_set[i].glyphs[j].width + 0x7) &~0x7; //align width to 8
-        fwrite(&w, sizeof(w), 1, f);
-        fwrite(&(char_set[i].height), sizeof(char_set[i].height), 1, f);
-        fwrite(&(char_set[i].glyphs[j].width), sizeof(char_set[i].glyphs[j].width), 1, f);
-        rgb1555_t *rgb555 = malloc(w*char_set[i].glyphs[j].width*sizeof(rgb1555_t));
-        for (int k = char_set[i].glyphs[j].offset.y;
-                  k<(char_set[i].glyphs[j].offset.y+char_set[i].height);
-                  k++) {
-          rgba_t* src =  &image->pixels[k*image->width+char_set[i].glyphs[j].offset.x];
-          for (int l = 0; l<char_set[i].glyphs[j].width; l++) {
-            rgb555[l]= convert_to_rgb(src[l]);
-          }
-          for (int l = char_set[i].glyphs[j].width; l<w; l++) {
-            rgb555[l]= 0;
-          }
+				character_t *ch = &out.character[j];
+				ch->width = char_set[i].glyphs[j].width;
+				ch->stride = (ch->width + 0x7) &~0x7; //align width to 8
+				ch->height = char_set[i].height;
+				ch->offset = offset;
+
+				uint16_t width_s= SWAP(ch->width);
+				uint16_t stride_s= SWAP(ch->stride);
+				uint16_t height_s= SWAP(ch->height);
+				uint16_t offset_s= SWAP(ch->offset);
+
+				fwrite(&width_s, 1, sizeof(uint16_t), f); current +=sizeof(uint16_t);
+				fwrite(&stride_s, 1, sizeof(uint16_t), f); current +=sizeof(uint16_t);
+				fwrite(&height_s, 1, sizeof(uint16_t), f); current +=sizeof(uint16_t);
+				fwrite(&offset_s, 1, sizeof(uint16_t), f); current +=sizeof(uint16_t);
+				offset += ch->stride*ch->height*sizeof(rgb1555_t);
+			}
+			//Padding
+			uint8_t zero = 0;
+			while (current < out.character[0].offset) {
+				fwrite(&zero, 1, sizeof(uint8_t), f);
+				current +=sizeof(uint8_t);
+			}
+
+			//write all pixels
+			for (int j=0; j<38; j++) {
+				for (int k = char_set[i].glyphs[j].offset.y;
+					k<(char_set[i].glyphs[j].offset.y+char_set[i].height);
+					k++)
+					{
+						rgba_t* src =  &image->pixels[k*image->width+char_set[i].glyphs[j].offset.x];
+						for (int l = 0; l<char_set[i].glyphs[j].width; l++) {
+            	rgb1555_t pix = SWAP(convert_to_rgb(src[l]));
+							fwrite(&pix, 1, sizeof(rgb1555_t), f);
+          	}
+						rgb1555_t pix_zero = 0;
+          	for (int l = char_set[i].glyphs[j].width; l<out.character[j].stride; l++) {
+            	fwrite(&pix_zero, 1, sizeof(rgb1555_t), f);
+          	}
         }
-        fwrite(rgb555, sizeof(rgb1555_t), w*char_set[i].height, f);
-        fclose(f);
       }
+			fclose(f);
     }
 
 
-		char png_name[1024] = {0};
-		sprintf(png_name, "%s.%d.png", argv[1], i);
-    printf("extract %s\n", png_name);
-		stbi_write_png(png_name, image->width, image->height, 4, image->pixels, 0);
+		// char png_name[1024] = {0};
+		// sprintf(png_name, "%s.%d.png", argv[1], i);
+    // printf("extract %s\n", png_name);
+		// stbi_write_png(png_name, image->width, image->height, 4, image->pixels, 0);
 
 		free(image);
 	}

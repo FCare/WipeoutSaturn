@@ -1,71 +1,110 @@
 #include "../render.h"
 #include "../utils.h"
 
+#include "mem.h"
+#include "platform.h"
+
 #include "ui.h"
 #include "image.h"
 
-typedef struct {
-	vec2i_t offset;
-	uint16_t width;
-} glyph_t;
-
-typedef struct {
-	uint16_t texture;
-	uint16_t height;
-	glyph_t glyphs[40];
-} char_set_t;
-
 int ui_scale = 2;
 
-char_set_t char_set[UI_SIZE_MAX] = {
-	[UI_SIZE_16] = {
-		.texture = 0,
-		.height = 16,
-		.glyphs = {
-			{{  0,   0}, 25}, {{ 25,   0}, 24}, {{ 49,   0}, 17}, {{ 66,   0}, 24}, {{ 90,   0}, 24}, {{114,   0}, 17}, {{131,   0}, 25}, {{156,   0}, 18},
-			{{174,   0},  7}, {{181,   0}, 17}, {{  0,  16}, 17}, {{ 17,  16}, 17}, {{ 34,  16}, 28}, {{ 62,  16}, 17}, {{ 79,  16}, 24}, {{103,  16}, 24},
-			{{127,  16}, 26}, {{153,  16}, 24}, {{177,  16}, 18}, {{195,  16}, 17}, {{  0,  32}, 17}, {{ 17,  32}, 17}, {{ 34,  32}, 29}, {{ 63,  32}, 24},
-			{{ 87,  32}, 17}, {{104,  32}, 18}, {{122,  32}, 24}, {{146,  32}, 10}, {{156,  32}, 18}, {{174,  32}, 17}, {{191,  32}, 18}, {{  0,  48}, 18},
-			{{ 18,  48}, 18}, {{ 36,  48}, 18}, {{ 54,  48}, 22}, {{ 76,  48}, 25}, {{101,  48},  7}, {{108,  48},  7}, {{198,   0},  0}, {{198,   0},  0}
-		}
-	},
-	[UI_SIZE_12] = {
-		.texture = 0,
-		.height = 12,
-		.glyphs = {
-			{{  0,   0}, 19}, {{ 19,   0}, 19}, {{ 38,   0}, 14}, {{ 52,   0}, 19}, {{ 71,   0}, 19}, {{ 90,   0}, 13}, {{103,   0}, 19}, {{122,   0}, 14},
-			{{136,   0},  6}, {{142,   0}, 13}, {{155,   0}, 14}, {{169,   0}, 14}, {{  0,  12}, 22}, {{ 22,  12}, 14}, {{ 36,  12}, 19}, {{ 55,  12}, 18},
-			{{ 73,  12}, 20}, {{ 93,  12}, 19}, {{112,  12}, 15}, {{127,  12}, 14}, {{141,  12}, 13}, {{154,  12}, 13}, {{167,  12}, 22}, {{  0,  24}, 19},
-			{{ 19,  24}, 13}, {{ 32,  24}, 14}, {{ 46,  24}, 19}, {{ 65,  24},  8}, {{ 73,  24}, 15}, {{ 88,  24}, 13}, {{101,  24}, 14}, {{115,  24}, 15},
-			{{130,  24}, 14}, {{144,  24}, 15}, {{159,  24}, 18}, {{177,  24}, 19}, {{196,  24},  5}, {{201,  24},  5}, {{183,   0},  0}, {{183,   0},  0}
-		}
-	},
-	[UI_SIZE_8] = {
-		.texture = 0,
-		.height = 8,
-		.glyphs = {
-			{{  0,   0}, 13}, {{ 13,   0}, 13}, {{ 26,   0}, 10}, {{ 36,   0}, 13}, {{ 49,   0}, 13}, {{ 62,   0},  9}, {{ 71,   0}, 13}, {{ 84,   0}, 10},
-			{{ 94,   0},  4}, {{ 98,   0},  9}, {{107,   0}, 10}, {{117,   0}, 10}, {{127,   0}, 16}, {{143,   0}, 10}, {{153,   0}, 13}, {{166,   0}, 13},
-			{{179,   0}, 14}, {{  0,   8}, 13}, {{ 13,   8}, 10}, {{ 23,   8},  9}, {{ 32,   8},  9}, {{ 41,   8},  9}, {{ 50,   8}, 16}, {{ 66,   8}, 14},
-			{{ 80,   8},  9}, {{ 89,   8}, 10}, {{ 99,   8}, 13}, {{112,   8},  6}, {{118,   8}, 11}, {{129,   8}, 10}, {{139,   8}, 10}, {{149,   8}, 11},
-			{{160,   8}, 10}, {{170,   8}, 10}, {{180,   8}, 12}, {{192,   8}, 14}, {{206,   8},  4}, {{210,   8},  4}, {{193,   0},  0}, {{193,   0},  0}
-		}
-	},
+typedef struct {
+	saturn_image_t *image;
+	uint16_t *tex;
+} char_set_t;
+
+char_set_t char_set[UI_SIZE_MAX];
+
+static const char letter[38] = {
+  'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+  '0','1','2','3','4','5','6','7','8','9',':','.'
 };
+
+static uint16_t getTexIndex(char c) {
+	switch(c) {
+		case 'A': return 0;
+		case 'B': return 1;
+		case 'C': return 2;
+		case 'D': return 3;
+		case 'E': return 4;
+		case 'F': return 5;
+		case 'G': return 6;
+		case 'H': return 7;
+		case 'I': return 8;
+		case 'J': return 9;
+		case 'K': return 10;
+		case 'L': return 11;
+		case 'M': return 12;
+		case 'N': return 13;
+		case 'O': return 14;
+		case 'P': return 15;
+		case 'Q': return 16;
+		case 'R': return 17;
+		case 'S': return 18;
+		case 'T': return 19;
+		case 'U': return 20;
+		case 'V': return 21;
+		case 'W': return 22;
+		case 'X': return 23;
+		case 'Y': return 24;
+		case 'Z': return 25;
+		case '0': return 26;
+		case '1': return 27;
+		case '2': return 28;
+		case '3': return 29;
+		case '4': return 30;
+		case '5': return 31;
+		case '6': return 32;
+		case '7': return 33;
+		case '8': return 34;
+		case '9': return 35;
+		case ':': return 36;
+		case '.': return 37;
+		default : return 0;
+	}
+}
+
 
 uint16_t icon_textures[UI_ICON_MAX];
 
+
 void ui_load(void) {
-	texture_list_t tl = image_get_compressed_textures("wipeout/textures/drfonts.cmp");
-	char_set[UI_SIZE_16].texture   = texture_from_list(tl, 0);
-	char_set[UI_SIZE_12].texture   = texture_from_list(tl, 1);
-	char_set[UI_SIZE_8 ].texture   = texture_from_list(tl, 2);
-	icon_textures[UI_ICON_HAND]    = texture_from_list(tl, 3);
-	icon_textures[UI_ICON_CONFIRM] = texture_from_list(tl, 5);
-	icon_textures[UI_ICON_CANCEL]  = texture_from_list(tl, 6);
-	icon_textures[UI_ICON_END]     = texture_from_list(tl, 7);
-	icon_textures[UI_ICON_DEL]     = texture_from_list(tl, 8);
-	icon_textures[UI_ICON_STAR]    = texture_from_list(tl, 9);
+	char_set[UI_SIZE_16].image = (saturn_image_t*) image_get_saturn_texture("wipeout/textures/fonts/fonts_16.stf");
+	char_set[UI_SIZE_16].tex = mem_bump(sizeof(uint16_t) * char_set[UI_SIZE_16].image->nbQuads);
+	for (int i =0; i<char_set[UI_SIZE_16].image->nbQuads; i++) {
+		character_t * char_glyph = &char_set[UI_SIZE_16].image->character[i];
+		int32_t data_chunk = (int)(char_set[UI_SIZE_16].image) + (int)char_glyph->offset;
+		rgb1555_t *buffer = (rgb1555_t *)(data_chunk);
+		char_set[UI_SIZE_16].tex[i] = render_texture_create_555(char_glyph->stride, char_glyph->height, buffer);
+		printf("Tex %d (%i)\n", char_set[UI_SIZE_16].tex[i], i);
+	}
+
+	char_set[UI_SIZE_12].image = (saturn_image_t*) image_get_saturn_texture("wipeout/textures/fonts/fonts_12.stf");
+	char_set[UI_SIZE_12].tex = mem_bump(sizeof(uint16_t) * char_set[UI_SIZE_12].image->nbQuads);
+	for (int i =0; i<char_set[UI_SIZE_12].image->nbQuads; i++) {
+		character_t * char_glyph = &char_set[UI_SIZE_12].image->character[i];
+		int32_t data_chunk = (int)(char_set[UI_SIZE_12].image) + (int)char_glyph->offset;
+		rgb1555_t *buffer = (rgb1555_t *)(data_chunk);
+		char_set[UI_SIZE_12].tex[i] = render_texture_create_555(char_glyph->stride, char_glyph->height, buffer);
+		printf("Tex %d (%i)\n", char_set[UI_SIZE_12].tex[i], i);
+	}
+
+	char_set[UI_SIZE_8].image = (saturn_image_t*) image_get_saturn_texture("wipeout/textures/fonts/fonts_8.stf");
+	char_set[UI_SIZE_8].tex = mem_bump(sizeof(uint16_t) * char_set[UI_SIZE_8].image->nbQuads);
+	for (int i =0; i<char_set[UI_SIZE_8].image->nbQuads; i++) {
+		character_t * char_glyph = &char_set[UI_SIZE_8].image->character[i];
+		int32_t data_chunk = (int)(char_set[UI_SIZE_8].image) + (int)char_glyph->offset;
+		rgb1555_t *buffer = (rgb1555_t *)(data_chunk);
+		char_set[UI_SIZE_8].tex[i] = render_texture_create_555(char_glyph->stride, char_glyph->height, buffer);
+	}
+
+	// icon_textures[UI_ICON_HAND]    = texture_from_list(tl, 3);
+	// icon_textures[UI_ICON_CONFIRM] = texture_from_list(tl, 5);
+	// icon_textures[UI_ICON_CANCEL]  = texture_from_list(tl, 6);
+	// icon_textures[UI_ICON_END]     = texture_from_list(tl, 7);
+	// icon_textures[UI_ICON_DEL]     = texture_from_list(tl, 8);
+	// icon_textures[UI_ICON_STAR]    = texture_from_list(tl, 9);
 }
 
 int ui_get_scale(void) {
@@ -118,16 +157,16 @@ int ui_char_width(char c, ui_text_size_t size) {
 	if (c == ' ') {
 		return 8;
 	}
-	return char_set[size].glyphs[char_to_glyph_index(c)].width;
+	return char_set[size].image->character[char_to_glyph_index(c)].width;
 }
 
 int ui_text_width(const char *text, ui_text_size_t size) {
 	int width = 0;
-	char_set_t *cs = &char_set[size];
+	saturn_image_t *cs = char_set[size].image;
 
 	for (int i = 0; text[i] != 0; i++) {
 		width += text[i] != ' '
-			? cs->glyphs[char_to_glyph_index(text[i])].width
+			? cs->character[char_to_glyph_index(text[i])].width
 			: 8;
 	}
 
@@ -187,9 +226,11 @@ void ui_draw_text(const char *text, vec2i_t pos, ui_text_size_t size, rgba_t col
 
 	for (int i = 0; text[i] != 0; i++) {
 		if (text[i] != ' ') {
-			glyph_t *glyph = &cs->glyphs[char_to_glyph_index(text[i])];
-			vec2i_t size = vec2i(glyph->width, cs->height);
-			render_push_2d_tile(pos, glyph->offset, size, ui_scaled(size), color, cs->texture);
+			uint16_t glyphIndex = getTexIndex(text[i]);
+			printf("%c => %d => tex %d\n", text[i], glyphIndex, cs->tex[glyphIndex]);
+			character_t *glyph = &cs->image->character[glyphIndex];
+			vec2i_t size = vec2i(glyph->width, glyph->height);
+			render_push_2d_tile(pos, vec2i(0,0), size, ui_scaled(size), color, cs->tex[glyphIndex]);
 			pos.x += glyph->width * ui_scale;
 		}
 		else {
