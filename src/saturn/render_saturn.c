@@ -7,7 +7,7 @@
 #include "utils.h"
 #include "mem.h"
 
-#define NEAR_PLANE 16.0
+#define NEAR_PLANE 128.0
 #define FAR_PLANE (RENDER_FADEOUT_FAR)
 #define TEXTURES_MAX 1024
 
@@ -19,7 +19,8 @@ static vec2i_t screen_size;
 
 static mat4_t view_mat = mat4_identity();
 static mat4_t mvp_mat = mat4_identity();
-static mat4_t projection_mat = mat4_identity();
+static mat4_t projection_mat_2d = mat4_identity();
+static mat4_t projection_mat_3d = mat4_identity();
 static mat4_t sprite_mat = mat4_identity();
 
 static void print_mat(mat4_t *m) {
@@ -65,14 +66,29 @@ void render_set_screen_size(vec2i_t size){
   //Screen is always same size on saturn port
   fix16_t lr = fix16_div(FIX16_ONE<<1, FIX16(screen_size.x));
   fix16_t bt = -fix16_div(FIX16_ONE<<1, FIX16(screen_size.y));
-  projection_mat = mat4(
+  projection_mat_2d = mat4(
     lr,  FIX16_ZERO,  FIX16_ZERO,  FIX16_ZERO,
     FIX16_ZERO,  bt,  FIX16_ZERO,  FIX16_ZERO,
     FIX16_ZERO,  FIX16_ZERO,  -FIX16_ONE,   FIX16_ZERO,
     -FIX16_ONE, FIX16_ONE, FIX16_ZERO, FIX16_ONE
   );
-  LOGD("Proj Mat= \n");
-  print_mat(&projection_mat);
+
+fix16_t aspect = fix16_div(FIX16(screen_size.x), FIX16(screen_size.y));
+fix16_t fov = fix16_mul(13425, PLATFORM_PI);
+fix16_t f = fix16_div(FIX16_ONE, tan(fov));
+
+printf("%d %d %d\n", aspect, fov, f);
+
+projection_mat_3d = mat4(
+  fix16_div(f, aspect), FIX16_ZERO, FIX16_ZERO, FIX16_ZERO,
+  FIX16_ZERO, f, FIX16_ZERO, FIX16_ZERO,
+  FIX16_ZERO, FIX16_ZERO, -FIX16_ONE, -FIX16_ONE,
+  FIX16_ZERO, FIX16_ZERO, FIX16(-256), FIX16_ZERO
+);
+  LOGD("Proj 2D Mat= \n");
+  print_mat(&projection_mat_2d);
+  LOGD("Proj 3D Mat= \n");
+  print_mat(&projection_mat_3d);
 }
 void render_set_resolution(render_resolution_t res){
   //Resolution is always same size on saturn port
@@ -100,9 +116,6 @@ void render_set_view(vec3_t pos, vec3_t angles){
   view_mat = mat4_identity();
   LOGD("View Mat= \n");
   print_mat(&view_mat);
-  mat4_set_translation(&view_mat, vec3_fix16(FIX16_ZERO, FIX16_ZERO, FIX16_ZERO));
-  LOGD("translation View Mat= \n");
-  print_mat(&view_mat);
   mat4_set_roll_pitch_yaw(&view_mat, vec3_fix16(angles.x, -angles.y + PLATFORM_PI, angles.z + PLATFORM_PI));
   LOGD("roll View Mat= \n");
   print_mat(&view_mat);
@@ -113,11 +126,23 @@ void render_set_view(vec3_t pos, vec3_t angles){
   LOGD("yaw View Mat= \n");
   print_mat(&sprite_mat);
 
-  render_set_model_mat(&mat4_identity());
+  LOGD("View Mat= \n");
+  print_mat(&view_mat);
+  LOGD("Proj 3D= \n");
+  print_mat(&projection_mat_3d);
+  mat4_mul(&mvp_mat, &projection_mat_3d, &view_mat);
+  LOGD("MVP= \n");
+  print_mat(&mvp_mat);
 }
 void render_set_view_2d(void){
   LOGD("%s\n", __FUNCTION__);
-  render_set_model_mat(&mat4_identity());
+  LOGD("View Mat= \n");
+  print_mat(&view_mat);
+  LOGD("Proj 2D= \n");
+  print_mat(&projection_mat_2d);
+  mat4_mul(&mvp_mat, &projection_mat_2d, &view_mat);
+  LOGD("MVP= \n");
+  print_mat(&mvp_mat);
 }
 void render_set_model_mat(mat4_t *m){
     LOGD("%s\n", __FUNCTION__);
@@ -129,7 +154,11 @@ void render_set_model_mat(mat4_t *m){
 	mat4_mul(&vm_mat, &view_mat, m);
   LOGD("Result= \n");
   print_mat(&vm_mat);
-	mat4_mul(&mvp_mat, &projection_mat, &vm_mat);
+  LOGD("Proj 3D= \n");
+  print_mat(&projection_mat_3d);
+	mat4_mul(&mvp_mat, &projection_mat_3d, &vm_mat);
+  LOGD("MVP= \n");
+  print_mat(&mvp_mat);
 }
 
 void render_set_depth_write(bool enabled){}
@@ -142,7 +171,7 @@ void render_set_blend_mode(render_blend_mode_t mode){}
 void render_set_cull_backface(bool enabled){}
 
 vec3_t render_transform(vec3_t pos){
-  return vec3_transform(vec3_transform(pos, &view_mat), &projection_mat);
+  return vec3_transform(vec3_transform(pos, &view_mat), &projection_mat_3d);
 }
 
 static void render_push_native_quads(quads_t *quad, rgba_t color, uint16_t texture_index) {
@@ -174,9 +203,12 @@ void render_push_quads(quads_t *quad, uint16_t texture_index) {
 
 void render_push_stripe(quads_t *quad, uint16_t texture_index) {
   LOGD("%s\n", __FUNCTION__);
+  LOGD("MVP =\n");
+  print_mat(&mvp_mat);
   for (int i = 0; i<4; i++) {
-    printf("P[%d]=(.x=%d, .x=%d)\n", i, quad->vertices[i].pos.x, quad->vertices[i].pos.y);
+    printf("P[%d]=(.x=%d, .y=%d, .z=%d) ", i, quad->vertices[i].pos.x, quad->vertices[i].pos.y, quad->vertices[i].pos.z);
     quad->vertices[i].pos = vec3_transform(quad->vertices[i].pos, &mvp_mat);
+    printf("=> (.x=%d, .y=%d, .z=%d)\n", quad->vertices[i].pos.x, quad->vertices[i].pos.y, quad->vertices[i].pos.z);
     if (quad->vertices[i].pos.z >= FIX16_ONE) {
       LOGD("discard due to Z=%d\n", (uint32_t)quad->vertices[i].pos.z);
       return;
