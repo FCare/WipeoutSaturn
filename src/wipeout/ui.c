@@ -77,7 +77,6 @@ void ui_load(void) {
 		int32_t data_chunk = (int)(char_set[UI_SIZE_16].image) + (int)char_glyph->offset;
 		rgb1555_t *buffer = (rgb1555_t *)(data_chunk);
 		char_set[UI_SIZE_16].tex[i] = render_texture_create_555(char_glyph->stride, char_glyph->height, buffer);
-		printf("Tex %d (%i)\n", char_set[UI_SIZE_16].tex[i], i);
 	}
 
 	char_set[UI_SIZE_12].image = (saturn_image_t*) image_get_saturn_texture("wipeout/textures/fonts/fonts_12.stf");
@@ -87,7 +86,6 @@ void ui_load(void) {
 		int32_t data_chunk = (int)(char_set[UI_SIZE_12].image) + (int)char_glyph->offset;
 		rgb1555_t *buffer = (rgb1555_t *)(data_chunk);
 		char_set[UI_SIZE_12].tex[i] = render_texture_create_555(char_glyph->stride, char_glyph->height, buffer);
-		printf("Tex %d (%i)\n", char_set[UI_SIZE_12].tex[i], i);
 	}
 
 	char_set[UI_SIZE_8].image = (saturn_image_t*) image_get_saturn_texture("wipeout/textures/fonts/fonts_8.stf");
@@ -227,7 +225,6 @@ void ui_draw_text(const char *text, vec2i_t pos, ui_text_size_t size, rgba_t col
 	for (int i = 0; text[i] != 0; i++) {
 		if (text[i] != ' ') {
 			uint16_t glyphIndex = getTexIndex(text[i]);
-			printf("%c => %d => tex %d\n", text[i], glyphIndex, cs->tex[glyphIndex]);
 			character_t *glyph = &cs->image->character[glyphIndex];
 			vec2i_t size = vec2i(glyph->width, glyph->height);
 			render_push_2d_tile(pos, vec2i(0,0), size, ui_scaled(size), color, cs->tex[glyphIndex]);
