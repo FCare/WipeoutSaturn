@@ -4,6 +4,7 @@
 #include <yaul.h>
 #include "fix16_mat44.h"
 
+#define PLATFORM_2PI      FIX16_2PI /* pi */
 #define PLATFORM_PI       FIX16_PI /* pi */
 #define PLATFORM_PI_2     FIX16_PI_2 /* pi/2 */
 #define PLATFORM_PI_4     FIX16_PI_4 /* pi/4 */

@@ -71,15 +71,15 @@ void mat4_set_yaw_pitch_roll(mat4_t *mat, vec3_t rot) {
 	fix16_t cy = cos(-rot.y);
 	fix16_t cz = cos(-rot.z);
 
-	mat->frow[0][0] = cy * cz + sx * sy * sz;
-	mat->frow[1][0] = cz * sx * sy - cy * sz;
-	mat->frow[2][0] = cx * sy;
-	mat->frow[0][1] = cx * sz;
-	mat->frow[1][1] = cx * cz;
+	mat->frow[0][0] = fix16_mul(cy, cz) + fix16_mul(fix16_mul(sx, sy), sz);
+	mat->frow[1][0] = fix16_mul(cz, fix16_mul(sx, sy)) - fix16_mul(cy, sz);
+	mat->frow[2][0] = fix16_mul(cx, sy);
+	mat->frow[0][1] = fix16_mul(cx, sz);
+	mat->frow[1][1] = fix16_mul(cx, cz);
 	mat->frow[2][1] = -sx;
-	mat->frow[0][2] = -cz * sy + cy * sx * sz;
-	mat->frow[1][2] = cy * cz * sx + sy * sz;
-	mat->frow[2][2] = cx * cy;
+	mat->frow[0][2] = -fix16_mul(cz, sy) + fix16_mul(cy, fix16_mul(sx, sz));
+	mat->frow[1][2] = fix16_mul(cy, fix16_mul(cz, sx)) + fix16_mul(sy, sz);
+	mat->frow[2][2] = fix16_mul(cx, cy);
 }
 
 void mat4_set_roll_pitch_yaw(mat4_t *mat, vec3_t rot) {
@@ -90,22 +90,22 @@ void mat4_set_roll_pitch_yaw(mat4_t *mat, vec3_t rot) {
 	fix16_t cy = cos(-rot.y);
 	fix16_t cz = cos(-rot.z);
 
-	mat->frow[0][0] = cy * cz - sx * sy * sz;
-	mat->frow[1][0] = -cx * sz;
-	mat->frow[2][0] = cz * sy + cy * sx * sz;
-	mat->frow[0][1] = cz * sx * sy + cy * sz;
-	mat->frow[1][1] = cx *cz;
-	mat->frow[2][1] = -cy * cz * sx + sy * sz;
-	mat->frow[0][2] = -cx * sy;
+	mat->frow[0][0] = fix16_mul(cy, cz) - fix16_mul(fix16_mul(sx, sy),sz);
+	mat->frow[1][0] = -fix16_mul(cx, sz);
+	mat->frow[2][0] = fix16_mul(cz, sy) + fix16_mul(fix16_mul(cy, sx), sz);
+	mat->frow[0][1] = fix16_mul(fix16_mul(cz, sx), sy) + fix16_mul(cy, sz);
+	mat->frow[1][1] = fix16_mul(cx, cz);
+	mat->frow[2][1] = -fix16_mul(fix16_mul(cy, cz), sx) + fix16_mul(sy, sz);
+	mat->frow[0][2] = -fix16_mul(cx, sy);
 	mat->frow[1][2] = sx;
-	mat->frow[2][2] = cx * cy;
+	mat->frow[2][2] = fix16_mul(cx, cy);
 }
 
 void mat4_translate(mat4_t *mat, vec3_t translation) {
-	mat->arr[12] = mat->arr[0] * translation.x + mat->arr[4] * translation.y + mat->arr[8] * translation.z + mat->arr[12];
-	mat->arr[13] = mat->arr[1] * translation.x + mat->arr[5] * translation.y + mat->arr[9] * translation.z + mat->arr[13];
-	mat->arr[14] = mat->arr[2] * translation.x + mat->arr[6] * translation.y + mat->arr[10] * translation.z + mat->arr[14];
-	mat->arr[15] = mat->arr[3] * translation.x + mat->arr[7] * translation.y + mat->arr[11] * translation.z + mat->arr[15];
+	mat->arr[12] = fix16_mul(mat->arr[0], translation.x) + fix16_mul(mat->arr[4], translation.y) + fix16_mul(mat->arr[8], translation.z) + mat->arr[12];
+	mat->arr[13] = fix16_mul(mat->arr[1], translation.x) + fix16_mul(mat->arr[5], translation.y) + fix16_mul(mat->arr[9], translation.z) + mat->arr[13];
+	mat->arr[14] = fix16_mul(mat->arr[2], translation.x) + fix16_mul(mat->arr[6], translation.y) + fix16_mul(mat->arr[10], translation.z) + mat->arr[14];
+	mat->arr[15] = fix16_mul(mat->arr[3], translation.x) + fix16_mul(mat->arr[7], translation.y) + fix16_mul(mat->arr[11], translation.z) + mat->arr[15];
 }
 
 void mat4_mul(mat4_t *res, mat4_t *a, mat4_t *b) {

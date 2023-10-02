@@ -167,12 +167,12 @@ static inline vec3_t vec3_normalize(vec3_t a) {
 	return res;
 }
 
-static inline fix16_t wrap_angle(fix16_t a) {
-	a = fmod(a + PLATFORM_PI, fix16_mul(PLATFORM_PI, FIX16(2)));
-	if (a < FIX16(0)) {
-		a += fix16_mul(PLATFORM_PI, FIX16(2));
+static inline angle_t wrap_angle(angle_t a) {
+	a = fmod(a + PLATFORM_PI, PLATFORM_2PI);
+	if (a < FIX16_ZERO) {
+		a += PLATFORM_PI;
 	}
-	return a - FIX16(PLATFORM_PI);
+	return (a - PLATFORM_PI);
 }
 
 rgba_t rgba_from_u32(uint32_t v);
@@ -183,7 +183,7 @@ vec3_t vec3_project_to_ray(vec3_t p, vec3_t r0, vec3_t r1);
 fix16_t vec3_distance_to_plane(vec3_t p, vec3_t plane_pos, vec3_t plane_normal);
 vec3_t vec3_reflect(vec3_t incidence, vec3_t normal, fix16_t f);
 
-fix16_t wrap_angle(fix16_t a);
+angle_t wrap_angle(angle_t a);
 
 vec3_t vec3_transform(vec3_t a, mat4_t *mat);
 void mat4_set_translation(mat4_t *mat, vec3_t pos);

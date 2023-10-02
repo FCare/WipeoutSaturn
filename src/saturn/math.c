@@ -7,15 +7,15 @@ fix16_t sqrt(fix16_t x) {
 }
 
 fix16_t sin(fix16_t x) {
-  return (fix16_t)fix16_sin((angle_t)RAD2ANGLE(x))/65536.0f;
+  return fix16_sin(x);
 }
 
 fix16_t cos(fix16_t x) {
-  return (fix16_t)fix16_cos((angle_t)RAD2ANGLE(x))/65536.0f;
+  return fix16_cos(x);
 }
 
 fix16_t tan(fix16_t x) {
-  return (fix16_t)fix16_tan((angle_t)RAD2ANGLE(x))/65536.0f;
+  return fix16_tan(x);
 }
 
 fix16_t acos(fix16_t x) {

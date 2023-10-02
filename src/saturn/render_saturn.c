@@ -105,13 +105,20 @@ void render_frame_end(void){
 void render_set_view(vec3_t pos, vec3_t angles){
     LOGD("%s\n", __FUNCTION__);
   view_mat = mat4_identity();
-  mat4_set_translation(&view_mat, vec3(0, 0, 0));
-  mat4_set_roll_pitch_yaw(&view_mat, vec3(angles.x, -angles.y + PLATFORM_PI, angles.z + PLATFORM_PI));
-  mat4_translate(&view_mat, vec3_inv(pos));
-  mat4_set_yaw_pitch_roll(&sprite_mat, vec3(-angles.x, angles.y - PLATFORM_PI, 0));
-
   LOGD("View Mat= \n");
   print_mat(&view_mat);
+  mat4_set_translation(&view_mat, vec3_fix16(FIX16_ZERO, FIX16_ZERO, FIX16_ZERO));
+  LOGD("translation View Mat= \n");
+  print_mat(&view_mat);
+  mat4_set_roll_pitch_yaw(&view_mat, vec3_fix16(angles.x, -angles.y + PLATFORM_PI, angles.z + PLATFORM_PI));
+  LOGD("roll View Mat= \n");
+  print_mat(&view_mat);
+  mat4_translate(&view_mat, vec3_inv(pos));
+  LOGD("translate View Mat= \n");
+  print_mat(&view_mat);
+  mat4_set_yaw_pitch_roll(&sprite_mat, vec3_fix16(-angles.x, angles.y - PLATFORM_PI, FIX16_ZERO));
+  LOGD("yaw View Mat= \n");
+  print_mat(&sprite_mat);
 
   render_set_model_mat(&mat4_identity());
 }
@@ -175,8 +182,9 @@ void render_push_quads(quads_t *quad, uint16_t texture_index) {
 void render_push_stripe(quads_t *quad, uint16_t texture_index) {
   LOGD("%s\n", __FUNCTION__);
   for (int i = 0; i<4; i++) {
+    printf("P[%d]=(.x=%d, .x=%d)\n", i, quad->vertices[i].pos.x, quad->vertices[i].pos.y);
     quad->vertices[i].pos = vec3_transform(quad->vertices[i].pos, &mvp_mat);
-    if (quad->vertices[i].pos.z >= 1.0) {
+    if (quad->vertices[i].pos.z >= FIX16_ONE) {
       LOGD("discard due to Z=%d\n", (uint32_t)quad->vertices[i].pos.z);
       return;
     }

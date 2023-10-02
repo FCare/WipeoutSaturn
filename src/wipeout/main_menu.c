@@ -40,13 +40,13 @@ static struct {
 } models;
 
 static void draw_model(Object *model, vec2_t offset, vec3_t pos, fix16_t rotation) {
-	render_set_view(vec3(0,0,0), vec3_fix16(0, -PLATFORM_PI, -PLATFORM_PI));
+	render_set_view(vec3_fix16(FIX16_ZERO,FIX16_ZERO,FIX16_ZERO), vec3_fix16(FIX16_ZERO, -PLATFORM_PI, -PLATFORM_PI));
 	render_set_screen_position(offset);
 	mat4_t mat = mat4_identity();
 	mat4_set_translation(&mat, pos);
-	mat4_set_yaw_pitch_roll(&mat, vec3_fix16(0, rotation, PLATFORM_PI));
+	mat4_set_yaw_pitch_roll(&mat, vec3_fix16(FIX16_ZERO, rotation, PLATFORM_PI));
 	object_draw(model, &mat);
-	render_set_screen_position(vec2(0, 0));
+	render_set_screen_position(vec2_fix16(FIX16_ZERO, FIX16_ZERO));
 }
 
 // -----------------------------------------------------------------------------
