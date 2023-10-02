@@ -193,8 +193,18 @@ void render_push_stripe(quads_t *quad, uint16_t texture_index) {
   quad->vertices[1].pos = quad->vertices[2].pos;
   quad->vertices[2].pos = quad->vertices[3].pos;
   quad->vertices[3].pos = temp;
+
+  quad->vertices[0].uv.x = 0;
+  quad->vertices[0].uv.y = 0;
+  quad->vertices[1].uv.x = 1;
+  quad->vertices[1].uv.y = 0;
+  quad->vertices[2].uv.x = 1;
+  quad->vertices[2].uv.y = 1;
+  quad->vertices[3].uv.x = 0;
+  quad->vertices[3].uv.y = 1;
+
   //Add a quad to the vdp1 list v0,v2,v3,v1
-  render_vdp1_add(quad, rgba(128,128,128,255), texture_index);
+  render_vdp1_add(quad, rgba(128,128,128,255), RENDER_NO_TEXTURE);
 }
 
 void render_push_tris(tris_t tris, uint16_t texture_index){
@@ -217,6 +227,7 @@ void render_push_tris(tris_t tris, uint16_t texture_index){
     (uint32_t)tris.vertices[2].uv.x,
     (uint32_t)tris.vertices[2].uv.y
   );
+
   quads_t q= (quads_t){
     .vertices = {
       tris.vertices[0], tris.vertices[1], tris.vertices[1], tris.vertices[2]
@@ -250,7 +261,17 @@ void render_push_tris(tris_t tris, uint16_t texture_index){
     (int32_t)q.vertices[3].uv.y
   );
 
-  render_push_native_quads(&q, rgba(128,128,128,255), texture_index);
+  q.vertices[0].uv.x = 0;
+  q.vertices[0].uv.y = 0;
+  q.vertices[1].uv.x = 1;
+  q.vertices[1].uv.y = 0;
+  q.vertices[2].uv.x = 1;
+  q.vertices[2].uv.y = 1;
+  q.vertices[3].uv.x = 0;
+  q.vertices[3].uv.y = 1;
+
+  // render_push_native_quads(&q, rgba(128,128,128,255), texture_index);
+  render_push_native_quads(&q, rgba(128,128,128,255), RENDER_NO_TEXTURE);
 }
 
 void render_push_sprite(vec3_t pos, vec2i_t size, rgba_t color, uint16_t texture_index){
