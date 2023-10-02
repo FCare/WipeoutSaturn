@@ -121,9 +121,9 @@ weapon_t *weapon_init(ship_t *ship) {
 	weapon->section = ship->section;
 	weapon->position = ship->position;
 	weapon->angle = ship->angle;
-	weapon->acceleration = vec3_fix16(0, 0, 0);
-	weapon->velocity = vec3_fix16(0, 0, 0);
-	weapon->acceleration = vec3_fix16(0, 0, 0);
+	weapon->acceleration = vec3_fix16(FIX16_ZERO, FIX16_ZERO, FIX16_ZERO);
+	weapon->velocity = vec3_fix16(FIX16_ZERO, FIX16_ZERO, FIX16_ZERO);
+	weapon->acceleration = vec3_fix16(FIX16_ZERO, FIX16_ZERO, FIX16_ZERO);
 	weapon->target = NULL;
 	weapon->model = NULL;
 	weapon->active = true;
@@ -248,7 +248,7 @@ void weapon_set_trajectory(weapon_t *self) {
 }
 
 void weapon_follow_target(weapon_t *self) {
-	vec3_t angular_velocity = vec3_fix16(0, 0, 0);
+	vec3_t angular_velocity = vec3_fix16(FIX16_ZERO, FIX16_ZERO, FIX16_ZERO);
 	if (self->target) {
 		vec3_t dir = vec3_mulf(vec3_sub(self->target->position, self->position), 0.125 * 30 * system_tick());
 		fix16_t height = sqrt(dir.x * dir.x + dir.z * dir.z);

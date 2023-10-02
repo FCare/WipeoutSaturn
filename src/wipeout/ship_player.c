@@ -176,7 +176,7 @@ void ship_player_update_race(ship_t *self) {
 		// FIXME_PL: make sure revconned is honored
 	}
 
-	self->angular_acceleration = vec3_fix16(0, 0, 0);
+	self->angular_acceleration = vec3_fix16(FIX16_ZERO, FIX16_ZERO, FIX16_ZERO);
 
 	if (input_state(A_LEFT)) {
 		if (self->angular_velocity.y >= 0) {
@@ -360,7 +360,7 @@ void ship_player_update_race(ship_t *self) {
 		fix16_t brake = (self->brake_left + self->brake_right);
 		fix16_t resistance = (self->resistance * (SHIP_MAX_RESISTANCE - (brake * 0.125))) * 0.0078125;
 
-		vec3_t force = vec3_fix16(0, SHIP_ON_TRACK_GRAVITY, 0);
+		vec3_t force = vec3_fix16(FIX16_ZERO, SHIP_ON_TRACK_GRAVITY, FIX16_ZERO);
 		force = vec3_add(force, vec3_mulf(vec3_mulf(face->normal, 4096), (SHIP_TRACK_MAGNET * SHIP_TRACK_fix16_t) / height));
 		force = vec3_sub(force, vec3_mulf(vec3_mulf(face->normal, 4096), SHIP_TRACK_MAGNET));
 		force = vec3_add(force, self->thrust);
@@ -411,14 +411,14 @@ void ship_player_update_race(ship_t *self) {
 			self->section = landing;
 			self->temp_target = vec3_mulf(vec3_add(landing->center, landing->next->center), 0.5);
 			self->temp_target.y -= 2000;
-			self->velocity = vec3_fix16(0, 0, 0);
+			self->velocity = vec3_fix16(FIX16_ZERO, FIX16_ZERO, FIX16_ZERO);
 		}
 
 
 		fix16_t brake = (self->brake_left + self->brake_right);
 		fix16_t resistance = (self->resistance * (SHIP_MAX_RESISTANCE - (brake * 0.125))) * 0.0078125;
 
-		vec3_t force = vec3_fix16(0, SHIP_FLYING_GRAVITY, 0);
+		vec3_t force = vec3_fix16(FIX16_ZERO, SHIP_FLYING_GRAVITY, FIX16_ZERO);
 		force = vec3_add(force, self->thrust);
 
 		self->acceleration = vec3_divf(vec3_sub(forward_velocity, self->velocity), SHIP_MIN_RESISTANCE + brake * 4);

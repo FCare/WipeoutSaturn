@@ -55,7 +55,7 @@ void scene_load(const char *base_path, fix16_t sky_y_offset) {
 
 	texture_list_t sky_textures = image_get_compressed_textures(get_path(base_path, "sky.cmp"));
 	sky_object = objects_load(get_path(base_path, "sky.prm") , sky_textures);
-	sky_offset = vec3_fix16(0, sky_y_offset, 0);
+	sky_offset = vec3_fix16(FIX16_ZERO, sky_y_offset, FIX16_ZERO);
 
 	// Collect all objects that need to be updated each frame
 	start_booms_len = 0;

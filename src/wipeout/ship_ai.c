@@ -117,7 +117,7 @@ vec3_t ship_ai_strat_zig_zag(ship_t *self, track_face_t *face) {
 
 
 void ship_ai_update_race(ship_t *self) {
-	vec3_t offset_vector = vec3_fix16(0, 0, 0);
+	vec3_t offset_vector = vec3_fix16(FIX16_ZERO, FIX16_ZERO, FIX16_ZERO);
 
 	ship_t *player = &(g.ships[g.pilot]);
 

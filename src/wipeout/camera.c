@@ -18,9 +18,9 @@ void camera_init(camera_t *camera, section_t *section) {
 	}
 
 	camera->position = camera->section->center;
-	camera->velocity = vec3_fix16(0, 0, 0);
-	camera->angle = vec3_fix16(0, 0, 0);
-	camera->angular_velocity = vec3_fix16(0, 0, 0);
+	camera->velocity = vec3_fix16(FIX16_ZERO, FIX16_ZERO, FIX16_ZERO);
+	camera->angle = vec3_fix16(FIX16_ZERO, FIX16_ZERO, FIX16_ZERO);
+	camera->angular_velocity = vec3_fix16(FIX16_ZERO, FIX16_ZERO, FIX16_ZERO);
 	camera->has_initial_section = false;
 }
 

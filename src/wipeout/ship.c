@@ -194,10 +194,10 @@ void ships_draw(void) {
 
 void ship_init(ship_t *self, section_t *section, int pilot, int inv_start_rank) {
 	self->pilot = pilot;
-	self->velocity = vec3_fix16(0, 0, 0);
-	self->acceleration = vec3_fix16(0, 0, 0);
-	self->angle = vec3_fix16(0, 0, 0);
-	self->angular_velocity = vec3_fix16(0, 0, 0);
+	self->velocity = vec3_fix16(FIX16_ZERO, FIX16_ZERO, FIX16_ZERO);
+	self->acceleration = vec3_fix16(FIX16_ZERO, FIX16_ZERO, FIX16_ZERO);
+	self->angle = vec3_fix16(FIX16_ZERO, FIX16_ZERO, FIX16_ZERO);
+	self->angular_velocity = vec3_fix16(FIX16_ZERO, FIX16_ZERO, FIX16_ZERO);
 	self->turn_rate = 0;
 	self->thrust_mag = 0;
 	self->current_thrust_max = 0;
