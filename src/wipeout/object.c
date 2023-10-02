@@ -15,6 +15,10 @@
 #include "hud.h"
 #include "object.h"
 
+static fix16_t to_fix16(int a) {
+	return FIX16(a);
+}
+
 Object *objects_load(char *name, texture_list_t tl) {
 	uint32_t length = 0;
 	printf("load: %s\n", name);
@@ -68,22 +72,22 @@ Object *objects_load(char *name, texture_list_t tl) {
 		p += 4; // skeleton sub
 		p += 4; // skeleton next
 
-		object->radius = 0;
+		object->radius = FIX16_ZERO;
 		object->vertices = mem_bump(object->vertices_len * sizeof(vec3_t));
 		for (int i = 0; i < object->vertices_len; i++) {
-			object->vertices[i].x = get_i16(bytes, &p);
-			object->vertices[i].y = get_i16(bytes, &p);
-			object->vertices[i].z = get_i16(bytes, &p);
+			object->vertices[i].x = to_fix16(get_i16(bytes, &p));
+			object->vertices[i].y = to_fix16(get_i16(bytes, &p));
+			object->vertices[i].z = to_fix16(get_i16(bytes, &p));
 			p += 2; // padding
 
-			if (fabsf(object->vertices[i].x) > object->radius) {
-				object->radius = fabsf(object->vertices[i].x);
+			if (fix16_abs(object->vertices[i].x) > object->radius) {
+				object->radius = fix16_abs(object->vertices[i].x);
 			}
-			if (fabsf(object->vertices[i].y) > object->radius) {
-				object->radius = fabsf(object->vertices[i].y);
+			if (fix16_abs(object->vertices[i].y) > object->radius) {
+				object->radius = fix16_abs(object->vertices[i].y);
 			}
-			if (fabsf(object->vertices[i].z) > object->radius) {
-				object->radius = fabsf(object->vertices[i].z);
+			if (fix16_abs(object->vertices[i].z) > object->radius) {
+				object->radius = fix16_abs(object->vertices[i].z);
 			}
 		}
 
@@ -91,9 +95,9 @@ Object *objects_load(char *name, texture_list_t tl) {
 
 		object->normals = mem_bump(object->normals_len * sizeof(vec3_t));
 		for (int i = 0; i < object->normals_len; i++) {
-			object->normals[i].x = get_i16(bytes, &p);
-			object->normals[i].y = get_i16(bytes, &p);
-			object->normals[i].z = get_i16(bytes, &p);
+			object->normals[i].x = to_fix16(get_i16(bytes, &p));
+			object->normals[i].y = to_fix16(get_i16(bytes, &p));
+			object->normals[i].z = to_fix16(get_i16(bytes, &p));
 			p += 2; // padding
 		}
 
@@ -106,27 +110,27 @@ Object *objects_load(char *name, texture_list_t tl) {
 			switch (prm_type) {
 			case PRM_TYPE_F3:
 				prm.ptr = mem_bump(sizeof(F3));
-				prm.f3->coords[0] = get_i16(bytes, &p);
-				prm.f3->coords[1] = get_i16(bytes, &p);
-				prm.f3->coords[2] = get_i16(bytes, &p);
+				prm.f3->coords[0] = to_fix16(get_i16(bytes, &p));
+				prm.f3->coords[1] = to_fix16(get_i16(bytes, &p));
+				prm.f3->coords[2] = to_fix16(get_i16(bytes, &p));
 				prm.f3->pad1 = get_i16(bytes, &p);
 				prm.f3->color = rgba_from_u32(get_u32(bytes, &p));
 				break;
 
 			case PRM_TYPE_F4:
 				prm.ptr = mem_bump(sizeof(F4));
-				prm.f4->coords[0] = get_i16(bytes, &p);
-				prm.f4->coords[1] = get_i16(bytes, &p);
-				prm.f4->coords[2] = get_i16(bytes, &p);
-				prm.f4->coords[3] = get_i16(bytes, &p);
+				prm.f4->coords[0] = to_fix16(get_i16(bytes, &p));
+				prm.f4->coords[1] = to_fix16(get_i16(bytes, &p));
+				prm.f4->coords[2] = to_fix16(get_i16(bytes, &p));
+				prm.f4->coords[3] = to_fix16(get_i16(bytes, &p));
 				prm.f4->color = rgba_from_u32(get_u32(bytes, &p));
 				break;
 
 			case PRM_TYPE_FT3:
 				prm.ptr = mem_bump(sizeof(FT3));
-				prm.ft3->coords[0] = get_i16(bytes, &p);
-				prm.ft3->coords[1] = get_i16(bytes, &p);
-				prm.ft3->coords[2] = get_i16(bytes, &p);
+				prm.ft3->coords[0] = to_fix16(get_i16(bytes, &p));
+				prm.ft3->coords[1] = to_fix16(get_i16(bytes, &p));
+				prm.ft3->coords[2] = to_fix16(get_i16(bytes, &p));
 
 				prm.ft3->texture = texture_from_list(tl, get_i16(bytes, &p));
 				prm.ft3->cba = get_i16(bytes, &p);
@@ -144,10 +148,10 @@ Object *objects_load(char *name, texture_list_t tl) {
 
 			case PRM_TYPE_FT4:
 				prm.ptr = mem_bump(sizeof(FT4));
-				prm.ft4->coords[0] = get_i16(bytes, &p);
-				prm.ft4->coords[1] = get_i16(bytes, &p);
-				prm.ft4->coords[2] = get_i16(bytes, &p);
-				prm.ft4->coords[3] = get_i16(bytes, &p);
+				prm.ft4->coords[0] = to_fix16(get_i16(bytes, &p));
+				prm.ft4->coords[1] = to_fix16(get_i16(bytes, &p));
+				prm.ft4->coords[2] = to_fix16(get_i16(bytes, &p));
+				prm.ft4->coords[3] = to_fix16(get_i16(bytes, &p));
 
 				prm.ft4->texture = texture_from_list(tl, get_i16(bytes, &p));
 				prm.ft4->cba = get_i16(bytes, &p);
@@ -166,9 +170,9 @@ Object *objects_load(char *name, texture_list_t tl) {
 
 			case PRM_TYPE_G3:
 				prm.ptr = mem_bump(sizeof(G3));
-				prm.g3->coords[0] = get_i16(bytes, &p);
-				prm.g3->coords[1] = get_i16(bytes, &p);
-				prm.g3->coords[2] = get_i16(bytes, &p);
+				prm.g3->coords[0] = to_fix16(get_i16(bytes, &p));
+				prm.g3->coords[1] = to_fix16(get_i16(bytes, &p));
+				prm.g3->coords[2] = to_fix16(get_i16(bytes, &p));
 				prm.g3->pad1 = get_i16(bytes, &p);
 				prm.g3->color[0] = rgba_from_u32(get_u32(bytes, &p));
 				prm.g3->color[1] = rgba_from_u32(get_u32(bytes, &p));
@@ -177,10 +181,10 @@ Object *objects_load(char *name, texture_list_t tl) {
 
 			case PRM_TYPE_G4:
 				prm.ptr = mem_bump(sizeof(G4));
-				prm.g4->coords[0] = get_i16(bytes, &p);
-				prm.g4->coords[1] = get_i16(bytes, &p);
-				prm.g4->coords[2] = get_i16(bytes, &p);
-				prm.g4->coords[3] = get_i16(bytes, &p);
+				prm.g4->coords[0] = to_fix16(get_i16(bytes, &p));
+				prm.g4->coords[1] = to_fix16(get_i16(bytes, &p));
+				prm.g4->coords[2] = to_fix16(get_i16(bytes, &p));
+				prm.g4->coords[3] = to_fix16(get_i16(bytes, &p));
 				prm.g4->color[0] = rgba_from_u32(get_u32(bytes, &p));
 				prm.g4->color[1] = rgba_from_u32(get_u32(bytes, &p));
 				prm.g4->color[2] = rgba_from_u32(get_u32(bytes, &p));
@@ -189,9 +193,9 @@ Object *objects_load(char *name, texture_list_t tl) {
 
 			case PRM_TYPE_GT3:
 				prm.ptr = mem_bump(sizeof(GT3));
-				prm.gt3->coords[0] = get_i16(bytes, &p);
-				prm.gt3->coords[1] = get_i16(bytes, &p);
-				prm.gt3->coords[2] = get_i16(bytes, &p);
+				prm.gt3->coords[0] = to_fix16(get_i16(bytes, &p));
+				prm.gt3->coords[1] = to_fix16(get_i16(bytes, &p));
+				prm.gt3->coords[2] = to_fix16(get_i16(bytes, &p));
 
 				prm.gt3->texture = texture_from_list(tl, get_i16(bytes, &p));
 				prm.gt3->cba = get_i16(bytes, &p);
@@ -210,10 +214,10 @@ Object *objects_load(char *name, texture_list_t tl) {
 
 			case PRM_TYPE_GT4:
 				prm.ptr = mem_bump(sizeof(GT4));
-				prm.gt4->coords[0] = get_i16(bytes, &p);
-				prm.gt4->coords[1] = get_i16(bytes, &p);
-				prm.gt4->coords[2] = get_i16(bytes, &p);
-				prm.gt4->coords[3] = get_i16(bytes, &p);
+				prm.gt4->coords[0] = to_fix16(get_i16(bytes, &p));
+				prm.gt4->coords[1] = to_fix16(get_i16(bytes, &p));
+				prm.gt4->coords[2] = to_fix16(get_i16(bytes, &p));
+				prm.gt4->coords[3] = to_fix16(get_i16(bytes, &p));
 
 				prm.gt4->texture = texture_from_list(tl, get_i16(bytes, &p));
 				prm.gt4->cba = get_i16(bytes, &p);
@@ -236,19 +240,19 @@ Object *objects_load(char *name, texture_list_t tl) {
 
 			case PRM_TYPE_LSF3:
 				prm.ptr = mem_bump(sizeof(LSF3));
-				prm.lsf3->coords[0] = get_i16(bytes, &p);
-				prm.lsf3->coords[1] = get_i16(bytes, &p);
-				prm.lsf3->coords[2] = get_i16(bytes, &p);
+				prm.lsf3->coords[0] = to_fix16(get_i16(bytes, &p));
+				prm.lsf3->coords[1] = to_fix16(get_i16(bytes, &p));
+				prm.lsf3->coords[2] = to_fix16(get_i16(bytes, &p));
 				prm.lsf3->normal = get_i16(bytes, &p);
 				prm.lsf3->color = rgba_from_u32(get_u32(bytes, &p));
 				break;
 
 			case PRM_TYPE_LSF4:
 				prm.ptr = mem_bump(sizeof(LSF4));
-				prm.lsf4->coords[0] = get_i16(bytes, &p);
-				prm.lsf4->coords[1] = get_i16(bytes, &p);
-				prm.lsf4->coords[2] = get_i16(bytes, &p);
-				prm.lsf4->coords[3] = get_i16(bytes, &p);
+				prm.lsf4->coords[0] = to_fix16(get_i16(bytes, &p));
+				prm.lsf4->coords[1] = to_fix16(get_i16(bytes, &p));
+				prm.lsf4->coords[2] = to_fix16(get_i16(bytes, &p));
+				prm.lsf4->coords[3] = to_fix16(get_i16(bytes, &p));
 				prm.lsf4->normal = get_i16(bytes, &p);
 				prm.lsf4->pad1 = get_i16(bytes, &p);
 				prm.lsf4->color = rgba_from_u32(get_u32(bytes, &p));
@@ -256,9 +260,9 @@ Object *objects_load(char *name, texture_list_t tl) {
 
 			case PRM_TYPE_LSFT3:
 				prm.ptr = mem_bump(sizeof(LSFT3));
-				prm.lsft3->coords[0] = get_i16(bytes, &p);
-				prm.lsft3->coords[1] = get_i16(bytes, &p);
-				prm.lsft3->coords[2] = get_i16(bytes, &p);
+				prm.lsft3->coords[0] = to_fix16(get_i16(bytes, &p));
+				prm.lsft3->coords[1] = to_fix16(get_i16(bytes, &p));
+				prm.lsft3->coords[2] = to_fix16(get_i16(bytes, &p));
 				prm.lsft3->normal = get_i16(bytes, &p);
 
 				prm.lsft3->texture = texture_from_list(tl, get_i16(bytes, &p));
@@ -275,10 +279,10 @@ Object *objects_load(char *name, texture_list_t tl) {
 
 			case PRM_TYPE_LSFT4:
 				prm.ptr = mem_bump(sizeof(LSFT4));
-				prm.lsft4->coords[0] = get_i16(bytes, &p);
-				prm.lsft4->coords[1] = get_i16(bytes, &p);
-				prm.lsft4->coords[2] = get_i16(bytes, &p);
-				prm.lsft4->coords[3] = get_i16(bytes, &p);
+				prm.lsft4->coords[0] = to_fix16(get_i16(bytes, &p));
+				prm.lsft4->coords[1] = to_fix16(get_i16(bytes, &p));
+				prm.lsft4->coords[2] = to_fix16(get_i16(bytes, &p));
+				prm.lsft4->coords[3] = to_fix16(get_i16(bytes, &p));
 				prm.lsft4->normal = get_i16(bytes, &p);
 
 				prm.lsft4->texture = texture_from_list(tl, get_i16(bytes, &p));
@@ -297,12 +301,12 @@ Object *objects_load(char *name, texture_list_t tl) {
 
 			case PRM_TYPE_LSG3:
 				prm.ptr = mem_bump(sizeof(LSG3));
-				prm.lsg3->coords[0] = get_i16(bytes, &p);
-				prm.lsg3->coords[1] = get_i16(bytes, &p);
-				prm.lsg3->coords[2] = get_i16(bytes, &p);
-				prm.lsg3->normals[0] = get_i16(bytes, &p);
-				prm.lsg3->normals[1] = get_i16(bytes, &p);
-				prm.lsg3->normals[2] = get_i16(bytes, &p);
+				prm.lsg3->coords[0] = to_fix16(get_i16(bytes, &p));
+				prm.lsg3->coords[1] = to_fix16(get_i16(bytes, &p));
+				prm.lsg3->coords[2] = to_fix16(get_i16(bytes, &p));
+				prm.lsg3->normals[0] = to_fix16(get_i16(bytes, &p));
+				prm.lsg3->normals[1] = to_fix16(get_i16(bytes, &p));
+				prm.lsg3->normals[2] = to_fix16(get_i16(bytes, &p));
 				prm.lsg3->color[0] = rgba_from_u32(get_u32(bytes, &p));
 				prm.lsg3->color[1] = rgba_from_u32(get_u32(bytes, &p));
 				prm.lsg3->color[2] = rgba_from_u32(get_u32(bytes, &p));
@@ -310,14 +314,14 @@ Object *objects_load(char *name, texture_list_t tl) {
 
 			case PRM_TYPE_LSG4:
 				prm.ptr = mem_bump(sizeof(LSG4));
-				prm.lsg4->coords[0] = get_i16(bytes, &p);
-				prm.lsg4->coords[1] = get_i16(bytes, &p);
-				prm.lsg4->coords[2] = get_i16(bytes, &p);
-				prm.lsg4->coords[3] = get_i16(bytes, &p);
-				prm.lsg4->normals[0] = get_i16(bytes, &p);
-				prm.lsg4->normals[1] = get_i16(bytes, &p);
-				prm.lsg4->normals[2] = get_i16(bytes, &p);
-				prm.lsg4->normals[3] = get_i16(bytes, &p);
+				prm.lsg4->coords[0] = to_fix16(get_i16(bytes, &p));
+				prm.lsg4->coords[1] = to_fix16(get_i16(bytes, &p));
+				prm.lsg4->coords[2] = to_fix16(get_i16(bytes, &p));
+				prm.lsg4->coords[3] = to_fix16(get_i16(bytes, &p));
+				prm.lsg4->normals[0] = to_fix16(get_i16(bytes, &p));
+				prm.lsg4->normals[1] = to_fix16(get_i16(bytes, &p));
+				prm.lsg4->normals[2] = to_fix16(get_i16(bytes, &p));
+				prm.lsg4->normals[3] = to_fix16(get_i16(bytes, &p));
 				prm.lsg4->color[0] = rgba_from_u32(get_u32(bytes, &p));
 				prm.lsg4->color[1] = rgba_from_u32(get_u32(bytes, &p));
 				prm.lsg4->color[2] = rgba_from_u32(get_u32(bytes, &p));
@@ -326,12 +330,12 @@ Object *objects_load(char *name, texture_list_t tl) {
 
 			case PRM_TYPE_LSGT3:
 				prm.ptr = mem_bump(sizeof(LSGT3));
-				prm.lsgt3->coords[0] = get_i16(bytes, &p);
-				prm.lsgt3->coords[1] = get_i16(bytes, &p);
-				prm.lsgt3->coords[2] = get_i16(bytes, &p);
-				prm.lsgt3->normals[0] = get_i16(bytes, &p);
-				prm.lsgt3->normals[1] = get_i16(bytes, &p);
-				prm.lsgt3->normals[2] = get_i16(bytes, &p);
+				prm.lsgt3->coords[0] = to_fix16(get_i16(bytes, &p));
+				prm.lsgt3->coords[1] = to_fix16(get_i16(bytes, &p));
+				prm.lsgt3->coords[2] = to_fix16(get_i16(bytes, &p));
+				prm.lsgt3->normals[0] = to_fix16(get_i16(bytes, &p));
+				prm.lsgt3->normals[1] = to_fix16(get_i16(bytes, &p));
+				prm.lsgt3->normals[2] = to_fix16(get_i16(bytes, &p));
 
 				prm.lsgt3->texture = texture_from_list(tl, get_i16(bytes, &p));
 				prm.lsgt3->cba = get_i16(bytes, &p);
@@ -349,14 +353,14 @@ Object *objects_load(char *name, texture_list_t tl) {
 
 			case PRM_TYPE_LSGT4:
 				prm.ptr = mem_bump(sizeof(LSGT4));
-				prm.lsgt4->coords[0] = get_i16(bytes, &p);
-				prm.lsgt4->coords[1] = get_i16(bytes, &p);
-				prm.lsgt4->coords[2] = get_i16(bytes, &p);
-				prm.lsgt4->coords[3] = get_i16(bytes, &p);
-				prm.lsgt4->normals[0] = get_i16(bytes, &p);
-				prm.lsgt4->normals[1] = get_i16(bytes, &p);
-				prm.lsgt4->normals[2] = get_i16(bytes, &p);
-				prm.lsgt4->normals[3] = get_i16(bytes, &p);
+				prm.lsgt4->coords[0] = to_fix16(get_i16(bytes, &p));
+				prm.lsgt4->coords[1] = to_fix16(get_i16(bytes, &p));
+				prm.lsgt4->coords[2] = to_fix16(get_i16(bytes, &p));
+				prm.lsgt4->coords[3] = to_fix16(get_i16(bytes, &p));
+				prm.lsgt4->normals[0] = to_fix16(get_i16(bytes, &p));
+				prm.lsgt4->normals[1] = to_fix16(get_i16(bytes, &p));
+				prm.lsgt4->normals[2] = to_fix16(get_i16(bytes, &p));
+				prm.lsgt4->normals[3] = to_fix16(get_i16(bytes, &p));
 
 				prm.lsgt4->texture = texture_from_list(tl, get_i16(bytes, &p));
 				prm.lsgt4->cba = get_i16(bytes, &p);
