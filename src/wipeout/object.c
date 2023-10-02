@@ -71,19 +71,22 @@ Object *objects_load(char *name, texture_list_t tl) {
 		object->radius = 0;
 		object->vertices = mem_bump(object->vertices_len * sizeof(vec3_t));
 		for (int i = 0; i < object->vertices_len; i++) {
-			object->vertices[i].x = get_i16(bytes, &p);
-			object->vertices[i].y = get_i16(bytes, &p);
-			object->vertices[i].z = get_i16(bytes, &p);
+			int val = get_i16(bytes, &p);
+			object->vertices[i].x = FIX16(val);
+			val = get_i16(bytes, &p);
+			object->vertices[i].y = FIX16(val);
+			val = get_i16(bytes, &p);
+			object->vertices[i].z = FIX16(val);
 			p += 2; // padding
 
-			if (fabsf(object->vertices[i].x) > object->radius) {
-				object->radius = fabsf(object->vertices[i].x);
+			if (fix16_abs(object->vertices[i].x) > object->radius) {
+				object->radius = fix16_abs(object->vertices[i].x);
 			}
-			if (fabsf(object->vertices[i].y) > object->radius) {
-				object->radius = fabsf(object->vertices[i].y);
+			if (fix16_abs(object->vertices[i].y) > object->radius) {
+				object->radius = fix16_abs(object->vertices[i].y);
 			}
-			if (fabsf(object->vertices[i].z) > object->radius) {
-				object->radius = fabsf(object->vertices[i].z);
+			if (fix16_abs(object->vertices[i].z) > object->radius) {
+				object->radius = fix16_abs(object->vertices[i].z);
 			}
 		}
 
