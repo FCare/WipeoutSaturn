@@ -180,8 +180,10 @@ static void render_push_native_quads(quads_t *quad, rgba_t color, uint16_t textu
   for (int i = 0; i<4; i++) {
     // quad->vertices[i].pos.x += w2;
     // quad->vertices[i].pos.y += h2;
+    LOGD("(%d,%d,%d)=>", quad->vertices[i].pos.x,quad->vertices[i].pos.y,quad->vertices[i].pos.z);
     quad->vertices[i].pos = vec3_transform(quad->vertices[i].pos, &mvp_mat);
     //Z-clampq
+    LOGD("(%d,%d,%d)\n", quad->vertices[i].pos.x,quad->vertices[i].pos.y,quad->vertices[i].pos.z);
     if (quad->vertices[i].pos.z >= FIX16_ONE) {
       LOGD("discard due to Z=%d\n", (uint32_t)quad->vertices[i].pos.z);
       return;
