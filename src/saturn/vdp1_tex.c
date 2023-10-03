@@ -50,7 +50,7 @@ static uint8_t isSameUv(vec2_t *uv, quads_t *q) {
 
 uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *quad, vec2i_t *size) {
 	render_texture_t* src = get_tex(texture_index);
-	int orig_w = quad->vertices[1].uv.x - quad->vertices[0].uv.x;
+	int orig_w = quad->vertices[1].uv.x - quad->vertices[0].uv.x + 1;
 	int h = quad->vertices[3].uv.y - quad->vertices[0].uv.y; //Here uv are simple uint32_t
 
 	assert(orig_w >= 0);
@@ -74,7 +74,7 @@ uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *quad, 
     if ((textures[id][i].index == texture_index) && isSameUv(textures[id][i].uv, quad))
 		{
 			textures[id][i].used = 1;
-				LOGD("&&&&&&&&&&&&&&& Texture vdp1 %d(0x%x) reused %dx%d => %dx%d:-) :-) :-)\n", i, textures[id][i].pixels, (int32_t)quad->vertices[0].uv.y, (int32_t)quad->vertices[0].uv.x, (int32_t)quad->vertices[3].uv.y, (int32_t)quad->vertices[3].uv.x);
+				LOGD("&&&&&&&&&&&&&&& Texture vdp1 %d(0x%x) reused %dx%d => %dx%d:-) :-) :-)\n", i, textures[id][i].pixels, (int32_t)quad->vertices[0].uv.y, (int32_t)quad->vertices[0].uv.x, (int32_t)quad->vertices[2].uv.y, (int32_t)quad->vertices[2].uv.x);
       return textures[id][i].pixels;
     }
   }
