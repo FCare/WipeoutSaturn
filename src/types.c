@@ -34,10 +34,14 @@ vec3_t vec3_transform(vec3_t a, mat4_t *mat) {
  	if (w == FIX16_ZERO) {
    	w = FIX16_ONE;
 	}
+	a.x = fix16_div(a.x, w);
+	a.y = fix16_div(a.y, w);
+	a.z = fix16_div(a.z, w);
+
 	return vec3_fix16(
-         fix16_div((fix16_mul(mat->arr[0], a.x) + fix16_mul(mat->arr[4], a.y) + fix16_mul(mat->arr[ 8], a.z) + mat->arr[12]), w),
-         fix16_div((fix16_mul(mat->arr[1], a.x) + fix16_mul(mat->arr[5], a.y) + fix16_mul(mat->arr[ 9], a.z) + mat->arr[13]), w),
-         fix16_div((fix16_mul(mat->arr[2], a.x) + fix16_mul(mat->arr[6], a.y) + fix16_mul(mat->arr[10], a.z) + mat->arr[14]), w)
+         fix16_mul(mat->arr[0], a.x) + fix16_mul(mat->arr[4], a.y) + fix16_mul(mat->arr[ 8], a.z) + fix16_div(mat->arr[12], w),
+         fix16_mul(mat->arr[1], a.x) + fix16_mul(mat->arr[5], a.y) + fix16_mul(mat->arr[ 9], a.z) + fix16_div(mat->arr[13], w),
+         fix16_mul(mat->arr[2], a.x) + fix16_mul(mat->arr[6], a.y) + fix16_mul(mat->arr[10], a.z) + fix16_div(mat->arr[14], w)
         );
  }
 
