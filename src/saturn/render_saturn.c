@@ -72,18 +72,12 @@ void render_set_screen_size(vec2i_t size){
     FIX16_ZERO,  FIX16_ZERO,  -FIX16_ONE,   FIX16_ZERO,
     -FIX16_ONE, FIX16_ONE, FIX16_ZERO, FIX16_ONE
   );
-
-fix16_t aspect = fix16_div(FIX16(screen_size.x), FIX16(screen_size.y));
-fix16_t fov = fix16_mul(13425, PLATFORM_PI);
-fix16_t f = fix16_div(FIX16_ONE, tan(fov));
-
-printf("%d %d %d\n", aspect, fov, f);
-
+//Near = 128.0 FAR = 32000.0
 projection_mat_3d = mat4(
-  fix16_div(f, aspect), FIX16_ZERO, FIX16_ZERO, FIX16_ZERO,
-  FIX16_ZERO, f, FIX16_ZERO, FIX16_ZERO,
-  FIX16_ZERO, FIX16_ZERO, -FIX16_ONE, -FIX16_ONE,
-  FIX16_ZERO, FIX16_ZERO, FIX16(-256), FIX16_ZERO
+  65523, FIX16_ZERO, FIX16_ZERO, FIX16_ZERO,
+  FIX16_ZERO, 87365, FIX16_ZERO, FIX16_ZERO,
+  FIX16_ZERO, FIX16_ZERO, -66062, -FIX16_ONE,
+  FIX16_ZERO, FIX16_ZERO, -16844594, FIX16_ZERO
 );
   LOGD("Proj 2D Mat= \n");
   print_mat(&projection_mat_2d);
