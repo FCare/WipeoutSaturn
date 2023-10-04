@@ -67,6 +67,8 @@ void render_cleanup(void){}
 void render_set_screen_size(vec2i_t size){
   LOGD("%s\n", __FUNCTION__);
   LOGD("Screen %dx%d\n", screen_size.x, screen_size.y);
+  fix16_t w2 = FIX16(screen_size.x>>1);
+  fix16_t h2 = FIX16(screen_size.y>>1);
   //Screen is always same size on saturn port
   fix16_t lr = fix16_div(FIX16_ONE<<1, FIX16(screen_size.x));
   fix16_t bt = -fix16_div(FIX16_ONE<<1, FIX16(screen_size.y));
@@ -76,30 +78,28 @@ void render_set_screen_size(vec2i_t size){
     FIX16_ZERO,  FIX16_ZERO,  -FIX16_ONE,   FIX16_ZERO,
     -FIX16_ONE, FIX16_ONE, FIX16_ZERO, FIX16_ONE
   );
-//Fov 90 deg on X an Y
-//Far -16000 Near -16
-//https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/building-basic-perspective-projection-matrix.html
-mat4_t proj_3d = mat4(
-  FIX16_ONE, FIX16_ZERO, FIX16_ZERO, FIX16_ZERO,
-  FIX16_ZERO, FIX16_ONE, FIX16_ZERO, FIX16_ZERO,
-  FIX16_ZERO, FIX16_ZERO, -65601, -FIX16_ONE,
-  FIX16_ZERO, FIX16_ZERO, -1049625, FIX16_ZERO
-);
 
-fix16_t w2 = FIX16(screen_size.x>>1);
-fix16_t h2 = FIX16(screen_size.y>>1);
+  fix16_t sx = fix16_mul(65523, w2);
+  fix16_t sy = fix16_mul(87365, h2);
 
-screen_mat = mat4(
-  w2,         FIX16_ZERO, FIX16_ZERO, FIX16_ZERO,
-  FIX16_ZERO,        -h2, FIX16_ZERO, FIX16_ZERO,
-  FIX16_ZERO, FIX16_ZERO, FIX16_ONE, FIX16_ZERO,
-          w2,         h2, FIX16_ZERO, FIX16_ONE
-);
-
-mat4_mul(&projection_mat_2d, &screen_mat, &proj_2d);
-mat4_mul(&projection_mat_3d, &screen_mat, &proj_3d);
+  mat4_t screen_mat_2d = mat4(
+    w2,         FIX16_ZERO, FIX16_ZERO, FIX16_ZERO,
+    FIX16_ZERO,        -h2, FIX16_ZERO, FIX16_ZERO,
+    FIX16_ZERO, FIX16_ZERO, FIX16_ONE, FIX16_ZERO,
+    w2,         h2, FIX16_ZERO, FIX16_ONE
+  );
+  mat4_mul(&projection_mat_2d, &screen_mat_2d, &proj_2d);
   LOGD("Proj 2D Mat= \n");
   print_mat(&projection_mat_2d);
+
+
+projection_mat_3d = mat4(
+          sx, FIX16_ZERO, FIX16_ZERO, FIX16_ZERO,
+  FIX16_ZERO,         -sy, FIX16_ZERO, FIX16_ZERO,
+  FIX16_ZERO, FIX16_ZERO, -66062, -FIX16_ONE,
+  FIX16_ZERO, FIX16_ZERO, -16844594, FIX16_ZERO
+);
+
   LOGD("Proj 3D Mat= \n");
   print_mat(&projection_mat_3d);
 }
