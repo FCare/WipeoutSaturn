@@ -27,7 +27,7 @@ static void cmdt_list_init(void)
 
   (void)memset(&(cmdt_list->cmdts[0]), 0x00, sizeof(vdp1_cmdt_t) * (cmdt_max));
 
-  const int16_vec2_t local_coords = INT16_VEC2_INITIALIZER(0,0);
+  const int16_vec2_t local_coords = INT16_VEC2_INITIALIZER(size.x>>1,size.y>>1);
 
   const int16_vec2_t system_clip_coords = size;
 

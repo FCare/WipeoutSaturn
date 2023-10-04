@@ -68,7 +68,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 		p += 4; // skeleton sub
 		p += 4; // skeleton next
 
-		object->radius = 0;
+		object->radius = FIX16_ZERO;
 		object->vertices = mem_bump(object->vertices_len * sizeof(vec3_t));
 		for (int i = 0; i < object->vertices_len; i++) {
 			int val = get_i16(bytes, &p);
