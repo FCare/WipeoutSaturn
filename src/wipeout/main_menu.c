@@ -75,7 +75,7 @@ static void button_quit(menu_t *menu, int data) {
 
 static void page_main_draw(menu_t *menu, int data) {
 	switch (data) {
-		case 0: draw_model(g.ships[0].model, vec2(0, -0.1), vec3(0, 0, -700), system_cycle_time()); break;
+		case 0: draw_model(g.ships[0].model, vec2(0, 0), vec3(0, 0, -700), system_cycle_time()); break;
 		case 1: draw_model(models.misc.options, vec2(0, -0.2), vec3(0, 0, -700), system_cycle_time()); break;
 		case 2: draw_model(models.misc.msdos, vec2(0, -0.2), vec3(0, 0, -700), system_cycle_time()); break;
 	}

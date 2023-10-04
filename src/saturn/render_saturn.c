@@ -127,17 +127,17 @@ void render_frame_end(void){
 void render_set_view(vec3_t pos, vec3_t angles){
     LOGD("%s\n", __FUNCTION__);
   view_mat = mat4_identity();
-  // LOGD("View Mat= \n");
-  // print_mat(&view_mat);
-  // mat4_set_roll_pitch_yaw(&view_mat, vec3_fix16(angles.x, -angles.y + PLATFORM_PI, angles.z + PLATFORM_PI));
-  // LOGD("roll View Mat= \n");
-  // print_mat(&view_mat);
-  // mat4_translate(&view_mat, vec3_inv(pos));
-  // LOGD("translate View Mat= \n");
-  // print_mat(&view_mat);
-  // mat4_set_yaw_pitch_roll(&sprite_mat, vec3_fix16(-angles.x, angles.y - PLATFORM_PI, FIX16_ZERO));
-  // LOGD("yaw View Mat= \n");
-  // print_mat(&sprite_mat);
+  LOGD("View Mat= \n");
+  print_mat(&view_mat);
+  mat4_set_roll_pitch_yaw(&view_mat, vec3_fix16(angles.x, -angles.y + PLATFORM_PI, angles.z + PLATFORM_PI));
+  LOGD("roll View Mat= \n");
+  print_mat(&view_mat);
+  mat4_translate(&view_mat, vec3_inv(pos));
+  LOGD("translate View Mat= \n");
+  print_mat(&view_mat);
+  mat4_set_yaw_pitch_roll(&sprite_mat, vec3_fix16(-angles.x, angles.y - PLATFORM_PI, FIX16_ZERO));
+  LOGD("yaw View Mat= \n");
+  print_mat(&sprite_mat);
 
   LOGD("View Mat= \n");
   print_mat(&view_mat);
