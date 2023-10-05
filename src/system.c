@@ -36,6 +36,7 @@ void system_update(void) {
 	fix16_t real_delta = time_real_now - time_real;
 	time_real = time_real_now;
 	tick_last = fix16_mul(fix16_min(real_delta, FIX16(0.1)), time_scale);
+
 	time_scaled += tick_last;
 
 	// FIXME: come up with a better way to wrap the cycle_time, so that it

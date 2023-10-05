@@ -10,12 +10,12 @@ fix16_t sqrt(fix16_t x) {
 }
 
 fix16_t sin(fix16_t inAngle) {
-  fix16_t tempAngle = inAngle % (PLATFORM_PI << 1);
+  fix16_t tempAngle = inAngle % PLATFORM_2PI;
 
   if(tempAngle > PLATFORM_PI)
-		tempAngle -= (PLATFORM_PI << 1);
+		tempAngle -= PLATFORM_2PI;
 	else if(tempAngle < -PLATFORM_PI)
-		tempAngle += (PLATFORM_PI << 1);
+		tempAngle += PLATFORM_2PI;
 
 	fix16_t tempAngleSq = fix16_mul(tempAngle, tempAngle);
 
