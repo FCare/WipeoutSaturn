@@ -12,6 +12,8 @@ vdp1_cmdt_list_t *cmdt_list;
 vdp1_cmdt_t *cmdts;
 uint32_t cmdt_max;
 
+fix16_t *minZ;
+
 static uint8_t id = 0;
 static vdp1_vram_partitions_t _vdp1_vram_partitions;
 
@@ -26,6 +28,8 @@ static void cmdt_list_init(void)
   assert(cmdt_list != NULL);
 
   (void)memset(&(cmdt_list->cmdts[0]), 0x00, sizeof(vdp1_cmdt_t) * (cmdt_max));
+
+  minZ = mem_bump(cmdt_max*sizeof(fix16_t));
 
   const int16_vec2_t local_coords = INT16_VEC2_INITIALIZER(size.x>>1,size.y>>1);
 
@@ -114,6 +118,13 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
   vdp1_cmdt_t *cmd = &cmdts[nbCommand];
   memset(cmd, 0x0, sizeof(vdp1_cmdt_t));
 
+  minZ[nbCommand] = quad->vertices[0].pos.z;
+  for (int i = 1; i<4; i++) {
+    if (minZ[nbCommand] > quad->vertices[i].pos.z) {
+      minZ[nbCommand] = quad->vertices[i].pos.z;
+    }
+  }
+
   vec2i_t size;
   uint16_t*character = getVdp1VramAddress(texture_index, id, quad, &size); //a revoir parce qu'il ne faut copier suivant le UV
   LOGD(
@@ -166,9 +177,16 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
 
 void render_vdp1_flush(void) {
   //Flush shall not force the sync of the screen
-  //Set the last command as end
-  if (nbCommand > 0) vdp1_cmdt_end_set(&cmdts[nbCommand]);
+  if (nbCommand > 0) {
+    //sort all the quads
+    quickSort_Z(cmdts, 0, nbCommand, minZ);
+    //Set the last command as end
+    vdp1_cmdt_end_set(&cmdts[nbCommand]);
+  }
+
   cmdt_list->count = nbCommand+3;
+
+
   LOGD("List count = %d\n", cmdt_list->count);
   vdp1_sync_cmdt_list_put(cmdt_list, 0);
   id = (id+1)%2;

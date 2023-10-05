@@ -81,7 +81,7 @@ bool file_exists(const char *path);
 uint8_t *file_load(const char *path, uint32_t *bytes_read);
 uint32_t file_store(const char *path, void *bytes, int32_t len);
 
-void quickSort_Z(vec3_t array[], int16_t low, int16_t high, int16_t *map);
+void quickSort_Z(vdp1_cmdt_t array[], uint16_t low, uint16_t high, fix16_t* map);
 
 
 #define sort(LIST, LEN, COMPARE_FUNC) \
