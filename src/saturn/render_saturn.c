@@ -79,6 +79,8 @@ void render_set_screen_size(vec2i_t size){
     -FIX16_ONE, FIX16_ONE, FIX16_ZERO, FIX16_ONE
   );
 
+  fix16_t sx = fix16_mul(65523, w2);
+  fix16_t sy = fix16_mul(87365, h2);
 
   mat4_t screen_mat_2d = mat4(
     w2,         FIX16_ZERO, FIX16_ZERO, FIX16_ZERO,
@@ -89,12 +91,6 @@ void render_set_screen_size(vec2i_t size){
   mat4_mul(&projection_mat_2d, &screen_mat_2d, &proj_2d);
   LOGD("Proj 2D Mat= \n");
   print_mat(&projection_mat_2d);
-
-  //Fov of 90/aspect
-  fix16_t fovx = fix16_mul(98144, w2);
-  fix16_t fovy = fix16_mul(98144, h2);
-  fix16_t sx = fix16_mul(65523, fovx);
-  fix16_t sy = fix16_mul(87365, fovy);
 
 
 projection_mat_3d = mat4(
