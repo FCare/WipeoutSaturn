@@ -18,7 +18,6 @@ static uint8_t nb_planes = 0;
 static vec2i_t screen_size;
 
 static mat4_t view_mat = mat4_identity();
-static mat4_t model_mat = mat4_identity();
 static mat4_t mvp_mat = mat4_identity();
 static mat4_t projection_mat_2d = mat4_identity();
 static mat4_t projection_mat_3d = mat4_identity();
@@ -88,7 +87,7 @@ void render_set_screen_size(vec2i_t size){
     FIX16_ZERO, FIX16_ZERO, FIX16_ONE, FIX16_ZERO,
     w2,         h2, FIX16_ZERO, FIX16_ONE
   );
-  mat4_mul(&projection_mat_2d, &screen_mat_2d, &proj_2d);
+  mat4_mul(&projection_mat_2d, &proj_2d, &screen_mat_2d);
   LOGD("Proj 2D Mat= \n");
   print_mat(&projection_mat_2d);
 
@@ -143,40 +142,26 @@ void render_set_view(vec3_t pos, vec3_t angles){
   print_mat(&view_mat);
   LOGD("Proj 3D= \n");
   print_mat(&projection_mat_3d);
-  mat4_mul(&mvp_mat, &projection_mat_3d, &view_mat);
+  mat4_mul(&mvp_mat, &view_mat, &projection_mat_3d);
   LOGD("MVP= \n");
   print_mat(&mvp_mat);
 }
 void render_set_view_2d(void){
   LOGD("%s\n", __FUNCTION__);
   view_mat = mat4_identity();
-  model_mat = mat4_identity();
   LOGD("View Mat= \n");
   print_mat(&view_mat);
   LOGD("Proj 2D= \n");
   print_mat(&projection_mat_2d);
-  mat4_mul(&mvp_mat, &projection_mat_2d, &view_mat);
+  mat4_mul(&mvp_mat, &view_mat, &projection_mat_2d);
   LOGD("MVP= \n");
   print_mat(&mvp_mat);
 }
 void render_set_model_mat(mat4_t *m){
-    LOGD("%s\n", __FUNCTION__);
-    model_mat = *m;
-    LOGD("Model Mat= \n");
-    print_mat(&model_mat);
-  // mat4_t vm_mat;
-  // LOGD("M Mat= \n");
-  // print_mat(m);
-  // LOGD("View Mat= \n");
-  // print_mat(&view_mat);
-	// mat4_mul(&vm_mat, &view_mat, m);
-  // LOGD("Result= \n");
-  // print_mat(&vm_mat);
-  // LOGD("Proj 3D= \n");
-  // print_mat(&projection_mat_3d);
-	// mat4_mul(&mvp_mat, &projection_mat_3d, &vm_mat);
-  // LOGD("MVP= \n");
-  // print_mat(&mvp_mat);
+  LOGD("%s\n", __FUNCTION__);
+  mat4_t vm_mat;
+  mat4_mul(&vm_mat, m, &view_mat);
+  mat4_mul(&mvp_mat, &vm_mat, &projection_mat_3d);
 }
 
 void render_set_depth_write(bool enabled){}
@@ -196,12 +181,9 @@ static void render_push_native_quads(quads_t *quad, rgba_t color, uint16_t textu
   nb_planes++;
   LOGD("MVP =\n");
   print_mat(&mvp_mat);
+
   for (int i = 0; i<4; i++) {
     LOGD("(%d,%d,%d)\n", fix16_int32_to(quad->vertices[i].pos.x),fix16_int32_to(quad->vertices[i].pos.y),fix16_int32_to(quad->vertices[i].pos.z));
-    quad->vertices[i].pos = vec3_transform(quad->vertices[i].pos, &model_mat);
-    //Z-clampq
-    LOGD("model (%d,%d,%d)\n", fix16_int32_to(quad->vertices[i].pos.x),fix16_int32_to(quad->vertices[i].pos.y),fix16_int32_to(quad->vertices[i].pos.z));
-
     quad->vertices[i].pos = vec3_transform(quad->vertices[i].pos, &mvp_mat);
     LOGD("proj (%d,%d,%d)\n", fix16_int32_to(quad->vertices[i].pos.x),fix16_int32_to(quad->vertices[i].pos.y),fix16_int32_to(quad->vertices[i].pos.z));
     if (quad->vertices[i].pos.z >= FIX16_ONE) {
@@ -245,10 +227,6 @@ void render_push_tris(tris_t tris, uint16_t texture_index){
   print_mat(&mvp_mat);
   for (int i = 0; i<3; i++) {
     LOGD("(%d,%d,%d)\n", fix16_int32_to(tris.vertices[i].pos.x),fix16_int32_to(tris.vertices[i].pos.y),fix16_int32_to(tris.vertices[i].pos.z));
-    tris.vertices[i].pos = vec3_transform(tris.vertices[i].pos, &model_mat);
-    //Z-clampq
-    LOGD("model (%d,%d,%d)\n", fix16_int32_to(tris.vertices[i].pos.x),fix16_int32_to(tris.vertices[i].pos.y),fix16_int32_to(tris.vertices[i].pos.z));
-
     tris.vertices[i].pos = vec3_transform(tris.vertices[i].pos, &mvp_mat);
     LOGD("proj (%d,%d,%d)\n", fix16_int32_to(tris.vertices[i].pos.x),fix16_int32_to(tris.vertices[i].pos.y),fix16_int32_to(tris.vertices[i].pos.z));
     if (tris.vertices[i].pos.z >= FIX16_ONE) {
