@@ -64,7 +64,7 @@ static void swapMap(fix16_t *a, fix16_t *b) {
 }
 
 // function to find the partition position
-static int partition(vdp1_cmdt_t array[], uint16_t low, uint16_t high, fix16_t *map) {
+static int partition(vdp1_cmdt_t *array, uint16_t low, uint16_t high, fix16_t *map) {
 
   // select the rightmost element as pivot
   fix16_t pivot = map[high];
@@ -75,7 +75,7 @@ static int partition(vdp1_cmdt_t array[], uint16_t low, uint16_t high, fix16_t *
   // traverse each element of the array
   // compare them with the pivot
   for (int16_t j = low; j < high; j++) {
-    if (map[j] <= pivot) {
+    if (map[j] >= pivot) {
 
       // if element smaller than pivot is found
       // swap it with the greater element pointed by i
@@ -95,7 +95,7 @@ static int partition(vdp1_cmdt_t array[], uint16_t low, uint16_t high, fix16_t *
   return (i + 1);
 }
 
-void quickSort_Z(vdp1_cmdt_t array[], uint16_t low, uint16_t high, fix16_t* map) {
+void quickSort_Z(vdp1_cmdt_t *array, uint16_t low, uint16_t high, fix16_t* map) {
   if (low < high) {
 
     // find the pivot element such that

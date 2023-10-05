@@ -29,7 +29,7 @@ static void cmdt_list_init(void)
 
   (void)memset(&(cmdt_list->cmdts[0]), 0x00, sizeof(vdp1_cmdt_t) * (cmdt_max));
 
-  minZ = mem_bump(cmdt_max*sizeof(fix16_t));
+  minZ = (fix16_t*)mem_bump(cmdt_max*sizeof(fix16_t));
 
   const int16_vec2_t local_coords = INT16_VEC2_INITIALIZER(size.x>>1,size.y>>1);
 
@@ -118,12 +118,11 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
   vdp1_cmdt_t *cmd = &cmdts[nbCommand];
   memset(cmd, 0x0, sizeof(vdp1_cmdt_t));
 
-  minZ[nbCommand] = quad->vertices[0].pos.z;
-  for (int i = 1; i<4; i++) {
-    if (minZ[nbCommand] > quad->vertices[i].pos.z) {
-      minZ[nbCommand] = quad->vertices[i].pos.z;
-    }
+  minZ[nbCommand] = 0;
+  for (int i = 0; i<4; i++) {
+    minZ[nbCommand] += quad->vertices[i].pos.z;
   }
+  minZ[nbCommand] = minZ[nbCommand]>>2;
 
   vec2i_t size;
   uint16_t*character = getVdp1VramAddress(texture_index, id, quad, &size); //a revoir parce qu'il ne faut copier suivant le UV
