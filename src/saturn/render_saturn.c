@@ -17,6 +17,8 @@ static uint8_t nb_planes = 0;
 
 static vec2i_t screen_size;
 
+static fix16_t currentMaxZ;
+
 static mat4_t view_mat = mat4_identity();
 static mat4_t mvp_mat = mat4_identity();
 static mat4_t projection_mat_2d = mat4_identity();
@@ -115,6 +117,7 @@ void render_frame_prepare(void){
   //Function called every frame need to prepare render list
   //Faire un clear screen a chaque frame (VDP1 VBlank Erase)?
   LOGD("%s\n", __FUNCTION__);
+  currentMaxZ = FIX16_ZERO;
 }
 void render_frame_end(void){
   //On peut lancer la queue.
@@ -186,13 +189,15 @@ void render_object_transform(vec3_t *out, vec3_t *in, int16_t size) {
 
 static void render_push_native_quads(quads_t *quad, rgba_t color, uint16_t texture_index) {
   nb_planes++;
-
+  fix16_t maxZ = FIX16_ZERO;
   for (int i = 0; i<4; i++) {
     if (quad->vertices[i].pos.z >= FIX16_ONE) {
       LOGD("discard due to Z=%d\n", (uint32_t)quad->vertices[i].pos.z);
       return;
     }
+    maxZ = max(maxZ, quad->vertices[i].pos.z);
   }
+  currentMaxZ = max(currentMaxZ, maxZ);
   //Add a quad to the vdp1 list v0,v1,v2,v3
   render_vdp1_add(quad, color, texture_index);
 }
@@ -224,13 +229,17 @@ void render_push_stripe(quads_t *quad, uint16_t texture_index) {
 
 void render_push_tris(tris_t tris, uint16_t texture_index){
   LOGD("%s\n", __FUNCTION__);
+  fix16_t maxZ = FIX16_ZERO;
   nb_planes++;
   for (int i = 0; i<3; i++) {
     if (tris.vertices[i].pos.z >= FIX16_ONE) {
       LOGD("discard due to Z=%d\n", (uint32_t)tris.vertices[i].pos.z);
       return;
     }
+    maxZ = max(maxZ, tris.vertices[i].pos.z);
   }
+
+  currentMaxZ = max(currentMaxZ, maxZ);
 
   quads_t q= (quads_t){
     .vertices = {
@@ -334,9 +343,10 @@ void render_push_2d_tile(vec2i_t pos, vec2i_t uv_offset, vec2i_t uv_size, vec2i_
     (uint32_t)q.vertices[3].uv.x,
     (uint32_t)q.vertices[3].uv.y
   );
+  currentMaxZ += 1;
   for (int i = 0; i<4; i++) {
     q.vertices[i].pos = vec3_transform(q.vertices[i].pos, &mvp_mat);
-    q.vertices[i].pos.z = FIX16_ONE;
+    q.vertices[i].pos.z = currentMaxZ;
   }
   // render_push_native_quads(&q, color, texture_index);
   nb_planes++;
