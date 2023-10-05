@@ -197,8 +197,6 @@ static void render_push_native_quads(quads_t *quad, rgba_t color, uint16_t textu
   LOGD("MVP =\n");
   print_mat(&mvp_mat);
   for (int i = 0; i<4; i++) {
-    // quad->vertices[i].pos.x += w2;
-    // quad->vertices[i].pos.y += h2;
     LOGD("(%d,%d,%d)\n", fix16_int32_to(quad->vertices[i].pos.x),fix16_int32_to(quad->vertices[i].pos.y),fix16_int32_to(quad->vertices[i].pos.z));
     quad->vertices[i].pos = vec3_transform(quad->vertices[i].pos, &model_mat);
     //Z-clampq
@@ -246,8 +244,13 @@ void render_push_tris(tris_t tris, uint16_t texture_index){
   LOGD("MVP =\n");
   print_mat(&mvp_mat);
   for (int i = 0; i<3; i++) {
-    tris.vertices[i].pos = vec3_transform(tris.vertices[i].pos, &mvp_mat);
+    LOGD("(%d,%d,%d)\n", fix16_int32_to(tris.vertices[i].pos.x),fix16_int32_to(tris.vertices[i].pos.y),fix16_int32_to(tris.vertices[i].pos.z));
+    tris.vertices[i].pos = vec3_transform(tris.vertices[i].pos, &model_mat);
     //Z-clampq
+    LOGD("model (%d,%d,%d)\n", fix16_int32_to(tris.vertices[i].pos.x),fix16_int32_to(tris.vertices[i].pos.y),fix16_int32_to(tris.vertices[i].pos.z));
+
+    tris.vertices[i].pos = vec3_transform(tris.vertices[i].pos, &mvp_mat);
+    LOGD("proj (%d,%d,%d)\n", fix16_int32_to(tris.vertices[i].pos.x),fix16_int32_to(tris.vertices[i].pos.y),fix16_int32_to(tris.vertices[i].pos.z));
     if (tris.vertices[i].pos.z >= FIX16_ONE) {
       LOGD("discard due to Z=%d\n", (uint32_t)tris.vertices[i].pos.z);
       return;
@@ -270,7 +273,7 @@ void render_push_tris(tris_t tris, uint16_t texture_index){
   q.vertices[3].uv.y = 1;
 
   //Add a quad to the vdp1 list v0,v1,v2,v3
-  // render_vdp1_add(&q,  rgba(128,128,128,255), RENDER_NO_TEXTURE);
+  render_vdp1_add(&q,  q.vertices[0].color, RENDER_NO_TEXTURE);
 }
 
 void render_push_sprite(vec3_t pos, vec2i_t size, rgba_t color, uint16_t texture_index){
