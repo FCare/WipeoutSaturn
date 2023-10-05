@@ -336,8 +336,11 @@ void render_push_2d_tile(vec2i_t pos, vec2i_t uv_offset, vec2i_t uv_size, vec2i_
   );
   for (int i = 0; i<4; i++) {
     q.vertices[i].pos = vec3_transform(q.vertices[i].pos, &mvp_mat);
+    q.vertices[i].pos.z = FIX16_ONE;
   }
-  render_push_native_quads(&q, color, texture_index);
+  // render_push_native_quads(&q, color, texture_index);
+  nb_planes++;
+  render_vdp1_add(&q, color, texture_index);
 }
 
 static inline rgb1555_t convert_to_rgb(rgba_t val) {
