@@ -2,7 +2,6 @@
 #define __FIXED_MATH_H__
 
 #include <yaul.h>
-#include "fix16_mat44.h"
 
 #define PLATFORM_2PI      0x0006487F /* pi */
 #define PLATFORM_PI       0x0003243F /* pi */
@@ -20,6 +19,8 @@ extern fix16_t atan2(fix16_t x, fix16_t y);
 extern fix16_t fabsf(fix16_t x);
 extern fix16_t floor(fix16_t x);
 extern fix16_t ceil(fix16_t x);
+
+#include "fix16_mat44.h"
 
 #undef min
 #undef max

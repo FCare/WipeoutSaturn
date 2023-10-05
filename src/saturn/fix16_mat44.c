@@ -97,10 +97,8 @@ fix16_mat44_mul(const fix16_mat44_t *m0, const fix16_mat44_t *m1, fix16_mat44_t 
 void
 fix16_mat44_x_rotate(const fix16_mat44_t *m0, fix16_mat44_t *result, angle_t angle)
 {
-    fix16_t sin;
-    fix16_t cos;
-
-    fix16_sincos(angle, &sin, &cos);
+    fix16_t sinus = sin(angle);
+    fix16_t cosinus = cos(angle);
 
     const fix16_t m01 = m0->frow[0][1];
     const fix16_t m02 = m0->frow[0][2];
@@ -109,21 +107,19 @@ fix16_mat44_x_rotate(const fix16_mat44_t *m0, fix16_mat44_t *result, angle_t ang
     const fix16_t m21 = m0->frow[2][1];
     const fix16_t m22 = m0->frow[2][2];
 
-    result->frow[0][1] =  fix16_mul(m01, cos) + fix16_mul(m02, sin);
-    result->frow[0][2] = -fix16_mul(m01, sin) + fix16_mul(m02, cos);
-    result->frow[1][1] =  fix16_mul(m11, cos) + fix16_mul(m12, sin);
-    result->frow[1][2] = -fix16_mul(m11, sin) + fix16_mul(m12, cos);
-    result->frow[2][1] =  fix16_mul(m21, cos) + fix16_mul(m22, sin);
-    result->frow[2][2] = -fix16_mul(m21, sin) + fix16_mul(m22, cos);
+    result->frow[0][1] =  fix16_mul(m01, cosinus) + fix16_mul(m02, sinus);
+    result->frow[0][2] = -fix16_mul(m01, sinus) + fix16_mul(m02, cosinus);
+    result->frow[1][1] =  fix16_mul(m11, cosinus) + fix16_mul(m12, sinus);
+    result->frow[1][2] = -fix16_mul(m11, sinus) + fix16_mul(m12, cosinus);
+    result->frow[2][1] =  fix16_mul(m21, cosinus) + fix16_mul(m22, sinus);
+    result->frow[2][2] = -fix16_mul(m21, sinus) + fix16_mul(m22, cosinus);
 }
 
 void
 fix16_mat44_y_rotate(const fix16_mat44_t *m0, fix16_mat44_t *result, angle_t angle)
 {
-    fix16_t sin_value;
-    fix16_t cos_value;
-
-    fix16_sincos(angle, &sin_value, &cos_value);
+    fix16_t sin_value = sin(angle);
+    fix16_t cos_value = cos(angle);
 
     const fix16_t m00 = m0->frow[0][0];
     const fix16_t m02 = m0->frow[0][2];
@@ -143,10 +139,9 @@ fix16_mat44_y_rotate(const fix16_mat44_t *m0, fix16_mat44_t *result, angle_t ang
 void
 fix16_mat44_z_rotate(const fix16_mat44_t *m0, fix16_mat44_t *result, angle_t angle)
 {
-    fix16_t sin_value;
-    fix16_t cos_value;
+  fix16_t sin_value = sin(angle);
+  fix16_t cos_value = cos(angle);
 
-    fix16_sincos(angle, &sin_value, &cos_value);
 
     const fix16_t m00 = m0->frow[0][0];
     const fix16_t m01 = m0->frow[0][1];
@@ -166,20 +161,14 @@ fix16_mat44_z_rotate(const fix16_mat44_t *m0, fix16_mat44_t *result, angle_t ang
 void
 fix16_mat44_rotation_create(fix16_mat44_t *m0, angle_t rx, angle_t ry, angle_t rz)
 {
-    fix16_t sx;
-    fix16_t cx;
+    fix16_t sx = sin(rx);
+    fix16_t cx = cos(rx);
 
-    fix16_sincos(rx, &sx, &cx);
+    fix16_t sy = sin(ry);
+    fix16_t cy = cos(ry);
 
-    fix16_t sy;
-    fix16_t cy;
-
-    fix16_sincos(ry, &sy, &cy);
-
-    fix16_t sz;
-    fix16_t cz;
-
-    fix16_sincos(rz, &sz, &cz);
+    fix16_t sz = sin(rz);
+    fix16_t cz = cos(rz);
 
     const fix16_t sxsy = fix16_mul(sx, sy);
     const fix16_t cxsy = fix16_mul(cx, sy);
