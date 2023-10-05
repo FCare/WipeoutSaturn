@@ -137,6 +137,7 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
   rgb1555_t gouraud = RGB1555(1, color.r>>3,  color.g>>3,  color.b>>3);
   if ((gouraud.r != 0x10) || (gouraud.g != 0x10) || (gouraud.b != 0x10)) {
     //apply gouraud
+    //Shall not be shared between lists
     vdp1_gouraud_table_t *gouraud_base;
     gouraud_base = &_vdp1_vram_partitions.gouraud_base[gouraud_cmd];
     gouraud_base->colors[0] = gouraud;
@@ -173,7 +174,7 @@ void render_vdp1_flush(void) {
   id = (id+1)%2;
   reset_vdp1_pool(id);
   nbCommand = 0;
-  gouraud_cmd = 0;
+  gouraud_cmd = id*(VDP1_VRAM_DEFAULT_GOURAUD_COUNT>>1);
   vdp1_sync_render();
 }
 
