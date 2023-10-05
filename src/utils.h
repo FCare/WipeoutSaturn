@@ -70,16 +70,18 @@
 #define flags_none(FLAGS, F) ((FLAGS & (F)) == 0)
 #define flags_set(FLAGS, F)  (FLAGS = (F))
 
-	
+
 
 char *get_path(const char *dir, const char *file);
 bool str_starts_with(const char *haystack, const char *needle);
 fix16_t rand_fix16_t(fix16_t min, fix16_t max);
-int32_t rand_int(int32_t min, int32_t max); 
+int32_t rand_int(int32_t min, int32_t max);
 
 bool file_exists(const char *path);
 uint8_t *file_load(const char *path, uint32_t *bytes_read);
 uint32_t file_store(const char *path, void *bytes, int32_t len);
+
+void quickSort_Z(vec3_t array[], int16_t low, int16_t high, int16_t *map);
 
 
 #define sort(LIST, LEN, COMPARE_FUNC) \
