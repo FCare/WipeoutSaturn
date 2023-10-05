@@ -177,15 +177,17 @@ vec3_t render_transform(vec3_t pos){
   return vec3_transform(vec3_transform(pos, &view_mat), &projection_mat_3d);
 }
 
+
+void render_object_transform(vec3_t *out, vec3_t *in, int16_t size) {
+  for (int i = 0; i<size; i++) {
+    out[i] = vec3_transform(in[i], &mvp_mat);
+  }
+}
+
 static void render_push_native_quads(quads_t *quad, rgba_t color, uint16_t texture_index) {
   nb_planes++;
-  LOGD("MVP =\n");
-  print_mat(&mvp_mat);
 
   for (int i = 0; i<4; i++) {
-    LOGD("(%d,%d,%d)\n", fix16_int32_to(quad->vertices[i].pos.x),fix16_int32_to(quad->vertices[i].pos.y),fix16_int32_to(quad->vertices[i].pos.z));
-    quad->vertices[i].pos = vec3_transform(quad->vertices[i].pos, &mvp_mat);
-    LOGD("proj (%d,%d,%d)\n", fix16_int32_to(quad->vertices[i].pos.x),fix16_int32_to(quad->vertices[i].pos.y),fix16_int32_to(quad->vertices[i].pos.z));
     if (quad->vertices[i].pos.z >= FIX16_ONE) {
       LOGD("discard due to Z=%d\n", (uint32_t)quad->vertices[i].pos.z);
       return;
@@ -223,12 +225,7 @@ void render_push_stripe(quads_t *quad, uint16_t texture_index) {
 void render_push_tris(tris_t tris, uint16_t texture_index){
   LOGD("%s\n", __FUNCTION__);
   nb_planes++;
-  LOGD("MVP =\n");
-  print_mat(&mvp_mat);
   for (int i = 0; i<3; i++) {
-    LOGD("(%d,%d,%d)\n", fix16_int32_to(tris.vertices[i].pos.x),fix16_int32_to(tris.vertices[i].pos.y),fix16_int32_to(tris.vertices[i].pos.z));
-    tris.vertices[i].pos = vec3_transform(tris.vertices[i].pos, &mvp_mat);
-    LOGD("proj (%d,%d,%d)\n", fix16_int32_to(tris.vertices[i].pos.x),fix16_int32_to(tris.vertices[i].pos.y),fix16_int32_to(tris.vertices[i].pos.z));
     if (tris.vertices[i].pos.z >= FIX16_ONE) {
       LOGD("discard due to Z=%d\n", (uint32_t)tris.vertices[i].pos.z);
       return;
@@ -337,6 +334,9 @@ void render_push_2d_tile(vec2i_t pos, vec2i_t uv_offset, vec2i_t uv_size, vec2i_
     (uint32_t)q.vertices[3].uv.x,
     (uint32_t)q.vertices[3].uv.y
   );
+  for (int i = 0; i<4; i++) {
+    q.vertices[i].pos = vec3_transform(q.vertices[i].pos, &mvp_mat);
+  }
   render_push_native_quads(&q, color, texture_index);
 }
 

@@ -458,12 +458,14 @@ Object *objects_load(char *name, texture_list_t tl) {
 
 
 void object_draw(Object *object, mat4_t *mat) {
-	vec3_t *vertex = object->vertices;
+	vec3_t *vertex = mem_temp_alloc(object->vertices_len * sizeof(vec3_t));
 
 	Prm poly = {.primitive = object->primitives};
 	int primitives_len = object->primitives_len;
 
 	render_set_model_mat(mat);
+
+	render_object_transform(vertex, object->vertices, object->vertices_len);
 
 	// TODO: check for PRM_SINGLE_SIDED
 
@@ -878,4 +880,6 @@ void object_draw(Object *object, mat4_t *mat) {
 
 		}
 	}
+
+	mem_temp_free(vertex);
 }
