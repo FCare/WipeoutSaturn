@@ -50,6 +50,8 @@ int main(int argc, char *argv[]) {
 	}
 	printf("Found %d models\n", nb_objects);
 
+	gl_init();
+
   uint16_t format = 0x1; //RGB/palette 16 bits
 
 	for (int i=0; i<nb_objects; i++) {

@@ -10,7 +10,8 @@ BUILD_SRC= \
 	texture.c \
 	file.c \
 	lzss.c \
-	type.c
+	type.c \
+	gl.c
 
 COMMON_OBJ = $(patsubst %.c, $(BUILD_DIR)/%.o, $(BUILD_SRC))
 COMMON_DEPS = $(patsubst %.c, $(BUILD_DIR)/%.d, $(BUILD_SRC))
