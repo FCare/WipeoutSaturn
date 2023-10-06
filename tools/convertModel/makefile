@@ -3,7 +3,19 @@ GL_LIB = /usr/X11R6/lib
 
 BUILD_DIR = build
 
-convertModel: $(BUILD_DIR)/convertModel.o $(BUILD_DIR)/image.o $(BUILD_DIR)/object.o $(BUILD_DIR)/texture.o $(BUILD_DIR)/file.o $(BUILD_DIR)/lzss.o $(BUILD_DIR)/type.o
+BUILD_SRC= \
+	convertModel.c \
+	image.c \
+	object.c \
+	texture.c \
+	file.c \
+	lzss.c \
+	type.c
+
+COMMON_OBJ = $(patsubst %.c, $(BUILD_DIR)/%.o, $(BUILD_SRC))
+COMMON_DEPS = $(patsubst %.c, $(BUILD_DIR)/%.d, $(BUILD_SRC))
+
+convertModel: $(COMMON_OBJ)
 	gcc -o $(BUILD_DIR)/convertModel $^ -L$(GL_LIB) -lGL -lglut -lGLEW -lm
 
 $(BUILD_DIR):
