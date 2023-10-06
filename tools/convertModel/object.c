@@ -1,8 +1,15 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "type.h"
 #include "object.h"
 #include "file.h"
+#include "gl.h"
+
+static uint16_t texture_from_list(texture_list_t tl, uint16_t index) {
+	error_if(index >= tl.len, "Texture %d not in list of len %d", index, tl.len);
+	return tl.start + index;
+}
 
 Object *objects_load(char *name, texture_list_t tl) {
 	uint32_t length = 0;
@@ -459,31 +466,34 @@ void object_draw(Object *object) {
 		int coord1;
 		int coord2;
 		int coord3;
+    int coord[4];
+    render_texture_t conv;
 		switch (poly.primitive->type) {
 		case PRM_TYPE_GT3:
-			coord0 = poly.gt3->coords[0];
-			coord1 = poly.gt3->coords[1];
-			coord2 = poly.gt3->coords[2];
+			coord[0] = poly.gt3->coords[0];
+			coord[1] = poly.gt3->coords[1];
+			coord[2] = poly.gt3->coords[2];
 
-			// render_push_tris((tris_t) {
-			// 	.vertices = {
-			// 		{
-			// 			.pos = vertex[coord2],
-			// 			.uv = {poly.gt3->u2, poly.gt3->v2},
-			// 			.color = poly.gt3->color[2]
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord1],
-			// 			.uv = {poly.gt3->u1, poly.gt3->v1},
-			// 			.color = poly.gt3->color[1]
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord0],
-			// 			.uv = {poly.gt3->u0, poly.gt3->v0},
-			// 			.color = poly.gt3->color[0]
-			// 		},
-			// 	}
-			// }, poly.gt3->texture);
+			tris_t t = (tris_t) {
+				.vertices = {
+					{
+						.pos = vertex[coord2],
+						.uv = {poly.gt3->u2, poly.gt3->v2},
+						.color = poly.gt3->color[2]
+					},
+					{
+						.pos = vertex[coord1],
+						.uv = {poly.gt3->u1, poly.gt3->v1},
+						.color = poly.gt3->color[1]
+					},
+					{
+						.pos = vertex[coord0],
+						.uv = {poly.gt3->u0, poly.gt3->v0},
+						.color = poly.gt3->color[0]
+					},
+				}
+			};
+      gl_generate_texture_from_tris(&conv, &t, poly.gt3->texture);
 
 			poly.gt3 += 1;
 			break;

@@ -8,16 +8,11 @@
 #include "texture.h"
 #include "image.h"
 #include "type.h"
-
+#include "gl.h"
 
 #include "object.h"
 
 static char *temp_path = NULL;
-
-uint16_t texture_from_list(texture_list_t tl, uint16_t index) {
-	error_if(index >= tl.len, "Texture %d not in list of len %d", index, tl.len);
-	return tl.start + index;
-}
 
 #define SWAP(X) (((X&0xFF)<<8)|(X>>8))
 
@@ -50,7 +45,7 @@ int main(int argc, char *argv[]) {
 	}
 	printf("Found %d models\n", nb_objects);
 
-	gl_init();
+	if (gl_init()) exit(-1);
 
   uint16_t format = 0x1; //RGB/palette 16 bits
 

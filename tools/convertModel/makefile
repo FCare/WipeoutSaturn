@@ -16,6 +16,7 @@ BUILD_SRC= \
 COMMON_OBJ = $(patsubst %.c, $(BUILD_DIR)/%.o, $(BUILD_SRC))
 COMMON_DEPS = $(patsubst %.c, $(BUILD_DIR)/%.d, $(BUILD_SRC))
 
+
 convertModel: $(COMMON_OBJ)
 	gcc -o $(BUILD_DIR)/convertModel $^ -L$(GL_LIB) -lGL -lglut -lGLEW -lm
 
