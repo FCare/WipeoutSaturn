@@ -26,7 +26,9 @@ $(BUILD_DIR)/%.o: %.c
 	mkdir -p $(dir $@)
 	gcc -c -o $@ $< -I$(GL_INCLUDE)
 
+.PHONY: clean
 clean:
 	rm -f $(BUILD_DIR)/convertModel $(BUILD_DIR)/*.o
 
+-include $(COMMON_DEPS)
 
