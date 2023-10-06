@@ -33,6 +33,9 @@ typedef struct {
 	rgba_t *pixels;
 } image_t;
 
+static rgb1555_t palette[256];
+static uint16_t palette_length;
+
 #define true 1
 #define false 0
 
@@ -450,12 +453,24 @@ typedef struct {
 
 #define SWAP(X) (((X&0xFF)<<8)|(X>>8))
 
+void updatePalette(rgb1555_t pix) {
+	for (int i=0; i< palette_length; i++) {
+		if (palette[i] == pix) return;
+	}
+	if (palette_length >= 256) {
+		palette_length++;
+	} else {
+		palette[palette_length++] = pix;
+	}
+}
+
 int main(int argc, char *argv[]) {
   if (argc != 2) return -1;
   cmp_t *cmp = image_load_compressed(argv[1]);
 
   uint16_t format = 0x1; //RGB/palette 16 bits
 
+	palette_length = 0;
 	for (int i = 0; i < cmp->len; i++) {
 		int32_t width, height;
 		image_t *image = image_load_from_bytes(cmp->entries[i], false);
@@ -517,6 +532,7 @@ int main(int argc, char *argv[]) {
 						rgba_t* src =  &image->pixels[k*image->width+char_set[i].glyphs[j].offset.x];
 						for (int l = 0; l<char_set[i].glyphs[j].width; l++) {
             	rgb1555_t pix = SWAP(convert_to_rgb(src[l]));
+							updatePalette(pix);
 							fwrite(&pix, 1, sizeof(rgb1555_t), f);
           	}
 						rgb1555_t pix_zero = 0;
@@ -536,6 +552,7 @@ int main(int argc, char *argv[]) {
 
 		free(image);
 	}
+	printf("Palette is %d\n", palette_length);
 
 	free(cmp);
   return 0;
