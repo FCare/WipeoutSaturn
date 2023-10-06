@@ -1,6 +1,8 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
+#include "type.h"
+#include "texture.h"
 // Primitive Structure Stub ( Structure varies with primitive type )
 
 typedef struct Primitive {
@@ -222,11 +224,6 @@ typedef struct LSGT4 {
 	rgba_t color[4];
 } LSGT4;
 
-
-
-
-
-
 /* OTHER PRIMITIVE TYPES
 */
 typedef struct SPR {
@@ -279,11 +276,6 @@ typedef struct InfiniteLight {
 	vec3_t direction;
 	rgba_t color;
 } InfiniteLight;
-
-
-
-
-
 
 // PRIMITIVE FLAGS
 
@@ -372,7 +364,7 @@ typedef union Prm {
 	LSGT4            *lsgt4;
 } Prm;
 
-Object *objects_load(char *name, texture_list_t tl);
-void object_draw(Object *object);
+extern Object *objects_load(char *name, texture_list_t tl);
+extern void object_draw(Object *object);
 
 #endif
