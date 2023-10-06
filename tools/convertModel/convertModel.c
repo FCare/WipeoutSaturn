@@ -1248,7 +1248,7 @@ typedef struct {
 #define SWAP(X) (((X&0xFF)<<8)|(X>>8))
 
 void updatePalette(rgb1555_t pix) {
-	for (int i=0; i< palette_length; i++) {
+	for (int i=0; i< 256; i++) {
 		if (palette[i] == pix) return;
 	}
 	if (palette_length >= 256) {
@@ -1276,6 +1276,7 @@ uint16_t texture_create(uint32_t width, uint32_t height, rgba_t *pixels){
 
   for (uint32_t i=0; i<width*height; i++) {
     buffer[i] = convert_to_rgb(pixels[i]);
+		updatePalette(buffer[i]);
   }
 
 	return allocate_tex(width, height, buffer);
@@ -1302,11 +1303,13 @@ texture_list_t image_get_compressed_textures(char *name) {
 
 int main(int argc, char *argv[]) {
   if (argc != 3) {
-		printf("Usage: ./convertModel myfile.cmp myfile.prm");
+		printf("Usage: ./convertModel myfile.cmp myfile.prm\n");
 		return -1;
 	}
   // cmp_t *cmp = image_load_compressed(argv[1]);
+	palette_length = 0;
 	texture_list_t textures = image_get_compressed_textures(argv[1]);
+	printf("Palette size should be %d\n", palette_length);
 	Object *models = objects_load(argv[2], textures);
 
 	int object_index;
