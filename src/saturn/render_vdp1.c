@@ -4,6 +4,8 @@
 #include "platform.h"
 #include "vdp1_tex.h"
 #include "tex.h"
+#include "mem.h"
+#include "utils.h"
 
 static uint16_t nbCommand = 0;
 static uint16_t gouraud_cmd = 0;
@@ -12,7 +14,7 @@ vdp1_cmdt_list_t *cmdt_list;
 vdp1_cmdt_t *cmdts;
 uint32_t cmdt_max;
 
-fix16_t *minZ;
+chain_t *chain;
 
 static uint8_t id = 0;
 static vdp1_vram_partitions_t _vdp1_vram_partitions;
@@ -29,20 +31,20 @@ static void cmdt_list_init(void)
 
   (void)memset(&(cmdt_list->cmdts[0]), 0x00, sizeof(vdp1_cmdt_t) * (cmdt_max));
 
-  minZ = (fix16_t*)mem_bump(cmdt_max*sizeof(fix16_t));
-
-  const int16_vec2_t local_coords = INT16_VEC2_INITIALIZER(size.x>>1,size.y>>1);
-
-  const int16_vec2_t system_clip_coords = size;
+  chain = (chain_t*)mem_bump(cmdt_max*sizeof(chain_t));
 
   /* Write directly to VDP1 VRAM. Since the first two command tables never
    * change, we can write directly */
+   const int16_vec2_t system_clip_coords = size;
+   const int16_vec2_t local_coords = INT16_VEC2_INITIALIZER(size.x>>1,size.y>>1);
 
   vdp1_cmdt_system_clip_coord_set(&(cmdt_list->cmdts[0]));
   vdp1_cmdt_vtx_system_clip_coord_set(&(cmdt_list->cmdts[0]), system_clip_coords);
 
   vdp1_cmdt_local_coord_set(&(cmdt_list->cmdts[1]));
   vdp1_cmdt_vtx_local_coord_set(&(cmdt_list->cmdts[1]), local_coords);
+  vdp1_cmdt_link_type_set(&(cmdt_list->cmdts[1]), VDP1_CMDT_LINK_TYPE_JUMP_ASSIGN);
+  cmdt_list->cmdts[1].cmd_link = (uint16_t)((uint32_t)&cmdt_list->cmdts[2]-(uint32_t)&cmdt_list->cmdts[0])>>3;
 
   vdp1_cmdt_end_set(&cmdt_list->cmdts[2]);
 
@@ -50,9 +52,7 @@ static void cmdt_list_init(void)
   cmdt_list->count = 3;
 
   vdp1_sync_cmdt_list_put(cmdt_list, 0);
-
 }
-
 
 void vdp1_init(void)
 {
@@ -118,11 +118,11 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
   vdp1_cmdt_t *cmd = &cmdts[nbCommand];
   memset(cmd, 0x0, sizeof(vdp1_cmdt_t));
 
-  minZ[nbCommand] = 0;
+  chain[nbCommand].z = 0;
   for (int i = 0; i<4; i++) {
-    minZ[nbCommand] += quad->vertices[i].pos.z;
+    chain[nbCommand].z += quad->vertices[i].pos.z;
   }
-  minZ[nbCommand] = minZ[nbCommand]>>2;
+  chain[nbCommand].z >>= 2;
 
   vec2i_t size;
   uint16_t*character = getVdp1VramAddress(texture_index, id, quad, &size); //a revoir parce qu'il ne faut copier suivant le UV
@@ -143,6 +143,9 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
   vdp1_cmdt_draw_mode_set(cmd, draw_mode);
   vdp1_cmdt_char_size_set(cmd, size.x, size.y);
   vdp1_cmdt_char_base_set(cmd, (vdp1_vram_t)character);
+  vdp1_cmdt_link_type_set(cmd, VDP1_CMDT_LINK_TYPE_JUMP_ASSIGN);
+  cmd->cmd_link = (uint16_t)((uint32_t)&cmdts[nbCommand+1]-(uint32_t)&cmdt_list->cmdts[0])>>3;
+  chain[nbCommand].id = nbCommand;
 
   rgb1555_t gouraud = RGB1555(1, color.r>>3,  color.g>>3,  color.b>>3);
   if ((gouraud.r != 0x10) || (gouraud.g != 0x10) || (gouraud.b != 0x10)) {
@@ -178,13 +181,17 @@ void render_vdp1_flush(void) {
   //Flush shall not force the sync of the screen
   if (nbCommand > 0) {
     //sort all the quads
-    quickSort_Z(cmdts, 0, nbCommand, minZ);
     //Set the last command as end
+    quickSort_Z(&chain[0], 0, nbCommand-1);
+    //Reordering jmp adress based on order
+    cmdt_list->cmdts[1].cmd_link = (chain[0].id+2)<<2;
+    for (int i = 0; i< nbCommand-1; i++) {
+      cmdts[chain[i].id].cmd_link = (chain[i+1].id+2)<<2;
+    }
+    cmdts[chain[nbCommand-1].id].cmd_link = (nbCommand+2)<<2;
     vdp1_cmdt_end_set(&cmdts[nbCommand]);
   }
-
   cmdt_list->count = nbCommand+3;
-
 
   LOGD("List count = %d\n", cmdt_list->count);
   vdp1_sync_cmdt_list_put(cmdt_list, 0);

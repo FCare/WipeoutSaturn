@@ -70,7 +70,10 @@
 #define flags_none(FLAGS, F) ((FLAGS & (F)) == 0)
 #define flags_set(FLAGS, F)  (FLAGS = (F))
 
-
+typedef struct {
+	uint16_t id;
+	fix16_t z;
+} chain_t;
 
 char *get_path(const char *dir, const char *file);
 bool str_starts_with(const char *haystack, const char *needle);
@@ -81,7 +84,7 @@ bool file_exists(const char *path);
 uint8_t *file_load(const char *path, uint32_t *bytes_read);
 uint32_t file_store(const char *path, void *bytes, int32_t len);
 
-void quickSort_Z(vdp1_cmdt_t array[], uint16_t low, uint16_t high, fix16_t* map);
+extern void quickSort_Z(chain_t *array, uint16_t low, uint16_t high);
 
 
 #define sort(LIST, LEN, COMPARE_FUNC) \
@@ -100,7 +103,6 @@ void quickSort_Z(vdp1_cmdt_t array[], uint16_t low, uint16_t high, fix16_t* map)
 		int j = rand_int(0, i+1); \
 		swap((LIST)[i], (LIST)[j]); \
 	}
-
 
 static inline uint8_t get_u8(uint8_t *bytes, uint32_t *p) {
 	return bytes[(*p)++];

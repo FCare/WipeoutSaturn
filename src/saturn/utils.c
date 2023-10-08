@@ -51,23 +51,17 @@ bool str_starts_with(const char *haystack, const char *needle) {
 	return (strncmp(haystack, needle, strlen(needle)) == 0);
 }
 
-static void swapArray(vdp1_cmdt_t *a, vdp1_cmdt_t *b) {
-	vdp1_cmdt_t tmp = *a;
-	*a = *b;
-	*b = tmp;
-}
-
-static void swapMap(fix16_t *a, fix16_t *b) {
-	fix16_t tmp = *a;
-	*a = *b;
-	*b = tmp;
+static void swapArray(chain_t *a, chain_t *b) {
+  chain_t tmp = *a;
+  *a = *b;
+  *b = tmp;
 }
 
 // function to find the partition position
-static int partition(vdp1_cmdt_t *array, uint16_t low, uint16_t high, fix16_t *map) {
+static int partition(chain_t *array, uint16_t low, uint16_t high) {
 
   // select the rightmost element as pivot
-  fix16_t pivot = map[high];
+  fix16_t pivot = array[high].z;
 
   // pointer for greater element
   int16_t i = (low - 1);
@@ -75,40 +69,38 @@ static int partition(vdp1_cmdt_t *array, uint16_t low, uint16_t high, fix16_t *m
   // traverse each element of the array
   // compare them with the pivot
   for (int16_t j = low; j < high; j++) {
-    if (map[j] >= pivot) {
+    if (array[j].z >= pivot) {
 
       // if element smaller than pivot is found
       // swap it with the greater element pointed by i
       i++;
 
       // swap element at i with element at j
-			swapArray(&array[i], &array[j]);
-      swapMap(&map[i], &map[j]);
+      swapArray(&array[i], &array[j]);
     }
   }
 
   // swap the pivot element with the greater element at i
 	swapArray(&array[i+1], &array[high]);
-  swapMap(&map[i+1], &map[high]);
 
   // return the partition point
   return (i + 1);
 }
 
-void quickSort_Z(vdp1_cmdt_t *array, uint16_t low, uint16_t high, fix16_t* map) {
+void quickSort_Z(chain_t *array, uint16_t low, uint16_t high) {
   if (low < high) {
 
     // find the pivot element such that
     // elements smaller than pivot are on left of pivot
     // elements greater than pivot are on right of pivot
-    int16_t pi = partition(array, low, high, map);
+    int16_t pi = partition(array, low, high);
 
     // recursive call on the left of pivot
     if (low < (pi-1))
-      quickSort_Z(array, low, pi - 1, map);
+      quickSort_Z(array, low, pi - 1);
 
     // recursive call on the right of pivot
     if ((pi + 1) < high)
-      quickSort_Z(array, pi + 1, high, map);
+      quickSort_Z(array, pi + 1, high);
   }
 }
