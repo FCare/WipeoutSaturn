@@ -32,6 +32,7 @@ static struct {
     GLuint vertex_buffer, texcoord_buffer;
     GLint texture;
     texture_t *srcTexture;
+    render_texture_t *dstTexture;
     GLuint vertex_shader, fragment_shader, program;
     uint8_t volatile ready;
     render_func step;
@@ -52,6 +53,20 @@ static void show_info_log(
     glGet__InfoLog(object, log_length, NULL, log);
     fprintf(stdout, "%s", log);
     free(log);
+}
+
+static rgb1555_t RGB888_RGB1555(uint8_t msb, uint8_t r, uint8_t g, uint8_t b) {
+  return (rgb1555_t)(((msb&0x1)<<15) | ((r>>0x3)<<10) | ((g>>0x3)<<5) | (b>>0x3));
+}
+
+static inline rgb1555_t convert_to_rgb(rgba_t val) {
+  //RGB 16bits, MSB 1, transparent code 0
+  if (val.a == 0) return RGB888_RGB1555(0,0,0,0);
+  if ((val.b == 0) && (val.r == 0) && (val.g == 0)) {
+    //Should be black but transparent usage makes it impossible
+    return RGB888_RGB1555(1,0,0,1);
+  }
+  return RGB888_RGB1555(1, val.b, val.g, val.r);
 }
 
 static GLuint make_buffer(
@@ -82,8 +97,6 @@ static GLuint make_texture(texture_t *src)
 
     if (!src->pixels)
         return 0;
-
-        printf("Make texture %dx%d\n", src->width, src->height);
 
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -210,8 +223,16 @@ static void render(void)
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(1);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    rgba_t *out=malloc(sizeof(rgba_t)*g_resources.dstTexture->width*g_resources.dstTexture->height);
+    glReadPixels(0,0, g_resources.dstTexture->width, g_resources.dstTexture->height, GL_RGBA, GL_UNSIGNED_BYTE, out);
+    g_resources.dstTexture->pixels = malloc(sizeof(rgb1555_t)*g_resources.dstTexture->width*g_resources.dstTexture->height);
+    for (int i=0; i<g_resources.dstTexture->height*g_resources.dstTexture->width; i++) {
+      g_resources.dstTexture->pixels[i] = convert_to_rgb(out[i]);
+    }
+    free(out);
     g_resources.ready = 0;
     glutSwapBuffers();
+
   }
 }
 
@@ -225,8 +246,6 @@ static void idle(void) {
 
 void gl_generate_texture_from_tris(render_texture_t *out, tris_t *t, texture_t *texture)
 {
-  printf("Rendering Tris\n");
-  while (g_resources.ready != 0);
   int16_t left = min(min(t->vertices[0].uv.x, t->vertices[1].uv.x), t->vertices[2].uv.x);
   int16_t right = max(max(t->vertices[0].uv.x, t->vertices[1].uv.x), t->vertices[2].uv.x);
   int16_t bottom = min(min(t->vertices[0].uv.y, t->vertices[1].uv.y), t->vertices[2].uv.y);
@@ -243,11 +262,9 @@ void gl_generate_texture_from_tris(render_texture_t *out, tris_t *t, texture_t *
   g_vertex_buffer_data[6] = (float)width/320.0f - 1.0f;
   g_vertex_buffer_data[7] = -1.0f;
 
-  printf("Orig %d %d %d\n", t->vertices[0].uv.x, t->vertices[1].uv.x,t->vertices[2].uv.x);
+  out->width = width;
+  out->height = height;
 
-  printf("tris %dx%d (%dx%d) => %f %f %f %f\n", width, height, texture->width, texture->height, g_vertex_buffer_data[1], g_vertex_buffer_data[2], g_vertex_buffer_data[3], g_vertex_buffer_data[6]);
-
-//diviser suivant la texture
   g_texcoord_buffer_data[0] = (float)t->vertices[0].uv.x / (float)texture->width;
   g_texcoord_buffer_data[1] = (float)t->vertices[0].uv.y / (float)texture->height;
   g_texcoord_buffer_data[2] = (float)t->vertices[1].uv.x / (float)texture->width;
@@ -257,7 +274,10 @@ void gl_generate_texture_from_tris(render_texture_t *out, tris_t *t, texture_t *
   g_texcoord_buffer_data[6] = (float)t->vertices[1].uv.x / (float)texture->width;
   g_texcoord_buffer_data[7] = (float)t->vertices[1].uv.y / (float)texture->height;
   g_resources.srcTexture = texture;
+  g_resources.dstTexture = out;
   g_resources.ready = 1;
+  //wait for rendering
+  while (g_resources.ready != 0);
 }
 
 void *conversion(void *arg) {

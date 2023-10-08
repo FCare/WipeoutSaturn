@@ -459,7 +459,6 @@ void object_draw(Object *object) {
 	int primitives_len = object->primitives_len;
 
 	// TODO: check for PRM_SINGLE_SIDED
-
 	for (int i = 0; i < primitives_len; i++) {
 		int coord0;
 		int coord1;
@@ -556,7 +555,6 @@ void object_draw(Object *object) {
 					},
 				}
 			};
-printf("texture %x\n", poly.ft3->texture);
 			gl_generate_texture_from_tris(&conv, &t1, poly.ft3->texture);
 
 			poly.ft3 += 1;

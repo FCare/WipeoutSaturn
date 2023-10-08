@@ -15,7 +15,8 @@ typedef struct {
 } texture_list_t;
 
 typedef struct {
-	vec2i_t size;
+	int16_t width;
+  int16_t height;
 	rgb1555_t *pixels;
 } render_texture_t;
 
