@@ -22,7 +22,7 @@ typedef struct FT3 {
 	int16_t type; // Type of primitive
 	int16_t flag;
 	int16_t coords[3]; // Indices of the coords
-	int16_t texture;
+	texture_t *texture;
 	int16_t cba;
 	int16_t tsb;
 	uint8_t u0;
@@ -46,7 +46,7 @@ typedef struct FT4 {
 	int16_t type; // Type of primitive
 	int16_t flag;
 	int16_t coords[4]; // Indices of the coords
-	int16_t texture;
+	texture_t *texture;
 	int16_t cba;
 	int16_t tsb;
 	uint8_t u0;
@@ -73,7 +73,7 @@ typedef struct GT3 {
 	int16_t type; // Type of primitive
 	int16_t flag;
 	int16_t coords[3]; // Indices of the coords
-	int16_t texture;
+	texture_t *texture;
 	int16_t cba;
 	int16_t tsb;
 	uint8_t u0;
@@ -97,7 +97,7 @@ typedef struct GT4 {
 	int16_t type; // Type of primitive
 	int16_t flag;
 	int16_t coords[4]; // Indices of the coords
-	int16_t texture;
+	texture_t *texture;
 	int16_t cba;
 	int16_t tsb;
 	uint8_t u0;
@@ -131,7 +131,7 @@ typedef struct LSFT3 {
 	int16_t flag;
 	int16_t coords[3]; // Indices of the coords
 	int16_t normal; // Indices of the normals
-	int16_t texture;
+	texture_t *texture;
 	int16_t cba;
 	int16_t tsb;
 	uint8_t u0;
@@ -157,7 +157,7 @@ typedef struct LSFT4 {
 	int16_t flag;
 	int16_t coords[4]; // Indices of the coords
 	int16_t normal; // Indices of the normals
-	int16_t texture;
+	texture_t *texture;
 	int16_t cba;
 	int16_t tsb;
 	uint8_t u0;
@@ -364,7 +364,7 @@ typedef union Prm {
 	LSGT4            *lsgt4;
 } Prm;
 
-extern Object *objects_load(char *name, texture_list_t tl);
+extern Object *objects_load(char *name, texture_list_t *tl);
 extern void object_draw(Object *object);
 
 #endif

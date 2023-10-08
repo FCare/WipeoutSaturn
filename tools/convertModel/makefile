@@ -11,14 +11,15 @@ BUILD_SRC= \
 	file.c \
 	lzss.c \
 	type.c \
-	gl.c
+	gl.c \
+	mem.c
 
 COMMON_OBJ = $(patsubst %.c, $(BUILD_DIR)/%.o, $(BUILD_SRC))
 COMMON_DEPS = $(patsubst %.c, $(BUILD_DIR)/%.d, $(BUILD_SRC))
 
 
 convertModel: $(COMMON_OBJ)
-	gcc -o $(BUILD_DIR)/convertModel $^ -L$(GL_LIB) -lGL -lglut -lGLEW -lm
+	gcc -Og -o $(BUILD_DIR)/convertModel $^ -L$(GL_LIB) -lGL -lglut -lGLEW -lm
 
 $(BUILD_DIR):
 		mkdir -p $(BUILD_DIR)

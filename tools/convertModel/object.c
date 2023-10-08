@@ -5,13 +5,14 @@
 #include "object.h"
 #include "file.h"
 #include "gl.h"
+#include "mem.h"
 
-static uint16_t texture_from_list(texture_list_t tl, uint16_t index) {
-	error_if(index >= tl.len, "Texture %d not in list of len %d", index, tl.len);
-	return tl.start + index;
+static texture_t * texture_from_list(texture_list_t *tl, uint16_t index) {
+	error_if(index >= tl->len, "Texture %d not in list of len %d", index, tl->len);
+	return tl->texture[index];
 }
 
-Object *objects_load(char *name, texture_list_t tl) {
+Object *objects_load(char *name, texture_list_t *tl) {
 	uint32_t length = 0;
 	printf("load: %s\n", name);
 	uint8_t *bytes = file_load(name, &length);
@@ -19,20 +20,20 @@ Object *objects_load(char *name, texture_list_t tl) {
 		die("Failed to load file %s\n", name);
 	}
 
-	Object *objectList = NULL;
+	Object *objectList = mem_mark();
 	Object *prevObject = NULL;
 	uint32_t p = 0;
 
 	while (p < length) {
-		Object *object = malloc(sizeof(Object));
+		Object *object = mem_bump(sizeof(Object));
 		if (objectList == NULL) objectList = object;
 		if (prevObject) {
 			prevObject->next = object;
 		}
 		prevObject = object;
-
 		for (int i = 0; i < 16; i++) {
-			object->name[i] = get_i8(bytes, &p);
+			char toto = get_i8(bytes, &p);
+			object->name[i] = toto;
 		}
 
 		object->vertices_len = get_i16(bytes, &p); p += 2;
@@ -65,7 +66,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 		p += 4; // skeleton next
 
 		object->radius = 0;
-		object->vertices = malloc(object->vertices_len * sizeof(vec3_t));
+		object->vertices = mem_bump(object->vertices_len * sizeof(vec3_t));
 		for (int i = 0; i < object->vertices_len; i++) {
 			int val = get_i16(bytes, &p);
 			object->vertices[i].x = val;
@@ -86,9 +87,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 			}
 		}
 
-
-
-		object->normals = malloc(object->normals_len * sizeof(vec3_t));
+		object->normals = mem_bump(object->normals_len * sizeof(vec3_t));
 		for (int i = 0; i < object->normals_len; i++) {
 			object->normals[i].x = get_i16(bytes, &p);
 			object->normals[i].y = get_i16(bytes, &p);
@@ -96,7 +95,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 			p += 2; // padding
 		}
 
-		object->primitives = NULL;
+		object->primitives = mem_mark();
 		for (int i = 0; i < object->primitives_len; i++) {
 			Prm prm;
 			int16_t prm_type = get_i16(bytes, &p);
@@ -104,7 +103,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 
 			switch (prm_type) {
 			case PRM_TYPE_F3:
-				prm.ptr = malloc(sizeof(F3));
+				prm.ptr = mem_bump(sizeof(F3));
 				prm.f3->coords[0] = get_i16(bytes, &p);
 				prm.f3->coords[1] = get_i16(bytes, &p);
 				prm.f3->coords[2] = get_i16(bytes, &p);
@@ -113,7 +112,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 				break;
 
 			case PRM_TYPE_F4:
-				prm.ptr = malloc(sizeof(F4));
+				prm.ptr = mem_bump(sizeof(F4));
 				prm.f4->coords[0] = get_i16(bytes, &p);
 				prm.f4->coords[1] = get_i16(bytes, &p);
 				prm.f4->coords[2] = get_i16(bytes, &p);
@@ -122,7 +121,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 				break;
 
 			case PRM_TYPE_FT3:
-				prm.ptr = malloc(sizeof(FT3));
+				prm.ptr = mem_bump(sizeof(FT3));
 				prm.ft3->coords[0] = get_i16(bytes, &p);
 				prm.ft3->coords[1] = get_i16(bytes, &p);
 				prm.ft3->coords[2] = get_i16(bytes, &p);
@@ -142,7 +141,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 				break;
 
 			case PRM_TYPE_FT4:
-				prm.ptr = malloc(sizeof(FT4));
+				prm.ptr = mem_bump(sizeof(FT4));
 				prm.ft4->coords[0] = get_i16(bytes, &p);
 				prm.ft4->coords[1] = get_i16(bytes, &p);
 				prm.ft4->coords[2] = get_i16(bytes, &p);
@@ -164,7 +163,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 				break;
 
 			case PRM_TYPE_G3:
-				prm.ptr = malloc(sizeof(G3));
+				prm.ptr = mem_bump(sizeof(G3));
 				prm.g3->coords[0] = get_i16(bytes, &p);
 				prm.g3->coords[1] = get_i16(bytes, &p);
 				prm.g3->coords[2] = get_i16(bytes, &p);
@@ -175,7 +174,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 				break;
 
 			case PRM_TYPE_G4:
-				prm.ptr = malloc(sizeof(G4));
+				prm.ptr = mem_bump(sizeof(G4));
 				prm.g4->coords[0] = get_i16(bytes, &p);
 				prm.g4->coords[1] = get_i16(bytes, &p);
 				prm.g4->coords[2] = get_i16(bytes, &p);
@@ -187,7 +186,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 				break;
 
 			case PRM_TYPE_GT3:
-				prm.ptr = malloc(sizeof(GT3));
+				prm.ptr = mem_bump(sizeof(GT3));
 				prm.gt3->coords[0] = get_i16(bytes, &p);
 				prm.gt3->coords[1] = get_i16(bytes, &p);
 				prm.gt3->coords[2] = get_i16(bytes, &p);
@@ -208,7 +207,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 				break;
 
 			case PRM_TYPE_GT4:
-				prm.ptr = malloc(sizeof(GT4));
+				prm.ptr = mem_bump(sizeof(GT4));
 				prm.gt4->coords[0] = get_i16(bytes, &p);
 				prm.gt4->coords[1] = get_i16(bytes, &p);
 				prm.gt4->coords[2] = get_i16(bytes, &p);
@@ -234,7 +233,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 
 
 			case PRM_TYPE_LSF3:
-				prm.ptr = malloc(sizeof(LSF3));
+				prm.ptr = mem_bump(sizeof(LSF3));
 				prm.lsf3->coords[0] = get_i16(bytes, &p);
 				prm.lsf3->coords[1] = get_i16(bytes, &p);
 				prm.lsf3->coords[2] = get_i16(bytes, &p);
@@ -243,7 +242,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 				break;
 
 			case PRM_TYPE_LSF4:
-				prm.ptr = malloc(sizeof(LSF4));
+				prm.ptr = mem_bump(sizeof(LSF4));
 				prm.lsf4->coords[0] = get_i16(bytes, &p);
 				prm.lsf4->coords[1] = get_i16(bytes, &p);
 				prm.lsf4->coords[2] = get_i16(bytes, &p);
@@ -254,7 +253,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 				break;
 
 			case PRM_TYPE_LSFT3:
-				prm.ptr = malloc(sizeof(LSFT3));
+				prm.ptr = mem_bump(sizeof(LSFT3));
 				prm.lsft3->coords[0] = get_i16(bytes, &p);
 				prm.lsft3->coords[1] = get_i16(bytes, &p);
 				prm.lsft3->coords[2] = get_i16(bytes, &p);
@@ -273,7 +272,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 				break;
 
 			case PRM_TYPE_LSFT4:
-				prm.ptr = malloc(sizeof(LSFT4));
+				prm.ptr = mem_bump(sizeof(LSFT4));
 				prm.lsft4->coords[0] = get_i16(bytes, &p);
 				prm.lsft4->coords[1] = get_i16(bytes, &p);
 				prm.lsft4->coords[2] = get_i16(bytes, &p);
@@ -295,7 +294,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 				break;
 
 			case PRM_TYPE_LSG3:
-				prm.ptr = malloc(sizeof(LSG3));
+				prm.ptr = mem_bump(sizeof(LSG3));
 				prm.lsg3->coords[0] = get_i16(bytes, &p);
 				prm.lsg3->coords[1] = get_i16(bytes, &p);
 				prm.lsg3->coords[2] = get_i16(bytes, &p);
@@ -308,7 +307,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 				break;
 
 			case PRM_TYPE_LSG4:
-				prm.ptr = malloc(sizeof(LSG4));
+				prm.ptr = mem_bump(sizeof(LSG4));
 				prm.lsg4->coords[0] = get_i16(bytes, &p);
 				prm.lsg4->coords[1] = get_i16(bytes, &p);
 				prm.lsg4->coords[2] = get_i16(bytes, &p);
@@ -324,7 +323,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 				break;
 
 			case PRM_TYPE_LSGT3:
-				prm.ptr = malloc(sizeof(LSGT3));
+				prm.ptr = mem_bump(sizeof(LSGT3));
 				prm.lsgt3->coords[0] = get_i16(bytes, &p);
 				prm.lsgt3->coords[1] = get_i16(bytes, &p);
 				prm.lsgt3->coords[2] = get_i16(bytes, &p);
@@ -347,7 +346,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 				break;
 
 			case PRM_TYPE_LSGT4:
-				prm.ptr = malloc(sizeof(LSGT4));
+				prm.ptr = mem_bump(sizeof(LSGT4));
 				prm.lsgt4->coords[0] = get_i16(bytes, &p);
 				prm.lsgt4->coords[1] = get_i16(bytes, &p);
 				prm.lsgt4->coords[2] = get_i16(bytes, &p);
@@ -376,7 +375,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 
 			case PRM_TYPE_TSPR:
 			case PRM_TYPE_BSPR:
-				prm.ptr = malloc(sizeof(SPR));
+				prm.ptr = mem_bump(sizeof(SPR));
 				prm.spr->coord = get_i16(bytes, &p);
 				prm.spr->width = get_i16(bytes, &p);
 				prm.spr->height = get_i16(bytes, &p);
@@ -385,7 +384,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 				break;
 
 			case PRM_TYPE_SPLINE:
-				prm.ptr = malloc(sizeof(Spline));
+				prm.ptr = mem_bump(sizeof(Spline));
 				prm.spline->control1.x = get_i32(bytes, &p);
 				prm.spline->control1.y = get_i32(bytes, &p);
 				prm.spline->control1.z = get_i32(bytes, &p);
@@ -402,7 +401,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 				break;
 
 			case PRM_TYPE_POINT_LIGHT:
-				prm.ptr = malloc(sizeof(PointLight));
+				prm.ptr = mem_bump(sizeof(PointLight));
 				prm.pointLight->position.x = get_i32(bytes, &p);
 				prm.pointLight->position.y = get_i32(bytes, &p);
 				prm.pointLight->position.z = get_i32(bytes, &p);
@@ -413,7 +412,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 				break;
 
 			case PRM_TYPE_SPOT_LIGHT:
-				prm.ptr = malloc(sizeof(SpotLight));
+				prm.ptr = mem_bump(sizeof(SpotLight));
 				prm.spotLight->position.x = get_i32(bytes, &p);
 				prm.spotLight->position.y = get_i32(bytes, &p);
 				prm.spotLight->position.z = get_i32(bytes, &p);
@@ -430,7 +429,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 				break;
 
 			case PRM_TYPE_INFINITE_LIGHT:
-				prm.ptr = malloc(sizeof(InfiniteLight));
+				prm.ptr = mem_bump(sizeof(InfiniteLight));
 				prm.infiniteLight->direction.x = get_i16(bytes, &p);
 				prm.infiniteLight->direction.y = get_i16(bytes, &p);
 				prm.infiniteLight->direction.z = get_i16(bytes, &p);
@@ -538,25 +537,27 @@ void object_draw(Object *object) {
 			coord1 = poly.ft3->coords[1];
 			coord2 = poly.ft3->coords[2];
 
-			// render_push_tris((tris_t) {
-			// 	.vertices = {
-			// 		{
-			// 			.pos = vertex[coord2],
-			// 			.uv = {poly.ft3->u2, poly.ft3->v2},
-			// 			.color = poly.ft3->color
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord1],
-			// 			.uv = {poly.ft3->u1, poly.ft3->v1},
-			// 			.color = poly.ft3->color
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord0],
-			// 			.uv = {poly.ft3->u0, poly.ft3->v0},
-			// 			.color = poly.ft3->color
-			// 		},
-			// 	}
-			// }, poly.ft3->texture);
+			tris_t t1 = (tris_t) {
+				.vertices = {
+					{
+						.pos = vertex[coord2],
+						.uv = {poly.ft3->u2, poly.ft3->v2},
+						.color = poly.ft3->color
+					},
+					{
+						.pos = vertex[coord1],
+						.uv = {poly.ft3->u1, poly.ft3->v1},
+						.color = poly.ft3->color
+					},
+					{
+						.pos = vertex[coord0],
+						.uv = {poly.ft3->u0, poly.ft3->v0},
+						.color = poly.ft3->color
+					},
+				}
+			};
+printf("texture %x\n", poly.ft3->texture);
+			gl_generate_texture_from_tris(&conv, &t1, poly.ft3->texture);
 
 			poly.ft3 += 1;
 			break;

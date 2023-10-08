@@ -11,6 +11,8 @@ typedef uint16_t rgb1555_t;
 #define true 1
 #define false 0
 
+typedef int (*render_func)(void);
+
 typedef struct {
   uint16_t x,y;
 } vec2i_t;

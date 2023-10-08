@@ -140,18 +140,20 @@ static cmp_t *image_load_compressed(char *name) {
 
 texture_list_t image_get_compressed_textures(char *name) {
 	cmp_t *cmp = image_load_compressed(name);
-	texture_list_t list = {.start = 0, .len = cmp->len};
+	texture_list_t list = {.len = cmp->len};
 
+  list.texture = malloc(cmp->len* sizeof(texture_t));
 	for (int i = 0; i < cmp->len; i++) {
 		int32_t width, height;
 		image_t *image = image_load_from_bytes(cmp->entries[i], false);
 
+printf("Got image %d => %dx%d\n", i, image->width, image->height);
 		// char png_name[1024] = {0};
 		// sprintf(png_name, "%s.%d.png", name, i);
 		// stbi_write_png(png_name, image->width, image->height, 4, image->pixels, 0);
 
-		texture_create(image->width, image->height, image->pixels);
-		free(image);
+		list.texture[i] = texture_create(image->width, image->height, image->pixels);
+		// free(image);
 	}
 	free(cmp);
 	return list;

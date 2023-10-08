@@ -4,8 +4,14 @@
 #include "type.h"
 
 typedef struct {
-	uint16_t start;
+	int16_t width;
+  int16_t height;
+	rgba_t *pixels;
+} texture_t;
+
+typedef struct {
 	uint16_t len;
+  texture_t **texture;
 } texture_list_t;
 
 typedef struct {
@@ -13,6 +19,6 @@ typedef struct {
 	rgb1555_t *pixels;
 } render_texture_t;
 
-uint16_t texture_create(uint32_t width, uint32_t height, rgba_t *pixels);
+texture_t *texture_create(uint32_t width, uint32_t height, rgba_t *pixels);
 
 #endif
