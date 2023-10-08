@@ -19,6 +19,8 @@ static cdfs_filelist_t _filelist;
 static int16_t nb_ovf = 0;
 static fix16_t ovf_time_step;
 
+static update_loop = 0;
+
 static void
 _frt_compare_output_handler(void)
 {
@@ -100,14 +102,17 @@ void main(void) {
     //Update controller
     controller_update();
 
-    LOGD("Update Game\n");
-    system_update();
+    if (update_loop == 0) {
+      LOGD("Update Game\n");
+      vdp2_video_sync();
 
-    vdp2_sync();
-    vdp1_sync();
-    vdp2_sync_wait();
-    vdp1_sync_wait();
-    vdp2_video_sync();
+      system_update();
+
+      vdp2_sync();
+      vdp1_sync();
+      vdp2_sync_wait();
+      vdp1_sync_wait();
+    }
   }
 
   system_cleanup();
@@ -116,6 +121,12 @@ void main(void) {
 static void _vblank_out_handler(void *work __unused)
 {
     smpc_peripheral_process(); //A chaque process
+    // update_loop = ~update_loop;
+}
+
+static void _vblank_in_handler(void *work __unused)
+{
+    vdp2_vblank_in_handler(); //A chaque process
 }
 
 void user_init(void)
@@ -123,6 +134,7 @@ void user_init(void)
   cd_block_init();
   smpc_peripheral_init();
   vdp_sync_vblank_out_set(_vblank_out_handler, NULL);
+  vdp_sync_vblank_in_set(_vblank_in_handler, NULL);
 }
 
 void platform_exit(void) {

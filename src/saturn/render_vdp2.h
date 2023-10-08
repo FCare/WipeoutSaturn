@@ -18,5 +18,6 @@ extern void render_vdp2_clear(void);
 
 //need to add the priority here
 void set_vdp2_texture(uint16_t texture_index, vec2i_t pos, vec2i_t size, vdp2_layer_t layer);
+void vdp2_vblank_in_handler(void);
 
 #endif

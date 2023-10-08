@@ -69,8 +69,6 @@ const vdp2_vram_cycp_t vram_cycp = {
         .pt[3].t7 = VDP2_VRAM_CYCP_CHPNDR_NBG0
 };
 
-static void _vblank_in_handler(void *work);
-
 static void setup_vdp2(vdp2_layer_t layer) {
   //setup default layer state
   vdp2_scrn_bitmap_format_set(&layer_ctrl[layer].format);
@@ -131,7 +129,6 @@ static void vdp2_output_video() {
 void vdp2_init(void)
 {
   LOGD("Setup vdp2\n");
-  vdp_sync_vblank_in_set(_vblank_in_handler, NULL);
   setup_vdp2(NBG0);
   drawVdp2_splash(NBG0);
   vdp2_output_video();
@@ -144,7 +141,7 @@ void vdp2_video_sync(void) {
   }
 }
 
-static void _vblank_in_handler(void *work __unused)
+void vdp2_vblank_in_handler(void)
 {
   //Do not update the layer if same texture is loaded unless a force (to be added as parameter)
   vdp2_scrn_disp_t val = vdp2_scrn_display_get();
