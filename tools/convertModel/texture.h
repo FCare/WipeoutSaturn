@@ -19,6 +19,7 @@ typedef struct {
 	int16_t width;
   int16_t height;
 	rgba_t *pixels;
+	int16_t id;
 } texture_t;
 
 typedef struct {
@@ -27,8 +28,11 @@ typedef struct {
 } texture_list_t;
 
 typedef struct {
+	int16_t id;
+	int16_t palette_id;
 	int16_t width;
   int16_t height;
+	int16_t length;
 	rgb1555_t *pixels;
 } render_texture_t;
 

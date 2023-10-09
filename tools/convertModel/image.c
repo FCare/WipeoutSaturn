@@ -153,6 +153,7 @@ texture_list_t image_get_compressed_textures(char *name) {
 		// stbi_write_png(png_name, image->width, image->height, 4, image->pixels, 0);
 
 		list.texture[i] = texture_create(image->width, image->height, image->pixels);
+		list.texture[i]->id = i;
 		// free(image);
 	}
 	free(cmp);

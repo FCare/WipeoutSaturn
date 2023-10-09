@@ -38,8 +38,8 @@ static int conversionStep(void) {
 static int savingStep(void) {
   printf("We can save the model now\n");
   printf("Saving converted models on %s\n", outputObject);
-  printf("Saving converture texture on %s\n", outputTexture);
-  // objects_load(argv[2], &textures);
+  printf("Saving converted texture on %s\n", outputTexture);
+  objects_save(outputObject, outputTexture, model , nb_objects, &textures);
   return 0;
 }
 

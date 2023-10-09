@@ -190,7 +190,8 @@ typedef struct LSGT3 {
 	int16_t flag;
 	int16_t coords[3]; // Indices of the coords
 	int16_t normals[3]; // Indices of the normals
-	int16_t texture;
+	texture_t *texture;
+	render_texture_t *conv;
 	int16_t cba;
 	int16_t tsb;
 	uint8_t u0;
@@ -215,7 +216,8 @@ typedef struct LSGT4 {
 	int16_t flag;
 	int16_t coords[4]; // Indices of the coords
 	int16_t normals[4]; // Indices of the normals
-	int16_t texture;
+	texture_t *texture;
+	render_texture_t *conv;
 	int16_t cba;
 	int16_t tsb;
 	uint8_t u0;
@@ -238,7 +240,8 @@ typedef struct SPR {
 	int16_t coord;
 	int16_t width;
 	int16_t height;
-	int16_t texture;
+	texture_t *texture;
+	render_texture_t *conv;
 	rgba_t color;
 } SPR;
 
@@ -371,6 +374,7 @@ typedef union Prm {
 } Prm;
 
 extern Object *objects_load(char *name, texture_list_t *tl);
+extern void objects_save(const char *objectPath, const char *texturePath, Object** model, int nb_objects, texture_list_t *textures);
 extern void object_draw(Object *object);
 
 #endif

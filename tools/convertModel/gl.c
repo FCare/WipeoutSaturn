@@ -187,6 +187,8 @@ int nbImage = 0;
 static void render(void)
 {
   if (g_resources.ready != 0) {
+    g_resources.dstTexture->id = nbImage;
+    g_resources.dstTexture->palette_id = g_resources.srcTexture->id;
     nbImage++;
     update_buffer(
       g_resources.vertex_buffer,
@@ -223,7 +225,8 @@ static void render(void)
     switch (g_resources.srcTexture->format) {
       COLOR_BANK_16_COL:
       {
-        g_resources.dstTexture->pixels = malloc(g_resources.dstTexture->width*g_resources.dstTexture->height/2);
+        g_resources.dstTexture->length = g_resources.dstTexture->width*g_resources.dstTexture->height/4;
+        g_resources.dstTexture->pixels = malloc(g_resources.dstTexture->length*2);
         for (int i=0; i<g_resources.dstTexture->height*g_resources.dstTexture->width; i+=4) {
           rgb1555_t a = convert_to_rgb(out[i]);
           rgb1555_t b = convert_to_rgb(out[i+1]);
@@ -246,7 +249,8 @@ static void render(void)
     	COLOR_BANK_64_COL:
         if (paletteSize < 64) paletteSize = 64;
         {
-          g_resources.dstTexture->pixels = malloc(g_resources.dstTexture->width*g_resources.dstTexture->height);
+          g_resources.dstTexture->length = g_resources.dstTexture->width*g_resources.dstTexture->height/2;
+          g_resources.dstTexture->pixels = malloc(g_resources.dstTexture->length);
           for (int i=0; i<g_resources.dstTexture->height*g_resources.dstTexture->width; i+=2) {
             rgb1555_t a = convert_to_rgb(out[i]);
             rgb1555_t b = convert_to_rgb(out[i+1]);
@@ -260,6 +264,7 @@ static void render(void)
         break;
     	COLOR_BANK_RGB:
       {
+        g_resources.dstTexture->length = g_resources.dstTexture->width*g_resources.dstTexture->height;
         g_resources.dstTexture->pixels = malloc(sizeof(rgb1555_t)*g_resources.dstTexture->width*g_resources.dstTexture->height);
         for (int i=0; i<g_resources.dstTexture->height*g_resources.dstTexture->width; i++) {
           g_resources.dstTexture->pixels[i] = convert_to_rgb(out[i]);
