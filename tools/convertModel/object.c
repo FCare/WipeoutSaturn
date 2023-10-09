@@ -465,7 +465,6 @@ void object_draw(Object *object) {
 		int coord2;
 		int coord3;
     int coord[4];
-    render_texture_t conv;
 		switch (poly.primitive->type) {
 		case PRM_TYPE_GT3:
 			coord[0] = poly.gt3->coords[0];
@@ -491,7 +490,8 @@ void object_draw(Object *object) {
 					},
 				}
 			};
-      gl_generate_texture_from_tris(&conv, &t, poly.gt3->texture);
+			poly.gt3->conv = malloc(sizeof(render_texture_t));
+      gl_generate_texture_from_tris(poly.gt3->conv, &t, poly.gt3->texture);
 
 			poly.gt3 += 1;
 			break;
@@ -526,7 +526,8 @@ void object_draw(Object *object) {
 					},
 				}
 			};
-			// render_push_stripe( &q1, poly.gt4->texture);
+			poly.gt4->conv = malloc(sizeof(render_texture_t));
+      gl_generate_texture_from_quad(poly.gt4->conv, &q1, poly.gt4->texture);
 
 			poly.gt4 += 1;
 			break;
@@ -555,7 +556,8 @@ void object_draw(Object *object) {
 					},
 				}
 			};
-			gl_generate_texture_from_tris(&conv, &t1, poly.ft3->texture);
+			poly.ft3->conv = malloc(sizeof(render_texture_t));
+			gl_generate_texture_from_tris(poly.ft3->conv, &t1, poly.ft3->texture);
 
 			poly.ft3 += 1;
 			break;
@@ -590,119 +592,27 @@ void object_draw(Object *object) {
 					},
 				}
 			};
-			// render_push_stripe( &q2, poly.ft4->texture);
+			poly.ft4->conv = malloc(sizeof(render_texture_t));
+			gl_generate_texture_from_quad(poly.ft4->conv, &q2, poly.ft4->texture);
 
 			poly.ft4 += 1;
 			break;
 
 		case PRM_TYPE_G3:
-			coord0 = poly.g3->coords[0];
-			coord1 = poly.g3->coords[1];
-			coord2 = poly.g3->coords[2];
-
-			// render_push_tris((tris_t) {
-			// 	.vertices = {
-			// 		{
-			// 			.pos = vertex[coord2],
-			// 			.color = poly.g3->color[2]
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord1],
-			// 			.color = poly.g3->color[1]
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord0],
-			// 			.color = poly.g3->color[0]
-			// 		},
-			// 	}
-			// }, RENDER_NO_TEXTURE);
-
 			poly.g3 += 1;
 			break;
 
 		case PRM_TYPE_G4:
-			coord0 = poly.g4->coords[0];
-			coord1 = poly.g4->coords[1];
-			coord2 = poly.g4->coords[2];
-			coord3 = poly.g4->coords[3];
-
-			quads_t q3 = {
-				.vertices = {
-					{
-						.pos = vertex[coord3],
-						.color = poly.g4->color[3]
-					},
-					{
-						.pos = vertex[coord2],
-						.color = poly.g4->color[2]
-					},
-					{
-						.pos = vertex[coord1],
-						.color = poly.g4->color[1]
-					},
-					{
-						.pos = vertex[coord0],
-						.color = poly.g4->color[0]
-					},
-				}
-			};
-			// render_push_stripe( &q3, RENDER_NO_TEXTURE);
 
 			poly.g4 += 1;
 			break;
 
 		case PRM_TYPE_F3:
-			coord0 = poly.f3->coords[0];
-			coord1 = poly.f3->coords[1];
-			coord2 = poly.f3->coords[2];
-
-			// render_push_tris((tris_t) {
-			// 	.vertices = {
-			// 		{
-			// 			.pos = vertex[coord2],
-			// 			.color = poly.f3->color
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord1],
-			// 			.color = poly.f3->color
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord0],
-			// 			.color = poly.f3->color
-			// 		},
-			// 	}
-			// }, RENDER_NO_TEXTURE);
 
 			poly.f3 += 1;
 			break;
 
 		case PRM_TYPE_F4:
-			coord0 = poly.f4->coords[0];
-			coord1 = poly.f4->coords[1];
-			coord2 = poly.f4->coords[2];
-			coord3 = poly.f4->coords[3];
-
-			quads_t q4 = {
-				.vertices = {
-					{
-						.pos = vertex[coord3],
-						.color = poly.f4->color
-					},
-					{
-						.pos = vertex[coord2],
-						.color = poly.f4->color
-					},
-					{
-						.pos = vertex[coord1],
-						.color = poly.f4->color
-					},
-					{
-						.pos = vertex[coord0],
-						.color = poly.f4->color
-					},
-				}
-			};
-			// render_push_stripe( &q4, RENDER_NO_TEXTURE);
 
 			poly.f4 += 1;
 			break;
@@ -710,17 +620,6 @@ void object_draw(Object *object) {
 		case PRM_TYPE_TSPR:
 		case PRM_TYPE_BSPR:
 			coord0 = poly.spr->coord;
-
-			// render_push_sprite(
-			// 	vec3_fix16(
-			// 		vertex[coord0].x,
-			// 		vertex[coord0].y + ((poly.primitive->type == PRM_TYPE_TSPR ? poly.spr->height : -poly.spr->height) >> 1),
-			// 		vertex[coord0].z
-			// 	),
-			// 	vec2i(poly.spr->width, poly.spr->height),
-			// 	poly.spr->color,
-			// 	poly.spr->texture
-			// );
 
 			poly.spr += 1;
 			break;

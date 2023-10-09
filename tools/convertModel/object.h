@@ -23,6 +23,7 @@ typedef struct FT3 {
 	int16_t flag;
 	int16_t coords[3]; // Indices of the coords
 	texture_t *texture;
+	render_texture_t *conv;
 	int16_t cba;
 	int16_t tsb;
 	uint8_t u0;
@@ -47,6 +48,7 @@ typedef struct FT4 {
 	int16_t flag;
 	int16_t coords[4]; // Indices of the coords
 	texture_t *texture;
+	render_texture_t *conv;
 	int16_t cba;
 	int16_t tsb;
 	uint8_t u0;
@@ -74,6 +76,7 @@ typedef struct GT3 {
 	int16_t flag;
 	int16_t coords[3]; // Indices of the coords
 	texture_t *texture;
+	render_texture_t *conv;
 	int16_t cba;
 	int16_t tsb;
 	uint8_t u0;
@@ -98,6 +101,7 @@ typedef struct GT4 {
 	int16_t flag;
 	int16_t coords[4]; // Indices of the coords
 	texture_t *texture;
+	render_texture_t *conv;
 	int16_t cba;
 	int16_t tsb;
 	uint8_t u0;
@@ -132,6 +136,7 @@ typedef struct LSFT3 {
 	int16_t coords[3]; // Indices of the coords
 	int16_t normal; // Indices of the normals
 	texture_t *texture;
+	render_texture_t *conv;
 	int16_t cba;
 	int16_t tsb;
 	uint8_t u0;
@@ -158,6 +163,7 @@ typedef struct LSFT4 {
 	int16_t coords[4]; // Indices of the coords
 	int16_t normal; // Indices of the normals
 	texture_t *texture;
+	render_texture_t *conv;
 	int16_t cba;
 	int16_t tsb;
 	uint8_t u0;

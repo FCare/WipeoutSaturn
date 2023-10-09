@@ -315,6 +315,42 @@ void gl_generate_texture_from_tris(render_texture_t *out, tris_t *t, texture_t *
   while (g_resources.ready != 0);
 }
 
+void gl_generate_texture_from_quad(render_texture_t *out, quads_t *t, texture_t *texture)
+{
+  int16_t left = min(min(min(t->vertices[0].uv.x, t->vertices[1].uv.x), t->vertices[2].uv.x), t->vertices[3].uv.x);
+  int16_t right = max(max(max(t->vertices[0].uv.x, t->vertices[1].uv.x), t->vertices[2].uv.x), t->vertices[3].uv.x);
+  int16_t bottom = min(min(min(t->vertices[0].uv.y, t->vertices[1].uv.y), t->vertices[2].uv.y), t->vertices[3].uv.y);
+  int16_t top = max(max(max(t->vertices[0].uv.y, t->vertices[1].uv.y), t->vertices[2].uv.y), t->vertices[3].uv.y);
+  int16_t width = ((right-left)+0x7)& ~0x7;
+  int16_t height = (top-bottom);
+
+  g_vertex_buffer_data[0] = -1.0f;
+  g_vertex_buffer_data[1] = (float)height/120.0f - 1.0f;
+  g_vertex_buffer_data[2] = (float)width/160.0f - 1.0f;
+  g_vertex_buffer_data[3] = (float)height/120.0f - 1.0f;
+  g_vertex_buffer_data[4] = -1.0f;
+  g_vertex_buffer_data[5] = -1.0f;
+  g_vertex_buffer_data[6] = (float)width/160.0f - 1.0f;
+  g_vertex_buffer_data[7] = -1.0f;
+
+  out->width = width;
+  out->height = height;
+
+  g_texcoord_buffer_data[0] = (float)t->vertices[0].uv.x / (float)texture->width;
+  g_texcoord_buffer_data[1] = (float)t->vertices[0].uv.y / (float)texture->height;
+  g_texcoord_buffer_data[2] = (float)t->vertices[1].uv.x / (float)texture->width;
+  g_texcoord_buffer_data[3] = (float)t->vertices[1].uv.y / (float)texture->height;
+  g_texcoord_buffer_data[4] = (float)t->vertices[2].uv.x / (float)texture->width;
+  g_texcoord_buffer_data[5] = (float)t->vertices[2].uv.y / (float)texture->height;
+  g_texcoord_buffer_data[6] = (float)t->vertices[3].uv.x / (float)texture->width;
+  g_texcoord_buffer_data[7] = (float)t->vertices[3].uv.y / (float)texture->height;
+  g_resources.srcTexture = texture;
+  g_resources.dstTexture = out;
+  g_resources.ready = 1;
+  //wait for rendering
+  while (g_resources.ready != 0);
+}
+
 void *conversion(void *arg) {
   int ended = 0;
   while ( ended == 0) {
