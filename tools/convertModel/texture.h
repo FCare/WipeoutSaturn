@@ -21,5 +21,6 @@ typedef struct {
 } render_texture_t;
 
 texture_t *texture_create(uint32_t width, uint32_t height, rgba_t *pixels);
+rgb1555_t convert_to_rgb(rgba_t val);
 
 #endif

@@ -4,6 +4,9 @@
 #include "texture.h"
 #include "type.h"
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+
 typedef struct {
 	uint32_t width;
 	uint32_t height;

@@ -55,20 +55,6 @@ static void show_info_log(
     free(log);
 }
 
-static rgb1555_t RGB888_RGB1555(uint8_t msb, uint8_t r, uint8_t g, uint8_t b) {
-  return (rgb1555_t)(((msb&0x1)<<15) | ((r>>0x3)<<10) | ((g>>0x3)<<5) | (b>>0x3));
-}
-
-static inline rgb1555_t convert_to_rgb(rgba_t val) {
-  //RGB 16bits, MSB 1, transparent code 0
-  if (val.a == 0) return RGB888_RGB1555(0,0,0,0);
-  if ((val.b == 0) && (val.r == 0) && (val.g == 0)) {
-    //Should be black but transparent usage makes it impossible
-    return RGB888_RGB1555(1,0,0,1);
-  }
-  return RGB888_RGB1555(1, val.b, val.g, val.r);
-}
-
 static GLuint make_buffer(
     GLenum target,
     const void *buffer_data,
@@ -190,10 +176,11 @@ static int make_resources(void)
   return 1;
 }
 
+int nbImage = 0;
 static void render(void)
 {
   if (g_resources.ready != 0) {
-
+    nbImage++;
     update_buffer(
       g_resources.vertex_buffer,
       GL_ARRAY_BUFFER,
@@ -229,6 +216,11 @@ static void render(void)
     for (int i=0; i<g_resources.dstTexture->height*g_resources.dstTexture->width; i++) {
       g_resources.dstTexture->pixels[i] = convert_to_rgb(out[i]);
     }
+#ifdef SAVE_EXTRACT
+    char png_name[1024] = {0};
+		sprintf(png_name, "%d.png", nbImage);
+		stbi_write_png(png_name, g_resources.dstTexture->width, g_resources.dstTexture->height, 4, out, 0);
+#endif
     free(out);
     g_resources.ready = 0;
     glutSwapBuffers();
@@ -254,12 +246,12 @@ void gl_generate_texture_from_tris(render_texture_t *out, tris_t *t, texture_t *
   int16_t height = (top-bottom);
 
   g_vertex_buffer_data[0] = -1.0f;
-  g_vertex_buffer_data[1] = (float)height/240.0f - 1.0f;
-  g_vertex_buffer_data[2] = (float)width/320.0f - 1.0f;
-  g_vertex_buffer_data[3] = (float)height/240.0f - 1.0f;
+  g_vertex_buffer_data[1] = (float)height/120.0f - 1.0f;
+  g_vertex_buffer_data[2] = (float)width/160.0f - 1.0f;
+  g_vertex_buffer_data[3] = (float)height/120.0f - 1.0f;
   g_vertex_buffer_data[4] = -1.0f;
   g_vertex_buffer_data[5] = -1.0f;
-  g_vertex_buffer_data[6] = (float)width/320.0f - 1.0f;
+  g_vertex_buffer_data[6] = (float)width/160.0f - 1.0f;
   g_vertex_buffer_data[7] = -1.0f;
 
   out->width = width;

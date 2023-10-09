@@ -1,8 +1,5 @@
 #include "lzss.h"
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
-
 #define LZSS_INDEX_BIT_COUNT  13
 #define LZSS_LENGTH_BIT_COUNT 4
 #define LZSS_WINDOW_SIZE      (1 << LZSS_INDEX_BIT_COUNT)
