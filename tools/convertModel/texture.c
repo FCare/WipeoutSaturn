@@ -62,7 +62,6 @@ texture_t *texture_create(uint32_t width, uint32_t height, rgba_t *pixels){
       nb_color++;
     }
   }
-  printf("Palette is %d colors\n", nb_color);
   texture_t *ret = allocate_tex(width, height, pixels);
   if (nb_color > 256) {
     ret->format = COLOR_BANK_RGB;

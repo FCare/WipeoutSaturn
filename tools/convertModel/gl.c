@@ -41,7 +41,8 @@ static struct {
     render_texture_t *dstTexture;
     GLuint vertex_shader, fragment_shader, program;
     uint8_t volatile ready;
-    render_func step;
+    step_func step;
+    step_func final;
 } g_resources;
 
 
@@ -279,8 +280,10 @@ static void render(void)
 
 static void idle(void) {
     int ended = 0;
-    if (g_resources.ready == 0xFF)
+    if (g_resources.ready == 0xFF) {
+      g_resources.final();
       exit(EXIT_SUCCESS);
+    }
     if (g_resources.ready != 0)
       glutPostRedisplay();
 }
@@ -370,11 +373,12 @@ void *conversion(void *arg) {
 	pthread_exit(EXIT_SUCCESS);
 }
 
-int gl_init(render_func func) {
+int gl_init(step_func func, step_func final) {
   int arg=0;
   pthread_t conv;
   g_resources.ready = 0;
   g_resources.step = func;
+  g_resources.final = final;
   g_resources.texture = -1;
   glutInit(&arg, NULL);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
@@ -395,7 +399,7 @@ int gl_init(render_func func) {
       return 1;
   }
 
-pthread_create(&conv, NULL, conversion, NULL);
+  pthread_create(&conv, NULL, conversion, NULL);
 
 
   glutMainLoop();

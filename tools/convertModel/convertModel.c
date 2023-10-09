@@ -33,6 +33,11 @@ static int conversionStep(void) {
   return 0;
 }
 
+static int savingStep(void) {
+  printf("We can save the model now\n");
+  return 0;
+}
+
 int main(int argc, char *argv[]) {
   if (argc != 3) {
 		printf("Usage: ./convertModel myfile.cmp myfile.prm\n");
@@ -60,10 +65,10 @@ int main(int argc, char *argv[]) {
 	}
 	printf("Found %d models\n", nb_objects);
 
-	if (gl_init(conversionStep) != 0) {
+	if (gl_init(conversionStep, savingStep) != 0) {
     printf("Error\n");
     exit(-1);
   }
-
+  //Never reached
   return 0;
 }

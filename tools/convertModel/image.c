@@ -147,7 +147,6 @@ texture_list_t image_get_compressed_textures(char *name) {
 		int32_t width, height;
 		image_t *image = image_load_from_bytes(cmp->entries[i], false);
 
-printf("Got image %d => %dx%d\n", i, image->width, image->height);
 		// char png_name[1024] = {0};
 		// sprintf(png_name, "%s_%d.png", name, i);
 		// printf("save as %s\n", png_name);
