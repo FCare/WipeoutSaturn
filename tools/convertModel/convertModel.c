@@ -21,6 +21,8 @@ static int nb_objects;
 static Object** model;
 
 static texture_list_t textures;
+static char *outputObject;
+static char *outputTexture;
 
 static int conversionStep(void) {
   uint16_t format = 0x1; //RGB/palette 16 bits
@@ -35,7 +37,24 @@ static int conversionStep(void) {
 
 static int savingStep(void) {
   printf("We can save the model now\n");
+  printf("Saving converted models on %s\n", outputObject);
+  printf("Saving converture texture on %s\n", outputTexture);
+  // objects_load(argv[2], &textures);
   return 0;
+}
+
+
+char *replace_ext(const char *org, const char *new_ext)
+{
+    char *ext;
+    char *tmp = strdup(org);
+    ext = strrchr(tmp , '.');
+    if (ext) { *ext = '\0'; }
+    size_t new_size = strlen(tmp) + strlen(new_ext) + 1;
+    char *new_name = malloc(new_size);
+    sprintf(new_name, "%s%s", tmp, new_ext);
+    free(tmp);
+    return new_name;
 }
 
 int main(int argc, char *argv[]) {
@@ -43,6 +62,10 @@ int main(int argc, char *argv[]) {
 		printf("Usage: ./convertModel myfile.cmp myfile.prm\n");
 		return -1;
 	}
+
+  outputTexture = replace_ext(argv[1], ".stf");
+  outputObject = replace_ext(argv[2], ".smf");
+
 	textures = image_get_compressed_textures(argv[1]);
 	Object *models = objects_load(argv[2], &textures);
 
