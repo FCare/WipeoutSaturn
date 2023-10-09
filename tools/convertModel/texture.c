@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include "texture.h"
 
 #define TEXTURES_MAX 1024
@@ -61,5 +63,28 @@ texture_t *texture_create(uint32_t width, uint32_t height, rgba_t *pixels){
     }
   }
   printf("Palette is %d colors\n", nb_color);
-	return allocate_tex(width, height, pixels);
+  texture_t *ret = allocate_tex(width, height, pixels);
+  if (nb_color > 256) {
+    ret->format = COLOR_BANK_RGB;
+  }
+  if (nb_color > 128) {
+    ret->format = COLOR_BANK_256_COL;
+    ret->palette = malloc(256*sizeof(rgb1555_t));
+    memcpy(ret->palette, &palette[0], 256*sizeof(rgb1555_t));
+  }
+  if (nb_color > 64) {
+    ret->format = COLOR_BANK_128_COL;
+    ret->palette = malloc(128*sizeof(rgb1555_t));
+    memcpy(ret->palette, &palette[0], 128*sizeof(rgb1555_t));
+  }
+  if (nb_color > 16) {
+    ret->format = COLOR_BANK_64_COL;
+    ret->palette = malloc(64*sizeof(rgb1555_t));
+    memcpy(ret->palette, &palette[0], 64*sizeof(rgb1555_t));
+  } else {
+    ret->format = COLOR_BANK_16_COL;
+    ret->palette = malloc(16*sizeof(rgb1555_t));
+    memcpy(ret->palette, &palette[0], 16*sizeof(rgb1555_t));
+  }
+	return ret;
 }

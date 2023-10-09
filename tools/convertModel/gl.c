@@ -212,9 +212,53 @@ static void render(void)
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     rgba_t *out=malloc(sizeof(rgba_t)*g_resources.dstTexture->width*g_resources.dstTexture->height);
     glReadPixels(0,0, g_resources.dstTexture->width, g_resources.dstTexture->height, GL_RGBA, GL_UNSIGNED_BYTE, out);
-    g_resources.dstTexture->pixels = malloc(sizeof(rgb1555_t)*g_resources.dstTexture->width*g_resources.dstTexture->height);
-    for (int i=0; i<g_resources.dstTexture->height*g_resources.dstTexture->width; i++) {
-      g_resources.dstTexture->pixels[i] = convert_to_rgb(out[i]);
+    int paletteSize = 0;
+    switch (g_resources.srcTexture->format) {
+      COLOR_BANK_16_COL:
+      {
+        g_resources.dstTexture->pixels = malloc(g_resources.dstTexture->width*g_resources.dstTexture->height/2);
+        for (int i=0; i<g_resources.dstTexture->height*g_resources.dstTexture->width; i+=4) {
+          rgb1555_t a = convert_to_rgb(out[i]);
+          rgb1555_t b = convert_to_rgb(out[i+1]);
+          rgb1555_t c = convert_to_rgb(out[i+2]);
+          rgb1555_t d = convert_to_rgb(out[i+3]);
+          for (int j=0; j<16; j++) {
+            if (a == g_resources.srcTexture->palette[j]) a = j;
+            if (b == g_resources.srcTexture->palette[j]) b = j;
+            if (c == g_resources.srcTexture->palette[j]) c = j;
+            if (d == g_resources.srcTexture->palette[j]) d = j;
+          }
+          g_resources.dstTexture->pixels[i] = ((a&0xF)<<12)|((b&0xF)<<8)|((c&0xF)<<4)|(d&0xF);
+        }
+        break;
+      }
+      COLOR_BANK_256_COL:
+        if (paletteSize < 256) paletteSize = 256;
+      COLOR_BANK_128_COL:
+        if (paletteSize < 128) paletteSize = 128;
+    	COLOR_BANK_64_COL:
+        if (paletteSize < 64) paletteSize = 64;
+        {
+          g_resources.dstTexture->pixels = malloc(g_resources.dstTexture->width*g_resources.dstTexture->height);
+          for (int i=0; i<g_resources.dstTexture->height*g_resources.dstTexture->width; i+=2) {
+            rgb1555_t a = convert_to_rgb(out[i]);
+            rgb1555_t b = convert_to_rgb(out[i+1]);
+            for (int j=0; j<paletteSize; j++) {
+              if (a == g_resources.srcTexture->palette[j]) a = j;
+              if (b == g_resources.srcTexture->palette[j]) b = j;
+            }
+            g_resources.dstTexture->pixels[i] = ((a&0xFF)<<8)|(b&0xFF);
+          }
+        }
+        break;
+    	COLOR_BANK_RGB:
+      {
+        g_resources.dstTexture->pixels = malloc(sizeof(rgb1555_t)*g_resources.dstTexture->width*g_resources.dstTexture->height);
+        for (int i=0; i<g_resources.dstTexture->height*g_resources.dstTexture->width; i++) {
+          g_resources.dstTexture->pixels[i] = convert_to_rgb(out[i]);
+        }
+        break;
+      }
     }
 #ifdef SAVE_EXTRACT
     char png_name[1024] = {0};
@@ -224,7 +268,6 @@ static void render(void)
     free(out);
     g_resources.ready = 0;
     glutSwapBuffers();
-
   }
 }
 

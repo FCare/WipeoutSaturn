@@ -3,7 +3,19 @@
 
 #include "type.h"
 
+typedef enum {
+	COLOR_BANK_16_COL = 0,
+	LOOKUP_TABLE_16_COL = 1,
+	COLOR_BANK_64_COL = 2,
+	COLOR_BANK_128_COL = 3,
+	COLOR_BANK_256_COL = 4,
+	COLOR_BANK_RGB = 5,
+	COLOR_MAX
+} color_mode_t;
+
 typedef struct {
+	color_mode_t format;
+	rgb1555_t* palette;
 	int16_t width;
   int16_t height;
 	rgba_t *pixels;
