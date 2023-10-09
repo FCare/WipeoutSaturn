@@ -467,11 +467,10 @@ void object_draw(Object *object) {
     int coord[4];
 		switch (poly.primitive->type) {
 		case PRM_TYPE_GT3:
-			coord[0] = poly.gt3->coords[0];
-			coord[1] = poly.gt3->coords[1];
-			coord[2] = poly.gt3->coords[2];
-
-			tris_t t = (tris_t) {
+			coord0 = poly.gt3->coords[0];
+			coord1 = poly.gt3->coords[1];
+			coord2 = poly.gt3->coords[2];
+			tris_t t0 = (tris_t) {
 				.vertices = {
 					{
 						.pos = vertex[coord2],
@@ -491,8 +490,7 @@ void object_draw(Object *object) {
 				}
 			};
 			poly.gt3->conv = malloc(sizeof(render_texture_t));
-      gl_generate_texture_from_tris(poly.gt3->conv, &t, poly.gt3->texture);
-
+      gl_generate_texture_from_tris(poly.gt3->conv, &t0, poly.gt3->texture);
 			poly.gt3 += 1;
 			break;
 
@@ -501,7 +499,6 @@ void object_draw(Object *object) {
 			coord1 = poly.gt4->coords[1];
 			coord2 = poly.gt4->coords[2];
 			coord3 = poly.gt4->coords[3];
-
 			quads_t q1 = {
 				.vertices = {
 					{
@@ -536,7 +533,6 @@ void object_draw(Object *object) {
 			coord0 = poly.ft3->coords[0];
 			coord1 = poly.ft3->coords[1];
 			coord2 = poly.ft3->coords[2];
-
 			tris_t t1 = (tris_t) {
 				.vertices = {
 					{
@@ -567,7 +563,6 @@ void object_draw(Object *object) {
 			coord1 = poly.ft4->coords[1];
 			coord2 = poly.ft4->coords[2];
 			coord3 = poly.ft4->coords[3];
-
 			quads_t q2 = {
 				.vertices = {
 					{
@@ -603,24 +598,19 @@ void object_draw(Object *object) {
 			break;
 
 		case PRM_TYPE_G4:
-
 			poly.g4 += 1;
 			break;
 
 		case PRM_TYPE_F3:
-
 			poly.f3 += 1;
 			break;
 
 		case PRM_TYPE_F4:
-
 			poly.f4 += 1;
 			break;
 
 		case PRM_TYPE_TSPR:
 		case PRM_TYPE_BSPR:
-			coord0 = poly.spr->coord;
-
 			poly.spr += 1;
 			break;
 

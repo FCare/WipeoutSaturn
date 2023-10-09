@@ -8,6 +8,12 @@
 #include "texture.h"
 #include "file.h"
 
+// #define SAVE_EXTRACT
+
+#ifdef SAVE_EXTRACT
+#include "image.h"
+#endif
+
 #define min(A,B) ((A)<(B)?(A):(B))
 #define max(A,B) ((A)>(B)?(A):(B))
 
