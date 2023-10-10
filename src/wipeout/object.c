@@ -456,6 +456,104 @@ Object *objects_load(char *name, texture_list_t tl) {
 	return objectList;
 }
 
+Object_Saturn *objects_saturn_load(char *name, texture_list_t tl) {
+	uint32_t length = 0;
+	printf("load: %s\n", name);
+	uint16_t *bytes = (uint16_t*)platform_load_saturn_asset(name);
+	if (!bytes) {
+		die("Failed to load file %s\n", name);
+	}
+	uint32_t p = 0;
+	uint16_t length = get_i16(bytes, &p)
+	Object *objectList = mem_bump(sizeof(Object_Saturn*)*length);
+	Object *prevObject = NULL;
+
+	for(int i = 0; i < length; i++) {
+		objectList[i] = (Object *)&bytes[p/2];
+		Object *object = objectList[i];
+		int16_t type = object->type;
+		p+=30;
+		object->primitives = mem_bump(sizeof(PRM_saturn*)*object->primitives_len);
+		for (int j=0; j<object->primitives_len; j++) {
+			object->primitives[i] = (PRM_saturn*)&bytes[p/2];
+			PRM_saturn *prm = object->primitives[i];
+			switch (prm->type) {
+			case PRM_TYPE_F3:
+				p += sizeof(F3_S);
+				break;
+			case PRM_TYPE_F4:
+				p += sizeof(F4_S);
+				break;
+			case PRM_TYPE_FT3:
+				p += sizeof(FT3_S);
+				break;
+			case PRM_TYPE_FT4:
+				p += sizeof(FT4_S);
+				break;
+			case PRM_TYPE_G3:
+				p += sizeof(G3_S);
+				break;
+			case PRM_TYPE_G4:
+				p += sizeof(G4_S);
+				break;
+			case PRM_TYPE_GT3:
+				p += sizeof(GT3_S);
+				break;
+			case PRM_TYPE_GT4:
+				p += sizeof(GT4_S);
+				break;
+			case PRM_TYPE_LSF3:
+				p += sizeof(LSF3_S);
+				break;
+			case PRM_TYPE_LSF4:
+				p += sizeof(LSF4_S);
+				break;
+			case PRM_TYPE_LSFT3:
+				p += sizeof(LSFT3_S);
+				break;
+			case PRM_TYPE_LSFT4:
+				p += sizeof(LSFT4_S);
+				break;
+			case PRM_TYPE_LSG3:
+				p += sizeof(LSG3_S);
+				break;
+			case PRM_TYPE_LSG4:
+				p += sizeof(LSG4_S);
+				break;
+			case PRM_TYPE_LSGT3:
+				p += sizeof(LSGT3_S);
+				break;
+			case PRM_TYPE_LSGT4:
+				p += sizeof(LSGT4_S);
+				break;
+			case PRM_TYPE_TSPR:
+			case PRM_TYPE_BSPR:
+				p += sizeof(SPR_S);
+				break;
+			case PRM_TYPE_SPLINE:
+				p += sizeof(Spline_S);
+				break;
+			case PRM_TYPE_POINT_LIGHT:
+				p += sizeof(PointLight_S);
+				break;
+			case PRM_TYPE_SPOT_LIGHT:
+				p += sizeof(SpotLight_S);
+				break;
+			case PRM_TYPE_INFINITE_LIGHT:
+				p += sizeof(InfiniteLight_S);
+				break;
+			default:
+				die("bad primitive type %x \n", prm_type);
+			} // switch
+		} // each prim
+		object->vertices = (fix16_t*)&bytes[p/2];
+		p += object->vertices_len*6;
+		object->normals = (fix16_t*)&bytes[p/2];
+		p += object->normal_len*6;
+	} // each object
+	return objectList;
+}
+
 
 void object_draw(Object *object, mat4_t *mat) {
 	vec3_t *vertex = mem_temp_alloc(object->vertices_len * sizeof(vec3_t));

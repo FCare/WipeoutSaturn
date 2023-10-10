@@ -4,6 +4,7 @@
 #include "../types.h"
 #include "../render.h"
 #include "../utils.h"
+#include "../saturn/object.h"
 #include "image.h"
 
 // Primitive Structure Stub ( Structure varies with primitive type )

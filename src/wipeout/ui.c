@@ -10,7 +10,7 @@
 int ui_scale = 2;
 
 typedef struct {
-	saturn_image_t *image;
+	saturn_font_t *image;
 	uint16_t *tex;
 } char_set_t;
 
@@ -70,28 +70,28 @@ uint16_t icon_textures[UI_ICON_MAX];
 
 
 void ui_load(void) {
-	char_set[UI_SIZE_16].image = (saturn_image_t*) image_get_saturn_texture("wipeout/textures/fonts/fonts_16.stf");
+	char_set[UI_SIZE_16].image = (saturn_font_t*) image_get_saturn_font_texture("wipeout/textures/fonts/fonts_16.stf");
 	char_set[UI_SIZE_16].tex = mem_bump(sizeof(uint16_t) * char_set[UI_SIZE_16].image->nbQuads);
 	for (int i =0; i<char_set[UI_SIZE_16].image->nbQuads; i++) {
-		character_t * char_glyph = &char_set[UI_SIZE_16].image->character[i];
+		font_character_t * char_glyph = &char_set[UI_SIZE_16].image->character[i];
 		int32_t data_chunk = (int)(char_set[UI_SIZE_16].image) + (int)char_glyph->offset;
 		rgb1555_t *buffer = (rgb1555_t *)(data_chunk);
 		char_set[UI_SIZE_16].tex[i] = render_texture_create_555(char_glyph->stride, char_glyph->height, buffer);
 	}
 
-	char_set[UI_SIZE_12].image = (saturn_image_t*) image_get_saturn_texture("wipeout/textures/fonts/fonts_12.stf");
+	char_set[UI_SIZE_12].image = (saturn_font_t*) image_get_saturn_font_texture("wipeout/textures/fonts/fonts_12.stf");
 	char_set[UI_SIZE_12].tex = mem_bump(sizeof(uint16_t) * char_set[UI_SIZE_12].image->nbQuads);
 	for (int i =0; i<char_set[UI_SIZE_12].image->nbQuads; i++) {
-		character_t * char_glyph = &char_set[UI_SIZE_12].image->character[i];
+		font_character_t * char_glyph = &char_set[UI_SIZE_12].image->character[i];
 		int32_t data_chunk = (int)(char_set[UI_SIZE_12].image) + (int)char_glyph->offset;
 		rgb1555_t *buffer = (rgb1555_t *)(data_chunk);
 		char_set[UI_SIZE_12].tex[i] = render_texture_create_555(char_glyph->stride, char_glyph->height, buffer);
 	}
 
-	char_set[UI_SIZE_8].image = (saturn_image_t*) image_get_saturn_texture("wipeout/textures/fonts/fonts_8.stf");
+	char_set[UI_SIZE_8].image = (saturn_font_t*) image_get_saturn_font_texture("wipeout/textures/fonts/fonts_8.stf");
 	char_set[UI_SIZE_8].tex = mem_bump(sizeof(uint16_t) * char_set[UI_SIZE_8].image->nbQuads);
 	for (int i =0; i<char_set[UI_SIZE_8].image->nbQuads; i++) {
-		character_t * char_glyph = &char_set[UI_SIZE_8].image->character[i];
+		font_character_t * char_glyph = &char_set[UI_SIZE_8].image->character[i];
 		int32_t data_chunk = (int)(char_set[UI_SIZE_8].image) + (int)char_glyph->offset;
 		rgb1555_t *buffer = (rgb1555_t *)(data_chunk);
 		char_set[UI_SIZE_8].tex[i] = render_texture_create_555(char_glyph->stride, char_glyph->height, buffer);
@@ -160,7 +160,7 @@ int ui_char_width(char c, ui_text_size_t size) {
 
 int ui_text_width(const char *text, ui_text_size_t size) {
 	int width = 0;
-	saturn_image_t *cs = char_set[size].image;
+	saturn_font_t *cs = char_set[size].image;
 
 	for (int i = 0; text[i] != 0; i++) {
 		width += text[i] != ' '
@@ -225,7 +225,7 @@ void ui_draw_text(const char *text, vec2i_t pos, ui_text_size_t size, rgba_t col
 	for (int i = 0; text[i] != 0; i++) {
 		if (text[i] != ' ') {
 			uint16_t glyphIndex = getTexIndex(text[i]);
-			character_t *glyph = &cs->image->character[glyphIndex];
+			font_character_t *glyph = &cs->image->character[glyphIndex];
 			vec2i_t size = vec2i(glyph->width, glyph->height);
 			render_push_2d_tile(pos, vec2i(0,0), size, ui_scaled(size), color, cs->tex[glyphIndex]);
 			pos.x += glyph->width * ui_scale;

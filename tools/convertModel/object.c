@@ -10,6 +10,8 @@
 #define SWAP(X) (((X&0xFF)<<8)|(X>>8))
 #define SWAP_32(X) (((X&0xFF)<<24)|((X&0xFF00)<<8)|((X&0xFF0000)>>8)|(X>>24))
 
+#define fix16(X) ((uint32_t)(X)<<16)
+
 static texture_t * texture_from_list(texture_list_t *tl, uint16_t index) {
 	error_if(index >= tl->len, "Texture %d not in list of len %d", index, tl->len);
 	return tl->texture[index];
@@ -464,11 +466,18 @@ void write_32(uint32_t val, FILE *f) {
 	fwrite(&tmp, 1, sizeof(uint32_t), f);
 }
 
+void write_fix(uint16_t val, FILE *f) {
+	uint32_t tmp = SWAP_32(fix16(val));
+	fwrite(&tmp, 1, sizeof(uint32_t), f);
+}
+
+
 void objects_save(const char *objectPath, const char *texturePath, Object** model, int nb_objects, texture_list_t *textures)
 {
 	FILE *fobj = fopen(objectPath, "w+");
 	FILE *ftex = fopen(texturePath, "w+");
 	int nb_texture = 0;
+	write_16((uint16_t)nb_objects, fobj);
 	for (int n=0; n<nb_objects; n++) {
 		uint16_t tmp;
 		uint32_t tmp32;
@@ -478,69 +487,60 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 		write_16((uint16_t)obj->normals_len, fobj);
 		write_16((uint16_t)obj->primitives_len, fobj);
 		write_16((uint16_t)obj->flags, fobj);
-		write_32((uint32_t)obj->origin.x, fobj);
-		write_32((uint32_t)obj->origin.y, fobj);
-		write_32((uint32_t)obj->origin.z, fobj);
-		for (int i=0; i<obj->vertices_len; i++) {
-			write_16((uint16_t)obj->vertices[i].x, fobj);
-			write_16((uint16_t)obj->vertices[i].y, fobj);
-			write_16((uint16_t)obj->vertices[i].z, fobj);
-		}
-		for (int i=0; i<obj->normals_len; i++) {
-			write_16((uint16_t)obj->normals[i].x, fobj);
-			write_16((uint16_t)obj->normals[i].y, fobj);
-			write_16((uint16_t)obj->normals[i].z, fobj);
-		}
+		write_fix((uint16_t)obj->origin.x, fobj);
+		write_fix((uint16_t)obj->origin.y, fobj);
+		write_fix((uint16_t)obj->origin.z, fobj);
+
 		Prm poly = {.primitive = obj->primitives};
 		for (int i = 0; i < obj->primitives_len; i++) {
 			write_16((uint16_t)poly.primitive->type, fobj);
 			switch (poly.primitive->type) {
 				case PRM_TYPE_F3:
-					write_16((uint16_t)poly.f3->coords[0], fobj);
-					write_16((uint16_t)poly.f3->coords[1], fobj);
-					write_16((uint16_t)poly.f3->coords[2], fobj);
+					write_fix((uint16_t)poly.f3->coords[0], fobj);
+					write_fix((uint16_t)poly.f3->coords[1], fobj);
+					write_fix((uint16_t)poly.f3->coords[2], fobj);
 					write_16(convert_to_rgb(poly.f3->color), fobj);
 					poly.f3 += 1;
 				break;
 				case PRM_TYPE_F4:
-					write_16((uint16_t)poly.f4->coords[0], fobj);
-					write_16((uint16_t)poly.f4->coords[1], fobj);
-					write_16((uint16_t)poly.f4->coords[2], fobj);
-					write_16((uint16_t)poly.f4->coords[3], fobj);
+					write_fix((uint16_t)poly.f4->coords[0], fobj);
+					write_fix((uint16_t)poly.f4->coords[1], fobj);
+					write_fix((uint16_t)poly.f4->coords[2], fobj);
+					write_fix((uint16_t)poly.f4->coords[3], fobj);
 					write_16(convert_to_rgb(poly.f4->color), fobj);
 					poly.f4 += 1;
 				break;
 				case PRM_TYPE_FT3:
-					write_16((uint16_t)poly.ft3->coords[0], fobj);
-					write_16((uint16_t)poly.ft3->coords[1], fobj);
-					write_16((uint16_t)poly.ft3->coords[2], fobj);
+					write_fix((uint16_t)poly.ft3->coords[0], fobj);
+					write_fix((uint16_t)poly.ft3->coords[1], fobj);
+					write_fix((uint16_t)poly.ft3->coords[2], fobj);
 					write_16((uint16_t)poly.ft3->conv->id, fobj);
 					write_16(convert_to_rgb(poly.ft3->color), fobj);
 					poly.ft3 += 1;
 				break;
 				case PRM_TYPE_FT4:
-					write_16((uint16_t)poly.ft4->coords[0], fobj);
-					write_16((uint16_t)poly.ft4->coords[1], fobj);
-					write_16((uint16_t)poly.ft4->coords[2], fobj);
-					write_16((uint16_t)poly.ft4->coords[3], fobj);
+					write_fix((uint16_t)poly.ft4->coords[0], fobj);
+					write_fix((uint16_t)poly.ft4->coords[1], fobj);
+					write_fix((uint16_t)poly.ft4->coords[2], fobj);
+					write_fix((uint16_t)poly.ft4->coords[3], fobj);
 					write_16((uint16_t)poly.ft4->conv->id, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.ft4->color), fobj);
 					poly.ft4 += 1;
 				break;
 				case PRM_TYPE_G3:
-					write_16((uint16_t)poly.g3->coords[0], fobj);
-					write_16((uint16_t)poly.g3->coords[1], fobj);
-					write_16((uint16_t)poly.g3->coords[2], fobj);
+					write_fix((uint16_t)poly.g3->coords[0], fobj);
+					write_fix((uint16_t)poly.g3->coords[1], fobj);
+					write_fix((uint16_t)poly.g3->coords[2], fobj);
 					write_16((uint16_t)convert_to_rgb(poly.g3->color[0]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.g3->color[1]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.g3->color[2]), fobj);
 					poly.g3 += 1;
 				break;
 				case PRM_TYPE_G4:
-					write_16((uint16_t)poly.g4->coords[0], fobj);
-					write_16((uint16_t)poly.g4->coords[1], fobj);
-					write_16((uint16_t)poly.g4->coords[2], fobj);
-					write_16((uint16_t)poly.g4->coords[3], fobj);
+					write_fix((uint16_t)poly.g4->coords[0], fobj);
+					write_fix((uint16_t)poly.g4->coords[1], fobj);
+					write_fix((uint16_t)poly.g4->coords[2], fobj);
+					write_fix((uint16_t)poly.g4->coords[3], fobj);
 					write_16((uint16_t)convert_to_rgb(poly.g4->color[0]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.g4->color[1]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.g4->color[2]), fobj);
@@ -548,9 +548,9 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					poly.g4 += 1;
 				break;
 				case PRM_TYPE_GT3:
-					write_16((uint16_t)poly.gt3->coords[0], fobj);
-					write_16((uint16_t)poly.gt3->coords[1], fobj);
-					write_16((uint16_t)poly.gt3->coords[2], fobj);
+					write_fix((uint16_t)poly.gt3->coords[0], fobj);
+					write_fix((uint16_t)poly.gt3->coords[1], fobj);
+					write_fix((uint16_t)poly.gt3->coords[2], fobj);
 					write_16((uint16_t)poly.gt3->conv->id, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.gt3->color[0]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.gt3->color[1]), fobj);
@@ -558,10 +558,10 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					poly.gt3 += 1;
 				break;
 				case PRM_TYPE_GT4:
-					write_16((uint16_t)poly.gt4->coords[0], fobj);
-					write_16((uint16_t)poly.gt4->coords[1], fobj);
-					write_16((uint16_t)poly.gt4->coords[2], fobj);
-					write_16((uint16_t)poly.gt4->coords[3], fobj);
+					write_fix((uint16_t)poly.gt4->coords[0], fobj);
+					write_fix((uint16_t)poly.gt4->coords[1], fobj);
+					write_fix((uint16_t)poly.gt4->coords[2], fobj);
+					write_fix((uint16_t)poly.gt4->coords[3], fobj);
 					write_16((uint16_t)poly.gt4->conv->id, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.gt4->color[0]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.gt4->color[1]), fobj);
@@ -570,62 +570,62 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					poly.gt4 += 1;
 				break;
 				case PRM_TYPE_LSF3:
-					write_16((uint16_t)poly.lsf3->coords[0], fobj);
-					write_16((uint16_t)poly.lsf3->coords[1], fobj);
-					write_16((uint16_t)poly.lsf3->coords[2], fobj);
-					write_16((uint16_t)poly.lsf3->normal, fobj);
+					write_fix((uint16_t)poly.lsf3->coords[0], fobj);
+					write_fix((uint16_t)poly.lsf3->coords[1], fobj);
+					write_fix((uint16_t)poly.lsf3->coords[2], fobj);
+					write_fix((uint16_t)poly.lsf3->normal, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsf3->color), fobj);
 					poly.lsf3 += 1;
 				break;
 				case PRM_TYPE_LSF4:
-					write_16((uint16_t)poly.lsf4->coords[0], fobj);
-					write_16((uint16_t)poly.lsf4->coords[1], fobj);
-					write_16((uint16_t)poly.lsf4->coords[2], fobj);
-					write_16((uint16_t)poly.lsf4->coords[3], fobj);
-					write_16((uint16_t)poly.lsf4->normal, fobj);
+					write_fix((uint16_t)poly.lsf4->coords[0], fobj);
+					write_fix((uint16_t)poly.lsf4->coords[1], fobj);
+					write_fix((uint16_t)poly.lsf4->coords[2], fobj);
+					write_fix((uint16_t)poly.lsf4->coords[3], fobj);
+					write_fix((uint16_t)poly.lsf4->normal, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsf4->color), fobj);
 					poly.lsf4 += 1;
 				break;
 				case PRM_TYPE_LSFT3:
-					write_16((uint16_t)poly.lsft3->coords[0], fobj);
-					write_16((uint16_t)poly.lsft3->coords[1], fobj);
-					write_16((uint16_t)poly.lsft3->coords[2], fobj);
-					write_16((uint16_t)poly.lsft3->normal, fobj);
+					write_fix((uint16_t)poly.lsft3->coords[0], fobj);
+					write_fix((uint16_t)poly.lsft3->coords[1], fobj);
+					write_fix((uint16_t)poly.lsft3->coords[2], fobj);
+					write_fix((uint16_t)poly.lsft3->normal, fobj);
 					write_16((uint16_t)poly.lsft3->conv->id, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsft3->color), fobj);
 					poly.lsft3 += 1;
 				break;
 				case PRM_TYPE_LSFT4:
-					write_16((uint16_t)poly.lsft4->coords[0], fobj);
-					write_16((uint16_t)poly.lsft4->coords[1], fobj);
-					write_16((uint16_t)poly.lsft4->coords[2], fobj);
-					write_16((uint16_t)poly.lsft4->coords[3], fobj);
-					write_16((uint16_t)poly.lsft4->normal, fobj);
+					write_fix((uint16_t)poly.lsft4->coords[0], fobj);
+					write_fix((uint16_t)poly.lsft4->coords[1], fobj);
+					write_fix((uint16_t)poly.lsft4->coords[2], fobj);
+					write_fix((uint16_t)poly.lsft4->coords[3], fobj);
+					write_fix((uint16_t)poly.lsft4->normal, fobj);
 					write_16((uint16_t)poly.lsft4->conv->id, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsft4->color), fobj);
 					poly.lsft4 += 1;
 				break;
 				case PRM_TYPE_LSG3:
-					write_16((uint16_t)poly.lsg3->coords[0], fobj);
-					write_16((uint16_t)poly.lsg3->coords[1], fobj);
-					write_16((uint16_t)poly.lsg3->coords[2], fobj);
-					write_16((uint16_t)poly.lsg3->normals[0], fobj);
-					write_16((uint16_t)poly.lsg3->normals[1], fobj);
-					write_16((uint16_t)poly.lsg3->normals[2], fobj);
+					write_fix((uint16_t)poly.lsg3->coords[0], fobj);
+					write_fix((uint16_t)poly.lsg3->coords[1], fobj);
+					write_fix((uint16_t)poly.lsg3->coords[2], fobj);
+					write_fix((uint16_t)poly.lsg3->normals[0], fobj);
+					write_fix((uint16_t)poly.lsg3->normals[1], fobj);
+					write_fix((uint16_t)poly.lsg3->normals[2], fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsg3->color[0]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsg3->color[1]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsg3->color[2]), fobj);
 					poly.lsg3 += 1;
 				break;
 				case PRM_TYPE_LSG4:
-					write_16((uint16_t)poly.lsg4->coords[0], fobj);
-					write_16((uint16_t)poly.lsg4->coords[1], fobj);
-					write_16((uint16_t)poly.lsg4->coords[2], fobj);
-					write_16((uint16_t)poly.lsg4->coords[3], fobj);
-					write_16((uint16_t)poly.lsg4->normals[0], fobj);
-					write_16((uint16_t)poly.lsg4->normals[1], fobj);
-					write_16((uint16_t)poly.lsg4->normals[2], fobj);
-					write_16((uint16_t)poly.lsg4->normals[3], fobj);
+					write_fix((uint16_t)poly.lsg4->coords[0], fobj);
+					write_fix((uint16_t)poly.lsg4->coords[1], fobj);
+					write_fix((uint16_t)poly.lsg4->coords[2], fobj);
+					write_fix((uint16_t)poly.lsg4->coords[3], fobj);
+					write_fix((uint16_t)poly.lsg4->normals[0], fobj);
+					write_fix((uint16_t)poly.lsg4->normals[1], fobj);
+					write_fix((uint16_t)poly.lsg4->normals[2], fobj);
+					write_fix((uint16_t)poly.lsg4->normals[3], fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsg4->color[0]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsg4->color[1]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsg4->color[2]), fobj);
@@ -633,12 +633,12 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					poly.lsg4 += 1;
 				break;
 				case PRM_TYPE_LSGT3:
-					write_16((uint16_t)poly.lsgt3->coords[0], fobj);
-					write_16((uint16_t)poly.lsgt3->coords[1], fobj);
-					write_16((uint16_t)poly.lsgt3->coords[2], fobj);
-					write_16((uint16_t)poly.lsgt3->normals[0], fobj);
-					write_16((uint16_t)poly.lsgt3->normals[1], fobj);
-					write_16((uint16_t)poly.lsgt3->normals[2], fobj);
+					write_fix((uint16_t)poly.lsgt3->coords[0], fobj);
+					write_fix((uint16_t)poly.lsgt3->coords[1], fobj);
+					write_fix((uint16_t)poly.lsgt3->coords[2], fobj);
+					write_fix((uint16_t)poly.lsgt3->normals[0], fobj);
+					write_fix((uint16_t)poly.lsgt3->normals[1], fobj);
+					write_fix((uint16_t)poly.lsgt3->normals[2], fobj);
 					write_16((uint16_t)poly.lsgt3->conv->id, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsgt3->color[0]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsgt3->color[1]), fobj);
@@ -646,14 +646,14 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					poly.lsgt3 += 1;
 				break;
 				case PRM_TYPE_LSGT4:
-					write_16((uint16_t)poly.lsgt4->coords[0], fobj);
-					write_16((uint16_t)poly.lsgt4->coords[1], fobj);
-					write_16((uint16_t)poly.lsgt4->coords[2], fobj);
-					write_16((uint16_t)poly.lsgt4->coords[3], fobj);
-					write_16((uint16_t)poly.lsgt4->normals[0], fobj);
-					write_16((uint16_t)poly.lsgt4->normals[1], fobj);
-					write_16((uint16_t)poly.lsgt4->normals[2], fobj);
-					write_16((uint16_t)poly.lsgt4->normals[3], fobj);
+					write_fix((uint16_t)poly.lsgt4->coords[0], fobj);
+					write_fix((uint16_t)poly.lsgt4->coords[1], fobj);
+					write_fix((uint16_t)poly.lsgt4->coords[2], fobj);
+					write_fix((uint16_t)poly.lsgt4->coords[3], fobj);
+					write_fix((uint16_t)poly.lsgt4->normals[0], fobj);
+					write_fix((uint16_t)poly.lsgt4->normals[1], fobj);
+					write_fix((uint16_t)poly.lsgt4->normals[2], fobj);
+					write_fix((uint16_t)poly.lsgt4->normals[3], fobj);
 					write_16((uint16_t)poly.lsgt4->conv->id, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsgt4->color[0]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsgt4->color[1]), fobj);
@@ -663,7 +663,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				break;
 				case PRM_TYPE_TSPR:
 				case PRM_TYPE_BSPR:
-					write_16((uint16_t)poly.spr->coord, fobj);
+					write_fix((uint16_t)poly.spr->coord, fobj);
 					write_16((uint16_t)poly.spr->width, fobj);
 					write_16((uint16_t)poly.spr->height, fobj);
 					write_16((uint16_t)poly.spr->conv->id, fobj);
@@ -671,34 +671,34 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					poly.spr += 1;
 				break;
 				case PRM_TYPE_SPLINE:
-					write_32((uint32_t)poly.spline->control1.x, fobj);
-					write_32((uint32_t)poly.spline->control1.y, fobj);
-					write_32((uint32_t)poly.spline->control1.z, fobj);
-					write_32((uint32_t)poly.spline->position.x, fobj);
-					write_32((uint32_t)poly.spline->position.y, fobj);
-					write_32((uint32_t)poly.spline->position.z, fobj);
-					write_32((uint32_t)poly.spline->control2.x, fobj);
-					write_32((uint32_t)poly.spline->control2.y, fobj);
-					write_32((uint32_t)poly.spline->control2.z, fobj);
+					write_fix((uint32_t)poly.spline->control1.x, fobj);
+					write_fix((uint32_t)poly.spline->control1.y, fobj);
+					write_fix((uint32_t)poly.spline->control1.z, fobj);
+					write_fix((uint32_t)poly.spline->position.x, fobj);
+					write_fix((uint32_t)poly.spline->position.y, fobj);
+					write_fix((uint32_t)poly.spline->position.z, fobj);
+					write_fix((uint32_t)poly.spline->control2.x, fobj);
+					write_fix((uint32_t)poly.spline->control2.y, fobj);
+					write_fix((uint32_t)poly.spline->control2.z, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.spline->color), fobj);
 					poly.spline += 1;
 				break;
 				case PRM_TYPE_POINT_LIGHT:
-					write_32((uint32_t)poly.pointLight->position.x, fobj);
-					write_32((uint32_t)poly.pointLight->position.y, fobj);
-					write_32((uint32_t)poly.pointLight->position.z, fobj);
+					write_fix((uint32_t)poly.pointLight->position.x, fobj);
+					write_fix((uint32_t)poly.pointLight->position.y, fobj);
+					write_fix((uint32_t)poly.pointLight->position.z, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.pointLight->color), fobj);
 					write_16((uint16_t)poly.pointLight->startFalloff, fobj);
 					write_16((uint16_t)poly.pointLight->endFalloff, fobj);
 					poly.pointLight += 1;
 				break;
 				case PRM_TYPE_SPOT_LIGHT:
-					write_32((uint32_t)poly.spotLight->position.x, fobj);
-					write_32((uint32_t)poly.spotLight->position.y, fobj);
-					write_32((uint32_t)poly.spotLight->position.z, fobj);
-					write_16((uint16_t)poly.spotLight->direction.x, fobj);
-					write_16((uint16_t)poly.spotLight->direction.y, fobj);
-					write_16((uint16_t)poly.spotLight->direction.z, fobj);
+					write_fix((uint32_t)poly.spotLight->position.x, fobj);
+					write_fix((uint32_t)poly.spotLight->position.y, fobj);
+					write_fix((uint32_t)poly.spotLight->position.z, fobj);
+					write_fix((uint16_t)poly.spotLight->direction.x, fobj);
+					write_fix((uint16_t)poly.spotLight->direction.y, fobj);
+					write_fix((uint16_t)poly.spotLight->direction.z, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.spotLight->color), fobj);
 					write_16((uint16_t)poly.spotLight->startFalloff, fobj);
 					write_16((uint16_t)poly.spotLight->endFalloff, fobj);
@@ -707,15 +707,25 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					poly.spotLight += 1;
 				break;
 				case PRM_TYPE_INFINITE_LIGHT:
-					write_16((uint16_t)poly.infiniteLight->direction.x, fobj);
-					write_16((uint16_t)poly.infiniteLight->direction.y, fobj);
-					write_16((uint16_t)poly.infiniteLight->direction.z, fobj);
+					write_fix((uint16_t)poly.infiniteLight->direction.x, fobj);
+					write_fix((uint16_t)poly.infiniteLight->direction.y, fobj);
+					write_fix((uint16_t)poly.infiniteLight->direction.z, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.infiniteLight->color), fobj);
 					poly.infiniteLight += 1;
 				break;
 				default:
 					die("bad primitive type\n");
 			}
+		}
+		for (int i=0; i<obj->vertices_len; i++) {
+			write_fix((uint16_t)obj->vertices[i].x, fobj);
+			write_fix((uint16_t)obj->vertices[i].y, fobj);
+			write_fix((uint16_t)obj->vertices[i].z, fobj);
+		}
+		for (int i=0; i<obj->normals_len; i++) {
+			write_fix((uint16_t)obj->normals[i].x, fobj);
+			write_fix((uint16_t)obj->normals[i].y, fobj);
+			write_fix((uint16_t)obj->normals[i].z, fobj);
 		}
 	}
 

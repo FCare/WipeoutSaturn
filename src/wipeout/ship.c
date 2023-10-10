@@ -17,9 +17,9 @@
 #include "sfx.h"
 
 void ships_load(void) {
-	texture_list_t ship_textures = image_get_compressed_textures("wipeout/common/allsh.cmp");
-	Object *ship_models = objects_load("wipeout/common/allsh.prm", ship_textures);
-
+	saturn_image_ctrl_t *ship_textures = image_get_saturn_textures("wipeout/common/allsh.stf");
+	Object *ship_models = objects_saturn_load("wipeout/common/allsh.smf", *ship_textures);
+	printf("Done\n");
 	texture_list_t collision_textures = image_get_compressed_textures("wipeout/common/alcol.cmp");
 	Object *collision_models = objects_load("wipeout/common/alcol.prm", collision_textures);
 

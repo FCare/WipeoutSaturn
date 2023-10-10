@@ -254,9 +254,45 @@ cmp_t *image_load_compressed(char *name) {
 	return cmp;
 }
 
-uint8_t* image_get_saturn_texture(char *name) {
+uint8_t* image_get_saturn_font_texture(char *name) {
 	printf("load: %s\n", name);
 	return platform_load_saturn_asset(name);
+}
+
+saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
+	printf("load: %s\n", name);
+	uint16_t *buf = (uint16_t*)platform_load_saturn_asset(name);
+
+	saturn_image_ctrl_t list;
+	int offset = 0;
+	list.nb_palettes = buf[offset++];
+	list.pal = mem_bump(sizeof(character_t*)*list.nb_palettes);
+	for (int i =0; i<list.nb_palettes; i++) {
+		list.pal[i] = &buf[offset];
+		switch(list.pal[i]->format) {
+			case COLOR_BANK_16_COL:
+				offset += 16;
+				break;
+			case COLOR_BANK_64_COL:
+				offset += 64;
+				break;
+			case COLOR_BANK_128_COL:
+				offset += 128;
+				break;
+			case COLOR_BANK_256_COL:
+				offset += 256;
+				break;
+			default:
+				break;
+			}
+	}
+	list.nb_characters = buf[offset++];
+	list.character = mem_bump(sizeof(character_t*)*list.nb_characters);
+	for (int i =0; i<list.nb_characters; i++) {
+		list.character[i] = &buf[offset];
+		offset += list.character[i]->length;
+	}
+	return &list;
 }
 
 uint16_t image_get_texture(char *name) {

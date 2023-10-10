@@ -3,6 +3,17 @@
 
 #include "../types.h"
 
+typedef enum {
+	COLOR_BANK_16_COL = 0,
+	LOOKUP_TABLE_16_COL = 1,
+	COLOR_BANK_64_COL = 2,
+	COLOR_BANK_128_COL = 3,
+	COLOR_BANK_256_COL = 4,
+	COLOR_BANK_RGB = 5,
+	COLOR_MAX
+} color_mode_t;
+
+
 typedef struct {
 	uint16_t start;
 	uint16_t len;
@@ -21,13 +32,36 @@ typedef struct {
 	uint16_t stride;
 	uint16_t height;
 	uint16_t offset;
-} character_t;
+} font_character_t;
 
 typedef struct {
 	uint16_t format;
 	uint16_t nbQuads;
-	character_t character[];
-} saturn_image_t;
+	font_character_t character[];
+} saturn_font_t;
+
+typedef struct {
+	uint16_t width;
+	uint16_t height;
+	color_mode_t format;
+	rgb1555_t *pixels;
+} palette_t;
+
+typedef struct {
+	uint16_t id;
+	uint16_t width;
+	uint16_t height;
+	uint16_t palette_id;
+	uint16_t length;
+	rgb1555_t *pixels;
+} character_t;
+
+typedef struct {
+	uint16_t nb_palettes;
+	palette_t **pal;
+	uint16_t nb_characters;
+	character_t **character;
+} saturn_image_ctrl_t;
 
 typedef struct {
 	uint32_t len;
@@ -45,6 +79,6 @@ uint16_t image_get_texture_semi_trans(char *name);
 texture_list_t image_get_compressed_textures(char *name);
 uint16_t texture_from_list(texture_list_t tl, uint16_t index);
 
-uint8_t* image_get_saturn_texture(char *name);
+uint8_t* image_get_saturn_font_texture(char *name);
 
 #endif

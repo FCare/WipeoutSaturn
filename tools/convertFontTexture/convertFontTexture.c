@@ -443,12 +443,12 @@ typedef struct {
 	uint16_t height;
 	uint16_t stride;
 	uint16_t offset;
-} character_t;
+} font_character_t;
 
 typedef struct {
 	uint16_t format;
 	uint16_t nbQuads;
-	character_t character[38];
+	font_character_t character[38];
 } texture_t;
 
 #define SWAP(X) (((X&0xFF)<<8)|(X>>8))
@@ -499,7 +499,7 @@ int main(int argc, char *argv[]) {
 			fwrite(&nbQuads_s, 1, sizeof(uint16_t), f); current +=sizeof(uint16_t);
 
       for (int j=0; j<38; j++) {
-				character_t *ch = &out.character[j];
+				font_character_t *ch = &out.character[j];
 				ch->width = char_set[i].glyphs[j].width;
 				ch->stride = (ch->width + 0x7) &~0x7; //align width to 8
 				ch->height = char_set[i].height;
