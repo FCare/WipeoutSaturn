@@ -11,53 +11,58 @@
 typedef struct F3_S {
 	int16_t type; // Type of primitive
 	fix16_t coords[3]; // Indices of the coords
-	rgba_t color;
+	rgb1555_t color;
+	int16_t pad;
 } F3_S;
 
 typedef struct FT3_S {
 	int16_t type; // Type of primitive
 	fix16_t coords[3]; // Indices of the coords
 	int16_t texture;
-	rgba_t color;
+	rgb1555_t color;
 } FT3_S;
 
 typedef struct F4_S {
 	int16_t type; // Type of primitive
 	fix16_t coords[4]; // Indices of the coords
-	rgba_t color;
+	rgb1555_t color;
+	int16_t pad;
 } F4_S;
 
 typedef struct FT4_S {
 	int16_t type; // Type of primitive
 	fix16_t coords[4]; // Indices of the coords
 	int16_t texture;
-	rgba_t color;
+	rgb1555_t color;
 } FT4_S;
 
 typedef struct G3_S {
 	int16_t type; // Type of primitive
 	fix16_t coords[3]; // Indices of the coords
-	rgba_t color[3];
+	rgb1555_t color[3];
+	int16_t pad;
 } G3_S;
 
 typedef struct GT3_S {
 	int16_t type; // Type of primitive
 	fix16_t coords[3]; // Indices of the coords
 	int16_t texture;
-	rgba_t color[3];
+	rgb1555_t color[3];
+	int16_t pad;
 } GT3_S;
 
 typedef struct G4_S {
 	int16_t type; // Type of primitive
 	fix16_t coords[4]; // Indices of the coords
-	rgba_t color[4];
+	rgb1555_t color[4];
 } G4_S;
 
 typedef struct GT4_S {
 	int16_t type; // Type of primitive
 	fix16_t coords[4]; // Indices of the coords
 	int16_t texture;
-	rgba_t color[4];
+	rgb1555_t color[4];
+	int16_t pad;
 } GT4_S;
 
 /* LIGHT SOURCED POLYGONS
@@ -67,7 +72,7 @@ typedef struct LSF3_S {
 	int16_t type; // Type of primitive
 	fix16_t coords[3]; // Indices of the coords
 	fix16_t normal; // Indices of the normals
-	rgba_t color;
+	rgb1555_t color;
 } LSF3_S;
 
 typedef struct LSFT3_S {
@@ -75,14 +80,15 @@ typedef struct LSFT3_S {
 	fix16_t coords[3]; // Indices of the coords
 	fix16_t normal; // Indices of the normals
 	int16_t texture;
-	rgba_t color;
+	rgb1555_t color;
+	int16_t pad;
 } LSFT3_S;
 
 typedef struct LSF4_S {
 	int16_t type; // Type of primitive
 	fix16_t coords[4]; // Indices of the coords
 	fix16_t normal; // Indices of the normals
-	rgba_t color;
+	rgb1555_t color;
 } LSF4_S;
 
 typedef struct LSFT4_S {
@@ -90,14 +96,15 @@ typedef struct LSFT4_S {
 	fix16_t coords[4]; // Indices of the coords
 	fix16_t normal; // Indices of the normals
 	int16_t texture;
-	rgba_t color;
+	rgb1555_t color;
+	int16_t pad;
 } LSFT4_S;
 
 typedef struct LSG3_S {
 	int16_t type; // Type of primitive
 	fix16_t coords[3]; // Indices of the coords
 	fix16_t normals[3]; // Indices of the normals
-	rgba_t color[3];
+	rgb1555_t color[3];
 } LSG3_S;
 
 typedef struct LSGT3_S {
@@ -105,14 +112,15 @@ typedef struct LSGT3_S {
 	fix16_t coords[3]; // Indices of the coords
 	fix16_t normals[3]; // Indices of the normals
 	int16_t texture;
-	rgba_t color[3];
+	rgb1555_t color[3];
+	int16_t pad;
 } LSGT3_S;
 
 typedef struct LSG4_S {
 	int16_t type; // Type of primitive
 	fix16_t coords[4]; // Indices of the coords
 	fix16_t normals[4]; // Indices of the normals
-	rgba_t color[4];
+	rgb1555_t color[4];
 } LSG4_S;
 
 typedef struct LSGT4_S {
@@ -120,7 +128,8 @@ typedef struct LSGT4_S {
 	fix16_t coords[4]; // Indices of the coords
 	fix16_t normals[4]; // Indices of the normals
 	int16_t texture;
-	rgba_t color[4];
+	rgb1555_t color[4];
+	int16_t pad;
 } LSGT4_S;
 
 /* OTHER PRIMITIVE TYPES
@@ -131,7 +140,7 @@ typedef struct SPR_S {
 	int16_t width;
 	int16_t height;
 	int16_t texture;
-	rgba_t color;
+	rgb1555_t color;
 } SPR_S;
 
 
@@ -140,16 +149,18 @@ typedef struct Spline_S {
 	fix16_vec3_t control1;
 	fix16_vec3_t position;
 	fix16_vec3_t control2;
-	rgba_t color;
+	rgb1555_t color;
+	int16_t pad;
 } Spline_S;
 
 
 typedef struct PointLight_S {
 	int16_t type;
 	fix16_vec3_t position;
-	rgba_t color;
+	rgb1555_t color;
 	int16_t startFalloff;
 	int16_t endFalloff;
+	int16_t pad;
 } PointLight_S;
 
 
@@ -157,18 +168,20 @@ typedef struct SpotLight_S {
 	int16_t type;
 	fix16_vec3_t position;
 	fix16_vec3_t direction;
-	rgba_t color;
+	rgb1555_t color;
 	int16_t startFalloff;
 	int16_t endFalloff;
 	int16_t coneAngle;
 	int16_t spreadAngle;
+	int16_t pad;
 } SpotLight_S;
 
 
 typedef struct InfiniteLight_S {
 	int16_t type;
 	fix16_vec3_t direction;
-	rgba_t color;
+	rgb1555_t color;
+	int16_t pad;
 } InfiniteLight_S;
 
 
