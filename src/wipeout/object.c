@@ -456,25 +456,24 @@ Object *objects_load(char *name, texture_list_t tl) {
 	return objectList;
 }
 
-Object_Saturn *objects_saturn_load(char *name, texture_list_t tl) {
-	uint32_t length = 0;
+Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 	printf("load: %s\n", name);
 	uint16_t *bytes = (uint16_t*)platform_load_saturn_asset(name);
 	if (!bytes) {
 		die("Failed to load file %s\n", name);
 	}
 	uint32_t p = 0;
-	uint16_t length = get_i16(bytes, &p)
-	Object *objectList = mem_bump(sizeof(Object_Saturn*)*length);
-	Object *prevObject = NULL;
+	uint16_t length = get_i16(bytes, &p);
+	Object_Saturn_list *list = mem_bump(sizeof(Object_Saturn*)*length+sizeof(int16_t));
 
 	for(int i = 0; i < length; i++) {
-		objectList[i] = (Object *)&bytes[p/2];
-		Object *object = objectList[i];
-		int16_t type = object->type;
+		Object_Saturn *object = mem_bump(sizeof(Object_Saturn));
+		object->info = (object_info *)&bytes[p/2];
+		list->objects[i] = object;
+		object->image = tl;
 		p+=30;
-		object->primitives = mem_bump(sizeof(PRM_saturn*)*object->primitives_len);
-		for (int j=0; j<object->primitives_len; j++) {
+		object->primitives = mem_bump(sizeof(PRM_saturn*)*object->info->primitives_len);
+		for (int j=0; j<object->info->primitives_len; j++) {
 			object->primitives[i] = (PRM_saturn*)&bytes[p/2];
 			PRM_saturn *prm = object->primitives[i];
 			switch (prm->type) {
@@ -543,15 +542,15 @@ Object_Saturn *objects_saturn_load(char *name, texture_list_t tl) {
 				p += sizeof(InfiniteLight_S);
 				break;
 			default:
-				die("bad primitive type %x \n", prm_type);
+				die("bad primitive type %x \n", prm->type);
 			} // switch
 		} // each prim
 		object->vertices = (fix16_t*)&bytes[p/2];
-		p += object->vertices_len*6;
+		p += object->info->vertices_len*6;
 		object->normals = (fix16_t*)&bytes[p/2];
-		p += object->normal_len*6;
+		p += object->info->normals_len*6;
 	} // each object
-	return objectList;
+	return list;
 }
 
 

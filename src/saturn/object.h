@@ -4,7 +4,7 @@
 #include "../types.h"
 #include "../render.h"
 #include "../utils.h"
-#include "image.h"
+#include "../wipeout/image.h"
 
 // Primitive Structure Stub ( Structure varies with primitive type )
 
@@ -83,7 +83,7 @@ typedef struct LSF4_S {
 	fix16_t coords[4]; // Indices of the coords
 	fix16_t normal; // Indices of the normals
 	rgba_t color;
-} LSF4;
+} LSF4_S;
 
 typedef struct LSFT4_S {
 	int16_t type; // Type of primitive
@@ -132,7 +132,7 @@ typedef struct SPR_S {
 	int16_t height;
 	int16_t texture;
 	rgba_t color;
-} SPR;
+} SPR_S;
 
 
 typedef struct Spline_S {
@@ -201,7 +201,8 @@ typedef struct InfiniteLight_S {
 #define PRM_TYPE_SPOT_LIGHT        23
 
 
-typedef union Prm {
+typedef union PRM_saturn {
+	uint16_t 					type;
 	F3_S               *f3;
 	FT3_S              *ft3;
 	F4_S               *f4;
@@ -233,10 +234,21 @@ typedef struct {
 	uint16_t primitives_len;
 	uint16_t flags;
 	fix16_vec3_t origin;
-	PRM_saturn *primitives
+} object_info;
+
+typedef struct {
+	object_info *info;
+	saturn_image_ctrl_t *image;
+	PRM_saturn **primitives;
 	fix16_t *vertices;
 	fix16_t *normals;
 } Object_Saturn;
 
+typedef struct{
+	int16_t length;
+	Object_Saturn *objects[];
+} Object_Saturn_list;
+
+extern Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl);
 
 #endif
