@@ -464,19 +464,21 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 	}
 	uint32_t p = 0;
 	uint16_t length = get_i16(bytes, &p);
-	Object_Saturn_list *list = mem_bump(sizeof(Object_Saturn*)*length+sizeof(int16_t));
-
+	Object_Saturn_list *list = mem_bump(sizeof(Object_Saturn_list));
+	list->objects = mem_bump(sizeof(Object_Saturn*)*length);
+	list->length = length;
 	for(int i = 0; i < length; i++) {
 		Object_Saturn *object = mem_bump(sizeof(Object_Saturn));
 		object->info = (object_info *)&bytes[p/2];
-		LOGD("Object[%d] %s\n", i, object->info->name);
 		list->objects[i] = object;
+		LOGD("Object[%d]@0x%x %s\n", i, p, list->objects[i]->info->name);
 		object->image = tl;
 		p+=sizeof(object_info);
 		object->primitives = mem_bump(sizeof(PRM_saturn*)*object->info->primitives_len);
 		for (int j=0; j< object->info->primitives_len; j++) {
 			object->primitives[j] = (PRM_saturn*)&bytes[p/2];
 			PRM_saturn *prm = object->primitives[j];
+			if (j==1) printf("First prim type = %d flags = 0x%x\n", prm->type, prm->flag);
 			switch (prm->type) {
 			case PRM_TYPE_F3:
 				p += sizeof(F3_S);
@@ -552,6 +554,12 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 		object->normals = (fix16_t*)&bytes[p/2];
 		p += object->info->normals_len*3*sizeof(fix16_t);
 	} // each object
+
+	for (int i =0; i<list->length; i++) {
+		printf("ended Model %s\n", list->objects[i]->info->name);
+		printf("First primitive type = %d flag 0x%x\n", list->objects[i]->primitives[1]->type, list->objects[i]->primitives[1]->flag);
+	}
+
 	return list;
 }
 

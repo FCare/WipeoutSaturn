@@ -10,58 +10,66 @@
 
 typedef struct F3_S {
 	int16_t type; // Type of primitive
+	int16_t flag;
 	fix16_t coords[3]; // Indices of the coords
 	rgb1555_t color;
-	int16_t pad;
 } F3_S;
 
 typedef struct FT3_S {
 	int16_t type; // Type of primitive
+	int16_t flag;
 	fix16_t coords[3]; // Indices of the coords
 	int16_t texture;
 	rgb1555_t color;
+	int16_t pad;
 } FT3_S;
 
 typedef struct F4_S {
 	int16_t type; // Type of primitive
+	int16_t flag;
 	fix16_t coords[4]; // Indices of the coords
 	rgb1555_t color;
-	int16_t pad;
 } F4_S;
 
 typedef struct FT4_S {
 	int16_t type; // Type of primitive
+	int16_t flag;
 	fix16_t coords[4]; // Indices of the coords
 	int16_t texture;
 	rgb1555_t color;
+	int16_t pad;
 } FT4_S;
 
 typedef struct G3_S {
 	int16_t type; // Type of primitive
+	int16_t flag;
 	fix16_t coords[3]; // Indices of the coords
 	rgb1555_t color[3];
-	int16_t pad;
 } G3_S;
 
 typedef struct GT3_S {
 	int16_t type; // Type of primitive
+	int16_t flag;
 	fix16_t coords[3]; // Indices of the coords
 	int16_t texture;
 	rgb1555_t color[3];
+	int16_t pad;
 } GT3_S;
 
 typedef struct G4_S {
 	int16_t type; // Type of primitive
+	int16_t flag;
 	fix16_t coords[4]; // Indices of the coords
 	rgb1555_t color[4];
+	int16_t pad;
 } G4_S;
 
 typedef struct GT4_S {
 	int16_t type; // Type of primitive
+	int16_t flag;
 	fix16_t coords[4]; // Indices of the coords
 	int16_t texture;
 	rgb1555_t color[4];
-	int16_t pad;
 } GT4_S;
 
 /* LIGHT SOURCED POLYGONS
@@ -69,102 +77,113 @@ typedef struct GT4_S {
 
 typedef struct LSF3_S {
 	int16_t type; // Type of primitive
+	int16_t flag;
 	fix16_t coords[3]; // Indices of the coords
 	fix16_t normal; // Indices of the normals
 	rgb1555_t color;
+	int16_t pad;
 } LSF3_S;
 
 typedef struct LSFT3_S {
 	int16_t type; // Type of primitive
+	int16_t flag;
 	fix16_t coords[3]; // Indices of the coords
 	fix16_t normal; // Indices of the normals
 	int16_t texture;
 	rgb1555_t color;
-	int16_t pad;
 } LSFT3_S;
 
 typedef struct LSF4_S {
 	int16_t type; // Type of primitive
+	int16_t flag;
 	fix16_t coords[4]; // Indices of the coords
 	fix16_t normal; // Indices of the normals
 	rgb1555_t color;
+	int16_t pad;
 } LSF4_S;
 
 typedef struct LSFT4_S {
 	int16_t type; // Type of primitive
+	int16_t flag;
 	fix16_t coords[4]; // Indices of the coords
 	fix16_t normal; // Indices of the normals
 	int16_t texture;
 	rgb1555_t color;
-	int16_t pad;
 } LSFT4_S;
 
 typedef struct LSG3_S {
 	int16_t type; // Type of primitive
+	int16_t flag;
 	fix16_t coords[3]; // Indices of the coords
 	fix16_t normals[3]; // Indices of the normals
 	rgb1555_t color[3];
+	int16_t pad;
 } LSG3_S;
 
 typedef struct LSGT3_S {
 	int16_t type; // Type of primitive
+	int16_t flag;
 	fix16_t coords[3]; // Indices of the coords
 	fix16_t normals[3]; // Indices of the normals
 	int16_t texture;
 	rgb1555_t color[3];
-	int16_t pad;
 } LSGT3_S;
 
 typedef struct LSG4_S {
 	int16_t type; // Type of primitive
+	int16_t flag;
 	fix16_t coords[4]; // Indices of the coords
 	fix16_t normals[4]; // Indices of the normals
 	rgb1555_t color[4];
+	int16_t pad;
 } LSG4_S;
 
 typedef struct LSGT4_S {
 	int16_t type; // Type of primitive
+	int16_t flag;
 	fix16_t coords[4]; // Indices of the coords
 	fix16_t normals[4]; // Indices of the normals
 	int16_t texture;
 	rgb1555_t color[4];
-	int16_t pad;
 } LSGT4_S;
 
 /* OTHER PRIMITIVE TYPES
 */
 typedef struct SPR_S {
 	int16_t type;
+	int16_t flag;
 	fix16_t coord;
 	int16_t width;
 	int16_t height;
 	int16_t texture;
 	rgb1555_t color;
+	int16_t pad;
 } SPR_S;
 
 
 typedef struct Spline_S {
 	int16_t type; // Type of primitive
+	int16_t flag;
 	fix16_vec3_t control1;
 	fix16_vec3_t position;
 	fix16_vec3_t control2;
 	rgb1555_t color;
-	int16_t pad;
 } Spline_S;
 
 
 typedef struct PointLight_S {
 	int16_t type;
+	int16_t flag;
 	fix16_vec3_t position;
 	rgb1555_t color;
 	int16_t startFalloff;
 	int16_t endFalloff;
-	int16_t pad;
 } PointLight_S;
 
 
 typedef struct SpotLight_S {
 	int16_t type;
+	int16_t flag;
 	fix16_vec3_t position;
 	fix16_vec3_t direction;
 	rgb1555_t color;
@@ -172,15 +191,14 @@ typedef struct SpotLight_S {
 	int16_t endFalloff;
 	int16_t coneAngle;
 	int16_t spreadAngle;
-	int16_t pad;
 } SpotLight_S;
 
 
 typedef struct InfiniteLight_S {
 	int16_t type;
+	int16_t flag;
 	fix16_vec3_t direction;
 	rgb1555_t color;
-	int16_t pad;
 } InfiniteLight_S;
 
 
@@ -214,29 +232,32 @@ typedef struct InfiniteLight_S {
 
 
 typedef union PRM_saturn {
-	uint16_t 					type;
-	F3_S               *f3;
-	FT3_S              *ft3;
-	F4_S               *f4;
-	FT4_S              *ft4;
-	G3_S               *g3;
-	GT3_S              *gt3;
-	G4_S               *g4;
-	GT4_S              *gt4;
-	SPR_S              *spr;
-	Spline_S           *spline;
-	PointLight_S       *pointLight;
-	SpotLight_S        *spotLight;
-	InfiniteLight_S    *infiniteLight;
+	struct {
+		uint16_t 					type;
+		uint16_t					flag;
+	};
+	F3_S               f3;
+	FT3_S              ft3;
+	F4_S               f4;
+	FT4_S              ft4;
+	G3_S               g3;
+	GT3_S              gt3;
+	G4_S               g4;
+	GT4_S              gt4;
+	SPR_S              spr;
+	Spline_S           spline;
+	PointLight_S       pointLight;
+	SpotLight_S        spotLight;
+	InfiniteLight_S    infiniteLight;
 
-	LSF3_S             *lsf3;
-	LSFT3_S            *lsft3;
-	LSF4_S             *lsf4;
-	LSFT4_S            *lsft4;
-	LSG3_S             *lsg3;
-	LSGT3_S            *lsgt3;
-	LSG4_S             *lsg4;
-	LSGT4_S            *lsgt4;
+	LSF3_S             lsf3;
+	LSFT3_S            lsft3;
+	LSF4_S             lsf4;
+	LSFT4_S            lsft4;
+	LSG3_S             lsg3;
+	LSGT3_S            lsgt3;
+	LSG4_S             lsg4;
+	LSGT4_S            lsgt4;
 } PRM_saturn;
 
 typedef struct {
@@ -252,13 +273,13 @@ typedef struct {
 	object_info *info;
 	saturn_image_ctrl_t *image;
 	PRM_saturn **primitives;
-	fix16_t *vertices;
-	fix16_t *normals;
+	fix16_vec3_t *vertices;
+	fix16_vec3_t *normals;
 } Object_Saturn;
 
 typedef struct{
 	int16_t length;
-	Object_Saturn *objects[];
+	Object_Saturn **objects;
 } Object_Saturn_list;
 
 extern Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl);

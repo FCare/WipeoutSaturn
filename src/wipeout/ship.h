@@ -126,13 +126,13 @@ typedef struct ship_t {
 	fix16_t last_impact_time;
 
 	mat4_t mat;
-	Object *model;
-	Object *collision_model;
+	Object_Saturn *model;
+	Object_Saturn *collision_model;
 	uint16_t shadow_texture;
 
 	struct {
-		vec3_t *v;
-		vec3_t initial;
+		fix16_vec3_t *v;
+		fix16_vec3_t initial;
 	} exhaust_plume[3];
 
 	// Control Routines

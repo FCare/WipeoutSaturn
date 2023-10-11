@@ -146,6 +146,7 @@ Object *objects_load(char *name, texture_list_t *tl) {
 				break;
 
 			case PRM_TYPE_FT4:
+				printf("Flag is 0x%x @ 0x%x\n", prm_flag, p);
 				prm.ptr = mem_bump(sizeof(FT4));
 				prm.ft4->coords[0] = get_i16(bytes, &p);
 				prm.ft4->coords[1] = get_i16(bytes, &p);
@@ -511,50 +512,56 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 			printf("Type %d 0x%x\n", poly.primitive->type, (uint32_t)ftell(fobj));
 			switch (poly.primitive->type) {
 				case PRM_TYPE_F3:
+					write_16((uint16_t)poly.f3->flag, fobj);
 					write_fix((uint16_t)poly.f3->coords[0], fobj);
 					write_fix((uint16_t)poly.f3->coords[1], fobj);
 					write_fix((uint16_t)poly.f3->coords[2], fobj);
 					write_16(convert_to_rgb(poly.f3->color), fobj);
-					pad(fobj);
 					poly.f3 += 1;
 				break;
 				case PRM_TYPE_F4:
+					write_16((uint16_t)poly.f4->flag, fobj);
 					write_fix((uint16_t)poly.f4->coords[0], fobj);
 					write_fix((uint16_t)poly.f4->coords[1], fobj);
 					write_fix((uint16_t)poly.f4->coords[2], fobj);
 					write_fix((uint16_t)poly.f4->coords[3], fobj);
 					write_16(convert_to_rgb(poly.f4->color), fobj);
-					pad(fobj);
 					poly.f4 += 1;
 				break;
 				case PRM_TYPE_FT3:
+					write_16((uint16_t)poly.ft3->flag, fobj);
 					write_fix((uint16_t)poly.ft3->coords[0], fobj);
 					write_fix((uint16_t)poly.ft3->coords[1], fobj);
 					write_fix((uint16_t)poly.ft3->coords[2], fobj);
 					write_16((uint16_t)poly.ft3->conv->id, fobj);
 					write_16(convert_to_rgb(poly.ft3->color), fobj);
+					pad(fobj);
 					poly.ft3 += 1;
 				break;
 				case PRM_TYPE_FT4:
+					printf("FT4 flasg is 0x%x\n",poly.ft4->flag);
+					write_16((uint16_t)poly.ft4->flag, fobj);
 					write_fix((uint16_t)poly.ft4->coords[0], fobj);
 					write_fix((uint16_t)poly.ft4->coords[1], fobj);
 					write_fix((uint16_t)poly.ft4->coords[2], fobj);
 					write_fix((uint16_t)poly.ft4->coords[3], fobj);
 					write_16((uint16_t)poly.ft4->conv->id, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.ft4->color), fobj);
+					pad(fobj);
 					poly.ft4 += 1;
 				break;
 				case PRM_TYPE_G3:
+					write_16((uint16_t)poly.g3->flag, fobj);
 					write_fix((uint16_t)poly.g3->coords[0], fobj);
 					write_fix((uint16_t)poly.g3->coords[1], fobj);
 					write_fix((uint16_t)poly.g3->coords[2], fobj);
 					write_16((uint16_t)convert_to_rgb(poly.g3->color[0]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.g3->color[1]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.g3->color[2]), fobj);
-					pad(fobj);
 					poly.g3 += 1;
 				break;
 				case PRM_TYPE_G4:
+					write_16((uint16_t)poly.g4->flag, fobj);
 					write_fix((uint16_t)poly.g4->coords[0], fobj);
 					write_fix((uint16_t)poly.g4->coords[1], fobj);
 					write_fix((uint16_t)poly.g4->coords[2], fobj);
@@ -563,9 +570,11 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)convert_to_rgb(poly.g4->color[1]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.g4->color[2]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.g4->color[3]), fobj);
+					pad(fobj);
 					poly.g4 += 1;
 				break;
 				case PRM_TYPE_GT3:
+					write_16((uint16_t)poly.gt3->flag, fobj);
 					write_fix((uint16_t)poly.gt3->coords[0], fobj);
 					write_fix((uint16_t)poly.gt3->coords[1], fobj);
 					write_fix((uint16_t)poly.gt3->coords[2], fobj);
@@ -573,9 +582,11 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)convert_to_rgb(poly.gt3->color[0]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.gt3->color[1]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.gt3->color[2]), fobj);
+					pad(fobj);
 					poly.gt3 += 1;
 				break;
 				case PRM_TYPE_GT4:
+					write_16((uint16_t)poly.gt4->flag, fobj);
 					write_fix((uint16_t)poly.gt4->coords[0], fobj);
 					write_fix((uint16_t)poly.gt4->coords[1], fobj);
 					write_fix((uint16_t)poly.gt4->coords[2], fobj);
@@ -585,37 +596,41 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)convert_to_rgb(poly.gt4->color[1]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.gt4->color[2]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.gt4->color[3]), fobj);
-					pad(fobj);
 					poly.gt4 += 1;
 				break;
 				case PRM_TYPE_LSF3:
+					write_16((uint16_t)poly.lsf3->flag, fobj);
 					write_fix((uint16_t)poly.lsf3->coords[0], fobj);
 					write_fix((uint16_t)poly.lsf3->coords[1], fobj);
 					write_fix((uint16_t)poly.lsf3->coords[2], fobj);
 					write_fix((uint16_t)poly.lsf3->normal, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsf3->color), fobj);
+					pad(fobj);
 					poly.lsf3 += 1;
 				break;
 				case PRM_TYPE_LSF4:
+					write_16((uint16_t)poly.lsf4->flag, fobj);
 					write_fix((uint16_t)poly.lsf4->coords[0], fobj);
 					write_fix((uint16_t)poly.lsf4->coords[1], fobj);
 					write_fix((uint16_t)poly.lsf4->coords[2], fobj);
 					write_fix((uint16_t)poly.lsf4->coords[3], fobj);
 					write_fix((uint16_t)poly.lsf4->normal, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsf4->color), fobj);
+					pad(fobj);
 					poly.lsf4 += 1;
 				break;
 				case PRM_TYPE_LSFT3:
+					write_16((uint16_t)poly.lsft3->flag, fobj);
 					write_fix((uint16_t)poly.lsft3->coords[0], fobj);
 					write_fix((uint16_t)poly.lsft3->coords[1], fobj);
 					write_fix((uint16_t)poly.lsft3->coords[2], fobj);
 					write_fix((uint16_t)poly.lsft3->normal, fobj);
 					write_16((uint16_t)poly.lsft3->conv->id, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsft3->color), fobj);
-					pad(fobj);
 					poly.lsft3 += 1;
 				break;
 				case PRM_TYPE_LSFT4:
+					write_16((uint16_t)poly.lsft4->flag, fobj);
 					write_fix((uint16_t)poly.lsft4->coords[0], fobj);
 					write_fix((uint16_t)poly.lsft4->coords[1], fobj);
 					write_fix((uint16_t)poly.lsft4->coords[2], fobj);
@@ -623,10 +638,10 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_fix((uint16_t)poly.lsft4->normal, fobj);
 					write_16((uint16_t)poly.lsft4->conv->id, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsft4->color), fobj);
-					pad(fobj);
 					poly.lsft4 += 1;
 				break;
 				case PRM_TYPE_LSG3:
+					write_16((uint16_t)poly.lsg3->flag, fobj);
 					write_fix((uint16_t)poly.lsg3->coords[0], fobj);
 					write_fix((uint16_t)poly.lsg3->coords[1], fobj);
 					write_fix((uint16_t)poly.lsg3->coords[2], fobj);
@@ -636,9 +651,11 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)convert_to_rgb(poly.lsg3->color[0]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsg3->color[1]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsg3->color[2]), fobj);
+					pad(fobj);
 					poly.lsg3 += 1;
 				break;
 				case PRM_TYPE_LSG4:
+					write_16((uint16_t)poly.lsg4->flag, fobj);
 					write_fix((uint16_t)poly.lsg4->coords[0], fobj);
 					write_fix((uint16_t)poly.lsg4->coords[1], fobj);
 					write_fix((uint16_t)poly.lsg4->coords[2], fobj);
@@ -651,9 +668,11 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)convert_to_rgb(poly.lsg4->color[1]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsg4->color[2]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsg4->color[3]), fobj);
+					pad(fobj);
 					poly.lsg4 += 1;
 				break;
 				case PRM_TYPE_LSGT3:
+					write_16((uint16_t)poly.lsgt3->flag, fobj);
 					write_fix((uint16_t)poly.lsgt3->coords[0], fobj);
 					write_fix((uint16_t)poly.lsgt3->coords[1], fobj);
 					write_fix((uint16_t)poly.lsgt3->coords[2], fobj);
@@ -664,10 +683,10 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)convert_to_rgb(poly.lsgt3->color[0]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsgt3->color[1]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsgt3->color[2]), fobj);
-					pad(fobj);
 					poly.lsgt3 += 1;
 				break;
 				case PRM_TYPE_LSGT4:
+					write_16((uint16_t)poly.lsgt4->flag, fobj);
 					write_fix((uint16_t)poly.lsgt4->coords[0], fobj);
 					write_fix((uint16_t)poly.lsgt4->coords[1], fobj);
 					write_fix((uint16_t)poly.lsgt4->coords[2], fobj);
@@ -681,19 +700,21 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)convert_to_rgb(poly.lsgt4->color[1]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsgt4->color[2]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsgt4->color[3]), fobj);
-					pad(fobj);
 					poly.lsgt4 += 1;
 				break;
 				case PRM_TYPE_TSPR:
 				case PRM_TYPE_BSPR:
+					write_16((uint16_t)poly.spr->flag, fobj);
 					write_fix((uint16_t)poly.spr->coord, fobj);
 					write_16((uint16_t)poly.spr->width, fobj);
 					write_16((uint16_t)poly.spr->height, fobj);
 					write_16((uint16_t)poly.spr->conv->id, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.spr->color), fobj);
+					pad(fobj);
 					poly.spr += 1;
 				break;
 				case PRM_TYPE_SPLINE:
+					write_16((uint16_t)poly.spline->flag, fobj);
 					write_fix((uint32_t)poly.spline->control1.x, fobj);
 					write_fix((uint32_t)poly.spline->control1.y, fobj);
 					write_fix((uint32_t)poly.spline->control1.z, fobj);
@@ -704,20 +725,20 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_fix((uint32_t)poly.spline->control2.y, fobj);
 					write_fix((uint32_t)poly.spline->control2.z, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.spline->color), fobj);
-					pad(fobj);
 					poly.spline += 1;
 				break;
 				case PRM_TYPE_POINT_LIGHT:
+					write_16((uint16_t)poly.pointLight->flag, fobj);
 					write_fix((uint32_t)poly.pointLight->position.x, fobj);
 					write_fix((uint32_t)poly.pointLight->position.y, fobj);
 					write_fix((uint32_t)poly.pointLight->position.z, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.pointLight->color), fobj);
 					write_16((uint16_t)poly.pointLight->startFalloff, fobj);
 					write_16((uint16_t)poly.pointLight->endFalloff, fobj);
-					pad(fobj);
 					poly.pointLight += 1;
 				break;
 				case PRM_TYPE_SPOT_LIGHT:
+					write_16((uint16_t)poly.spotLight->flag, fobj);
 					write_fix((uint32_t)poly.spotLight->position.x, fobj);
 					write_fix((uint32_t)poly.spotLight->position.y, fobj);
 					write_fix((uint32_t)poly.spotLight->position.z, fobj);
@@ -729,15 +750,14 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)poly.spotLight->endFalloff, fobj);
 					write_16((uint16_t)poly.spotLight->coneAngle, fobj);
 					write_16((uint16_t)poly.spotLight->spreadAngle, fobj);
-					pad(fobj);
 					poly.spotLight += 1;
 				break;
 				case PRM_TYPE_INFINITE_LIGHT:
+				write_16((uint16_t)poly.infiniteLight->flag, fobj);
 					write_fix((uint16_t)poly.infiniteLight->direction.x, fobj);
 					write_fix((uint16_t)poly.infiniteLight->direction.y, fobj);
 					write_fix((uint16_t)poly.infiniteLight->direction.z, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.infiniteLight->color), fobj);
-					pad(fobj);
 					poly.infiniteLight += 1;
 				break;
 				default:

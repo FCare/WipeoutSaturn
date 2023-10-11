@@ -22,23 +22,20 @@ void ships_load(void) {
 	saturn_image_ctrl_t *collision_textures = image_get_saturn_textures("wipeout/common/alcol.stf");
 	Object_Saturn_list *collision_models = objects_saturn_load("wipeout/common/alcol.smf", collision_textures);
 
-	int object_index;
-	Object *ship_model; // = ship_models;
-	Object *collision_model;// = collision_models;
+	error_if(ship_models->length != NUM_PILOTS, "Expected %ld ship models, got %d", NUM_PILOTS, ship_models->length);
+	error_if(collision_models->length != NUM_PILOTS, "Expected %ld collison models, got %d", NUM_PILOTS, collision_models->length);
 
-	for (object_index = 0; object_index < len(g.ships) && ship_model && collision_model; object_index++) {
+
+	for (int object_index = 0; object_index < NUM_PILOTS; object_index++) {
 		int ship_index = def.ship_model_to_pilot[object_index];
-		g.ships[ship_index].model = ship_model;
-		g.ships[ship_index].collision_model = collision_model;
-
-		ship_model = ship_model->next;
-		collision_model = collision_model->next;
-
+		g.ships[ship_index].model = ship_models->objects[object_index];
+		g.ships[ship_index].collision_model = collision_models->objects[object_index];
+printf("Plume on object %d ship %d %s\n", object_index, ship_index, ship_models->objects[object_index]->info->name);
 		ship_init_exhaust_plume(&g.ships[ship_index]);
 	}
 
-	error_if(object_index != len(g.ships), "Expected %ld ship models, got %d", len(g.ships), object_index);
 
+/*
 	uint16_t shadow_textures_start = render_textures_len();
 	image_get_texture_semi_trans("wipeout/textures/shad1.tim");
 	image_get_texture_semi_trans("wipeout/textures/shad2.tim");
@@ -48,6 +45,7 @@ void ships_load(void) {
 	for (int i = 0; i < len(g.ships); i++) {
 		g.ships[i].shadow_texture = shadow_textures_start + (i >> 1);
 	}
+*/
 }
 
 
@@ -270,86 +268,77 @@ void ship_init_exhaust_plume(ship_t *self) {
 	int16_t indices[64];
 	int16_t indices_len = 0;
 
-	Prm prm = {.primitive = self->model->primitives};
-
-	for (int i = 0; i < self->model->primitives_len; i++) {
-		switch (prm.f3->type) {
+	for (int i = 0; i < self->model->info->primitives_len; i++) {
+		PRM_saturn *prm = self->model->primitives[i];
+		switch (prm->type) {
 		case PRM_TYPE_F3 :
-			if (flags_is(prm.f3->flag, PRM_SHIP_ENGINE)) {
+			if (flags_is(prm->f3.flag, PRM_SHIP_ENGINE)) {
 				die("F3 ::SE marked polys should be ft3's");
 			}
-			prm.f3 += 1;
 			break;
 
 		case PRM_TYPE_F4 :
-			if (flags_is(prm.f4->flag, PRM_SHIP_ENGINE)) {
+			if (flags_is(prm->f4.flag, PRM_SHIP_ENGINE)) {
 				die("F4 ::SE marked polys should be ft3's");
 			}
-			prm.f4 += 1;
 			break;
 
 		case PRM_TYPE_FT3 :
-			if (flags_is(prm.ft3->flag, PRM_SHIP_ENGINE)) {
-				indices[indices_len++] = prm.ft3->coords[0];
-				indices[indices_len++] = prm.ft3->coords[1];
-				indices[indices_len++] = prm.ft3->coords[2];
+			if (flags_is(prm->ft3.flag, PRM_SHIP_ENGINE)) {
+				indices[indices_len++] = prm->ft3.coords[0];
+				indices[indices_len++] = prm->ft3.coords[1];
+				indices[indices_len++] = prm->ft3.coords[2];
 
-				flags_add(prm.ft3->flag, PRM_TRANSLUCENT);
-				prm.ft3->color.r = 180;
-				prm.ft3->color.g = 97 ;
-				prm.ft3->color.b = 120;
-				prm.ft3->color.a = 140;
+				flags_add(prm->ft3.flag, PRM_TRANSLUCENT);
+				prm->ft3.color.r = 180;
+				prm->ft3.color.g = 97 ;
+				prm->ft3.color.b = 120;
+				prm->ft3.color.msb = 1; //140; //to be review here. Shall use mesh
 			}
-			prm.ft3 += 1;
 			break;
 
 		case PRM_TYPE_FT4 :
-			if (flags_is(prm.ft4->flag, PRM_SHIP_ENGINE)) {
+			if (flags_is(prm->ft4.flag, PRM_SHIP_ENGINE)) {
 				die("FT4 ::SE marked polys should be ft3's");
 			}
-			prm.ft4 += 1;
 			break;
 
 		case PRM_TYPE_G3 :
-			if (flags_is(prm.g3->flag, PRM_SHIP_ENGINE)) {
+			if (flags_is(prm->g3.flag, PRM_SHIP_ENGINE)) {
 				die("G3 ::SE marked polys should be ft3's");
 			}
-			prm.g3 += 1;
 			break;
 
 		case PRM_TYPE_G4 :
-			if (flags_is(prm.g4->flag, PRM_SHIP_ENGINE)) {
+			if (flags_is(prm->g4.flag, PRM_SHIP_ENGINE)) {
 				die("G4 ::SE marked polys should be ft3's");
 			}
-			prm.g4 += 1;
 			break;
 
 		case PRM_TYPE_GT3 :
-			if (flags_is(prm.gt3->flag, PRM_SHIP_ENGINE)) {
-				indices[indices_len++] = prm.gt3->coords[0];
-				indices[indices_len++] = prm.gt3->coords[1];
-				indices[indices_len++] = prm.gt3->coords[2];
+			if (flags_is(prm->gt3.flag, PRM_SHIP_ENGINE)) {
+				indices[indices_len++] = prm->gt3.coords[0];
+				indices[indices_len++] = prm->gt3.coords[1];
+				indices[indices_len++] = prm->gt3.coords[2];
 
-				flags_add(prm.gt3->flag, PRM_TRANSLUCENT);
+				flags_add(prm->gt3.flag, PRM_TRANSLUCENT);
 				for (int j = 0; j < 3; j++) {
-					prm.gt3->color[j].r = 180;
-					prm.gt3->color[j].g = 97 ;
-					prm.gt3->color[j].b = 120;
-					prm.gt3->color[j].a = 140;
+					prm->gt3.color[j].r = 180;
+					prm->gt3.color[j].g = 97 ;
+					prm->gt3.color[j].b = 120;
+					prm->gt3.color[j].msb = 1; //140; //to be review here. Shall use mesh
 				}
 			}
-			prm.gt3 += 1;
 			break;
 
 		case PRM_TYPE_GT4 :
-			if (flags_is(prm.gt4->flag, PRM_SHIP_ENGINE)) {
+			if (flags_is(prm->gt4.flag, PRM_SHIP_ENGINE)) {
 				die("GT4 ::SE marked polys should be ft3's");
 			}
-			prm.gt4 += 1;
 			break;
 
 		default :
-			die("cone.c::InitCone:Bad primitive type %x\n", prm.f3->type);
+			die("cone.c::InitCone:Bad primitive type %x\n", prm->f3.type);
 			break;
 		}
 	}
@@ -885,7 +874,7 @@ bool ship_intersects_ship(ship_t *self, ship_t *other) {
 
 
 	Prm poly = {.primitive = other->collision_model->primitives};
-	int primitives_len = other->collision_model->primitives_len;
+	int primitives_len = other->collision_model->info->primitives_len;
 
 	vec3_t p1, p2, p3;
 
