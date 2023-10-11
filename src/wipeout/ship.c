@@ -19,13 +19,12 @@
 void ships_load(void) {
 	saturn_image_ctrl_t *ship_textures = image_get_saturn_textures("wipeout/common/allsh.stf");
 	Object_Saturn_list *ship_models = objects_saturn_load("wipeout/common/allsh.smf", ship_textures);
-	printf("Done\n");
-	texture_list_t collision_textures = image_get_compressed_textures("wipeout/common/alcol.cmp");
-	Object *collision_models = objects_load("wipeout/common/alcol.prm", collision_textures);
+	saturn_image_ctrl_t *collision_textures = image_get_saturn_textures("wipeout/common/alcol.stf");
+	Object_Saturn_list *collision_models = objects_saturn_load("wipeout/common/alcol.smf", collision_textures);
 
 	int object_index;
 	Object *ship_model; // = ship_models;
-	Object *collision_model = collision_models;
+	Object *collision_model;// = collision_models;
 
 	for (object_index = 0; object_index < len(g.ships) && ship_model && collision_model; object_index++) {
 		int ship_index = def.ship_model_to_pilot[object_index];
