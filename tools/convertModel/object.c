@@ -573,7 +573,6 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)convert_to_rgb(poly.gt3->color[0]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.gt3->color[1]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.gt3->color[2]), fobj);
-					pad(fobj);
 					poly.gt3 += 1;
 				break;
 				case PRM_TYPE_GT4:

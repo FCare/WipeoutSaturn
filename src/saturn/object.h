@@ -48,7 +48,6 @@ typedef struct GT3_S {
 	fix16_t coords[3]; // Indices of the coords
 	int16_t texture;
 	rgb1555_t color[3];
-	int16_t pad;
 } GT3_S;
 
 typedef struct G4_S {
