@@ -555,11 +555,6 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 		p += object->info->normals_len*sizeof(fix16_vec3_t);
 	} // each object
 
-	for (int i =0; i<list->length; i++) {
-		printf("ended Model %s\n", list->objects[i]->info->name);
-		printf("First primitive type = %d flag 0x%x\n", list->objects[i]->primitives[1]->type, list->objects[i]->primitives[1]->flag);
-	}
-
 	return list;
 }
 
@@ -633,7 +628,7 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 				}
 			};
 			printf("GT4\n");
-			render_push_stripe_saturn( &q1, poly->gt4.texture);
+			render_push_stripe_saturn( &q1, object->image->textures[poly->gt4.texture]);
 			break;
 
 		case PRM_TYPE_FT3:
@@ -686,7 +681,7 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 				}
 			};
 			printf("FT4 %d %d %d %d\n", coord0, coord1, coord2, coord3);
-			render_push_stripe_saturn( &q2, poly->ft4.texture);
+			render_push_stripe_saturn( &q2, object->image->textures[poly->ft4.texture]);
 			break;
 
 		case PRM_TYPE_G3:

@@ -14,6 +14,7 @@
 #include "game.h"
 #include "hud.h"
 #include "image.h"
+#include "tex.h"
 
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -256,7 +257,7 @@ cmp_t *image_load_compressed(char *name) {
 
 saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
 	printf("load: %s\n", name);
-	int texture;
+	uint16_t texture;
 	uint16_t *buf = (uint16_t*)platform_load_saturn_asset(name, &texture);
 
 	saturn_image_ctrl_t *list = mem_bump(sizeof(saturn_image_ctrl_t));
@@ -264,7 +265,8 @@ saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
 	list->nb_palettes = buf[offset++];
 	list->pal = mem_bump(sizeof(character_t*)*list->nb_palettes);
 	for (int i =0; i<list->nb_palettes; i++) {
-		list->pal[i] = &buf[offset];
+		list->pal[i] = (palette_t *)&buf[offset];
+		offset += 3;
 		switch(list->pal[i]->format) {
 			case COLOR_BANK_16_COL:
 				offset += 16;
@@ -284,8 +286,11 @@ saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
 	}
 	list->nb_characters = buf[offset++];
 	list->character = mem_bump(sizeof(character_t*)*list->nb_characters);
+	list->textures = mem_bump(sizeof(uint16_t)*list->nb_characters);
 	for (int i =0; i<list->nb_characters; i++) {
-		list->character[i] = &buf[offset];
+		list->character[i] = (character_t *)&buf[offset];
+		uint16_t delta = (uint16_t)list->character[i]->pixels - (uint16_t)buf;
+		list->textures[i] = create_sub_texture(delta , list->character[i]->width, list->character[i]->height, texture);
 		offset += list->character[i]->length;
 	}
 	return list;

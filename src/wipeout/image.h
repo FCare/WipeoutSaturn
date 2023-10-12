@@ -3,15 +3,13 @@
 
 #include "../types.h"
 
-typedef enum {
-	COLOR_BANK_16_COL = 0,
-	LOOKUP_TABLE_16_COL = 1,
-	COLOR_BANK_64_COL = 2,
-	COLOR_BANK_128_COL = 3,
-	COLOR_BANK_256_COL = 4,
-	COLOR_BANK_RGB = 5,
-	COLOR_MAX
-} color_mode_t;
+#define COLOR_BANK_16_COL 	0
+#define LOOKUP_TABLE_16_COL 1
+#define COLOR_BANK_64_COL 	2
+#define COLOR_BANK_128_COL 	3
+#define COLOR_BANK_256_COL 	4
+#define COLOR_BANK_RGB 			5
+typedef uint16_t color_mode_t;
 
 
 typedef struct {
@@ -61,6 +59,7 @@ typedef struct {
 	palette_t **pal;
 	uint16_t nb_characters;
 	character_t **character;
+	uint16_t *textures;
 } saturn_image_ctrl_t;
 
 typedef struct {

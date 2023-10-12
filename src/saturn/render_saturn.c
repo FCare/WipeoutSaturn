@@ -228,7 +228,7 @@ void render_push_stripe_saturn(quads_saturn_t *quad, uint16_t texture_index) {
   }
   currentminZ = min(currentminZ, minZ);
   //Add a quad to the vdp1 list v0,v1,v2,v3
-  render_vdp1_add_saturn(quad, quad->vertices[0].color, RENDER_NO_TEXTURE);
+  render_vdp1_add_saturn(quad, quad->vertices[0].color, texture_index);
 }
 
 
