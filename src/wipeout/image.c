@@ -291,7 +291,7 @@ saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
 		list->character[i] = (character_t *)&buf[offset];
 		uint16_t delta = (uint16_t)list->character[i]->pixels - (uint16_t)buf;
 		list->textures[i] = create_sub_texture(delta , list->character[i]->width, list->character[i]->height, texture);
-		offset += list->character[i]->length;
+		offset += list->character[i]->length + 5;
 	}
 	return list;
 }
