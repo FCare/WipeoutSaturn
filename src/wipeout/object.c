@@ -458,7 +458,8 @@ Object *objects_load(char *name, texture_list_t tl) {
 
 Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 	LOGD("load: %s\n", name);
-	uint16_t *bytes = (uint16_t*)platform_load_saturn_asset(name);
+	int texture;
+	uint16_t *bytes = (uint16_t*)platform_load_saturn_asset(name, &texture);
 	if (!bytes) {
 		die("Failed to load file %s\n", name);
 	}
@@ -478,7 +479,6 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 		for (int j=0; j< object->info->primitives_len; j++) {
 			object->primitives[j] = (PRM_saturn*)&bytes[p/2];
 			PRM_saturn *prm = object->primitives[j];
-			if (j==1) printf("First prim type = %d flags = 0x%x\n", prm->type, prm->flag);
 			switch (prm->type) {
 			case PRM_TYPE_F3:
 				p += sizeof(F3_S);
@@ -490,6 +490,7 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 				p += sizeof(FT3_S);
 				break;
 			case PRM_TYPE_FT4:
+			printf("Size is %d\n", sizeof(FT4_S));
 				p += sizeof(FT4_S);
 				break;
 			case PRM_TYPE_G3:
@@ -545,14 +546,13 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 				p += sizeof(InfiniteLight_S);
 				break;
 			default:
-				die("bad primitive type %x \n", prm->type);
+				die("bad primitive type %x Object %d Vertices %d positios 0x%x\n", prm->type, i, j, p);
 			} // switch
-			p-=2; //Go back to type pointer
 		} // each prim
-		object->vertices = (fix16_t*)&bytes[p/2];
-		p += object->info->vertices_len*3*sizeof(fix16_t);
-		object->normals = (fix16_t*)&bytes[p/2];
-		p += object->info->normals_len*3*sizeof(fix16_t);
+		object->vertices = (fix16_vec3_t*)&bytes[p/2];
+		p += object->info->vertices_len*sizeof(fix16_vec3_t);
+		object->normals = (fix16_vec3_t*)&bytes[p/2];
+		p += object->info->normals_len*sizeof(fix16_vec3_t);
 	} // each object
 
 	for (int i =0; i<list->length; i++) {
@@ -563,6 +563,261 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 	return list;
 }
 
+void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
+	vec3_t *vertex = mem_temp_alloc(object->info->vertices_len * sizeof(vec3_t));
+
+	uint16_t primitives_len = object->info->primitives_len;
+
+	render_set_model_mat(mat);
+
+	render_object_transform(vertex, object->vertices, object->info->vertices_len);
+
+	// TODO: check for PRM_SINGLE_SIDED
+
+	printf("Prim len = %d\n", primitives_len);
+
+	for (int i = 0; i < primitives_len; i++) {
+		int coord0;
+		int coord1;
+		int coord2;
+		int coord3;
+		PRM_saturn *poly = object->primitives[i];
+		printf("render %d\n", poly->type);
+		switch (poly->type) {
+		case PRM_TYPE_GT3:
+			coord0 = poly->gt3.coords[0];
+			coord1 = poly->gt3.coords[1];
+			coord2 = poly->gt3.coords[2];
+			render_push_tris_saturn((tris_saturn_t) {
+				.vertices = {
+					{
+						.pos = vertex[coord2],
+						.color = poly->gt3.color[2]
+					},
+					{
+						.pos = vertex[coord1],
+						.color = poly->gt3.color[1]
+					},
+					{
+						.pos = vertex[coord0],
+						.color = poly->gt3.color[0]
+					},
+				}
+			}, poly->gt3.texture);
+			break;
+
+		case PRM_TYPE_GT4:
+			coord0 = poly->gt4.coords[0];
+			coord1 = poly->gt4.coords[1];
+			coord2 = poly->gt4.coords[2];
+			coord3 = poly->gt4.coords[3];
+
+			quads_saturn_t q1 = {
+				.vertices = {
+					{
+						.pos = vertex[coord0],
+						.color = poly->gt4.color[0]
+					},
+					{
+						.pos = vertex[coord1],
+						.color = poly->gt4.color[1]
+					},
+					{
+						.pos = vertex[coord2],
+						.color = poly->gt4.color[2]
+					},
+					{
+						.pos = vertex[coord3],
+						.color = poly->gt4.color[3]
+					},
+				}
+			};
+			printf("GT4\n");
+			render_push_stripe_saturn( &q1, poly->gt4.texture);
+			break;
+
+		case PRM_TYPE_FT3:
+			coord0 = poly->ft3.coords[0];
+			coord1 = poly->ft3.coords[1];
+			coord2 = poly->ft3.coords[2];
+
+			render_push_tris_saturn((tris_saturn_t) {
+				.vertices = {
+					{
+						.pos = vertex[coord2],
+						.color = poly->ft3.color
+					},
+					{
+						.pos = vertex[coord1],
+						.color = poly->ft3.color
+					},
+					{
+						.pos = vertex[coord0],
+						.color = poly->ft3.color
+					},
+				}
+			}, poly->ft3.texture);
+			break;
+
+		case PRM_TYPE_FT4:
+			coord0 = poly->ft4.coords[0];
+			coord1 = poly->ft4.coords[1];
+			coord2 = poly->ft4.coords[2];
+			coord3 = poly->ft4.coords[3];
+
+			quads_saturn_t q2 = {
+				.vertices = {
+					{
+						.pos = vertex[coord3],
+						.color = poly->ft4.color
+					},
+					{
+						.pos = vertex[coord2],
+						.color = poly->ft4.color
+					},
+					{
+						.pos = vertex[coord1],
+						.color = poly->ft4.color
+					},
+					{
+						.pos = vertex[coord0],
+						.color = poly->ft4.color
+					},
+				}
+			};
+			printf("FT4 %d %d %d %d\n", coord0, coord1, coord2, coord3);
+			render_push_stripe_saturn( &q2, poly->ft4.texture);
+			break;
+
+		case PRM_TYPE_G3:
+			coord0 = poly->g3.coords[0];
+			coord1 = poly->g3.coords[1];
+			coord2 = poly->g3.coords[2];
+
+			render_push_tris_saturn((tris_saturn_t) {
+				.vertices = {
+					{
+						.pos = vertex[coord2],
+						.color = poly->g3.color[2]
+					},
+					{
+						.pos = vertex[coord1],
+						.color = poly->g3.color[1]
+					},
+					{
+						.pos = vertex[coord0],
+						.color = poly->g3.color[0]
+					},
+				}
+			}, RENDER_NO_TEXTURE);
+			break;
+
+		case PRM_TYPE_G4:
+			coord0 = poly->g4.coords[0];
+			coord1 = poly->g4.coords[1];
+			coord2 = poly->g4.coords[2];
+			coord3 = poly->g4.coords[3];
+
+			quads_saturn_t q3 = {
+				.vertices = {
+					{
+						.pos = vertex[coord3],
+						.color = poly->g4.color[3]
+					},
+					{
+						.pos = vertex[coord2],
+						.color = poly->g4.color[2]
+					},
+					{
+						.pos = vertex[coord1],
+						.color = poly->g4.color[1]
+					},
+					{
+						.pos = vertex[coord0],
+						.color = poly->g4.color[0]
+					},
+				}
+			};
+			printf("Q3\n");
+			render_push_stripe_saturn( &q3, RENDER_NO_TEXTURE);
+			break;
+
+		case PRM_TYPE_F3:
+			coord0 = poly->f3.coords[0];
+			coord1 = poly->f3.coords[1];
+			coord2 = poly->f3.coords[2];
+
+			render_push_tris_saturn((tris_saturn_t) {
+				.vertices = {
+					{
+						.pos = vertex[coord2],
+						.color = poly->f3.color
+					},
+					{
+						.pos = vertex[coord1],
+						.color = poly->f3.color
+					},
+					{
+						.pos = vertex[coord0],
+						.color = poly->f3.color
+					},
+				}
+			}, RENDER_NO_TEXTURE);
+			break;
+
+		case PRM_TYPE_F4:
+			coord0 = poly->f4.coords[0];
+			coord1 = poly->f4.coords[1];
+			coord2 = poly->f4.coords[2];
+			coord3 = poly->f4.coords[3];
+
+			quads_saturn_t q4 = {
+				.vertices = {
+					{
+						.pos = vertex[coord3],
+						.color = poly->f4.color
+					},
+					{
+						.pos = vertex[coord2],
+						.color = poly->f4.color
+					},
+					{
+						.pos = vertex[coord1],
+						.color = poly->f4.color
+					},
+					{
+						.pos = vertex[coord0],
+						.color = poly->f4.color
+					},
+				}
+			};
+			printf("F4\n");
+			render_push_stripe_saturn( &q4, RENDER_NO_TEXTURE);
+			break;
+
+		case PRM_TYPE_TSPR:
+		case PRM_TYPE_BSPR:
+			// coord0 = poly->spr.coord;
+			//
+			// render_push_sprite(
+			// 	vec3_fix16(
+			// 		vertex[coord0].x,
+			// 		vertex[coord0].y + ((poly->type == PRM_TYPE_TSPR ? poly->spr.height : -poly->spr.height) >> 1),
+			// 		vertex[coord0].z
+			// 	),
+			// 	vec2i(poly->spr.width, poly->spr.height),
+			// 	poly->spr.color,
+			// 	poly->spr.texture
+			// );
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	mem_temp_free(vertex);
+}
 
 void object_draw(Object *object, mat4_t *mat) {
 	vec3_t *vertex = mem_temp_alloc(object->vertices_len * sizeof(vec3_t));

@@ -11,63 +11,63 @@
 typedef struct F3_S {
 	int16_t type; // Type of primitive
 	int16_t flag;
-	fix16_t coords[3]; // Indices of the coords
+	int16_t coords[3]; // Indices of the coords
 	rgb1555_t color;
+	// int16_t pad;
 } F3_S;
 
 typedef struct FT3_S {
 	int16_t type; // Type of primitive
 	int16_t flag;
-	fix16_t coords[3]; // Indices of the coords
+	int16_t coords[3]; // Indices of the coords
 	int16_t texture;
 	rgb1555_t color;
-	int16_t pad;
 } FT3_S;
 
 typedef struct F4_S {
 	int16_t type; // Type of primitive
 	int16_t flag;
-	fix16_t coords[4]; // Indices of the coords
+	int16_t coords[4]; // Indices of the coords
 	rgb1555_t color;
 } F4_S;
 
 typedef struct FT4_S {
 	int16_t type; // Type of primitive
 	int16_t flag;
-	fix16_t coords[4]; // Indices of the coords
+	int16_t coords[4]; // Indices of the coords
 	int16_t texture;
 	rgb1555_t color;
-	int16_t pad;
+	// int16_t pad;
 } FT4_S;
 
 typedef struct G3_S {
 	int16_t type; // Type of primitive
 	int16_t flag;
-	fix16_t coords[3]; // Indices of the coords
+	int16_t coords[3]; // Indices of the coords
 	rgb1555_t color[3];
+	// int16_t pad;
 } G3_S;
 
 typedef struct GT3_S {
 	int16_t type; // Type of primitive
 	int16_t flag;
-	fix16_t coords[3]; // Indices of the coords
+	int16_t coords[3]; // Indices of the coords
 	int16_t texture;
 	rgb1555_t color[3];
-	int16_t pad;
 } GT3_S;
 
 typedef struct G4_S {
 	int16_t type; // Type of primitive
 	int16_t flag;
-	fix16_t coords[4]; // Indices of the coords
+	int16_t coords[4]; // Indices of the coords
 	rgb1555_t color[4];
-	int16_t pad;
+	// int16_t pad;
 } G4_S;
 
 typedef struct GT4_S {
 	int16_t type; // Type of primitive
 	int16_t flag;
-	fix16_t coords[4]; // Indices of the coords
+	int16_t coords[4]; // Indices of the coords
 	int16_t texture;
 	rgb1555_t color[4];
 } GT4_S;
@@ -78,16 +78,16 @@ typedef struct GT4_S {
 typedef struct LSF3_S {
 	int16_t type; // Type of primitive
 	int16_t flag;
-	fix16_t coords[3]; // Indices of the coords
+	int16_t coords[3]; // Indices of the coords
 	fix16_t normal; // Indices of the normals
 	rgb1555_t color;
-	int16_t pad;
+	// int16_t pad;
 } LSF3_S;
 
 typedef struct LSFT3_S {
 	int16_t type; // Type of primitive
 	int16_t flag;
-	fix16_t coords[3]; // Indices of the coords
+	int16_t coords[3]; // Indices of the coords
 	fix16_t normal; // Indices of the normals
 	int16_t texture;
 	rgb1555_t color;
@@ -96,34 +96,34 @@ typedef struct LSFT3_S {
 typedef struct LSF4_S {
 	int16_t type; // Type of primitive
 	int16_t flag;
-	fix16_t coords[4]; // Indices of the coords
+	int16_t coords[4]; // Indices of the coords
 	fix16_t normal; // Indices of the normals
 	rgb1555_t color;
-	int16_t pad;
 } LSF4_S;
 
 typedef struct LSFT4_S {
 	int16_t type; // Type of primitive
 	int16_t flag;
-	fix16_t coords[4]; // Indices of the coords
+	int16_t coords[4]; // Indices of the coords
 	fix16_t normal; // Indices of the normals
 	int16_t texture;
 	rgb1555_t color;
+	// int16_t pad;
 } LSFT4_S;
 
 typedef struct LSG3_S {
 	int16_t type; // Type of primitive
 	int16_t flag;
-	fix16_t coords[3]; // Indices of the coords
+	int16_t coords[3]; // Indices of the coords
 	fix16_t normals[3]; // Indices of the normals
 	rgb1555_t color[3];
-	int16_t pad;
+	// int16_t pad;
 } LSG3_S;
 
 typedef struct LSGT3_S {
 	int16_t type; // Type of primitive
 	int16_t flag;
-	fix16_t coords[3]; // Indices of the coords
+	int16_t coords[3]; // Indices of the coords
 	fix16_t normals[3]; // Indices of the normals
 	int16_t texture;
 	rgb1555_t color[3];
@@ -132,16 +132,16 @@ typedef struct LSGT3_S {
 typedef struct LSG4_S {
 	int16_t type; // Type of primitive
 	int16_t flag;
-	fix16_t coords[4]; // Indices of the coords
+	int16_t coords[4]; // Indices of the coords
 	fix16_t normals[4]; // Indices of the normals
 	rgb1555_t color[4];
-	int16_t pad;
+	// int16_t pad;
 } LSG4_S;
 
 typedef struct LSGT4_S {
 	int16_t type; // Type of primitive
 	int16_t flag;
-	fix16_t coords[4]; // Indices of the coords
+	int16_t coords[4]; // Indices of the coords
 	fix16_t normals[4]; // Indices of the normals
 	int16_t texture;
 	rgb1555_t color[4];
@@ -152,12 +152,11 @@ typedef struct LSGT4_S {
 typedef struct SPR_S {
 	int16_t type;
 	int16_t flag;
-	fix16_t coord;
+	int16_t coord;
 	int16_t width;
 	int16_t height;
 	int16_t texture;
 	rgb1555_t color;
-	int16_t pad;
 } SPR_S;
 
 
@@ -283,5 +282,5 @@ typedef struct{
 } Object_Saturn_list;
 
 extern Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl);
-
+extern void object_saturn_draw(Object_Saturn *object, mat4_t *mat);
 #endif

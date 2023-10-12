@@ -37,6 +37,20 @@ typedef struct {
 	vertex_t vertices[4];
 } quads_t;
 
+typedef struct {
+	vec3_t pos;
+	vec2_t uv;
+	rgb1555_t color;
+} vertex_saturn_t;
+
+typedef struct {
+	vertex_saturn_t vertices[3];
+} tris_saturn_t;
+
+typedef struct {
+	vertex_saturn_t vertices[4];
+} quads_saturn_t;
+
 
 #define rgba(R, G, B, A) ((rgba_t){.r = R, .g = G, .b = B, .a = A})
 #define vec2(X, Y) ((vec2_t){.x = FIX16(X), .y = FIX16(Y)})

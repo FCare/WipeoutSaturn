@@ -57,6 +57,9 @@ void render_push_sprite(vec3_t pos, vec2i_t size, rgba_t color, uint16_t texture
 void render_push_2d(vec2i_t pos, vec2i_t size, rgba_t color, uint16_t texture);
 void render_push_2d_tile(vec2i_t pos, vec2i_t uv_offset, vec2i_t uv_size, vec2i_t size, rgba_t color, uint16_t texture_index);
 
+void render_push_tris_saturn(tris_saturn_t tris, uint16_t texture);
+void render_push_stripe_saturn(quads_saturn_t *quad, uint16_t texture_index);
+
 uint16_t render_texture_create(uint32_t width, uint32_t height, rgba_t *pixels);
 vec2i_t render_texture_size(uint16_t texture_index);
 void render_texture_replace_pixels(uint16_t texture_index, rgba_t *pixels);

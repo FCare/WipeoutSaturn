@@ -27,6 +27,7 @@ void mem_init(void) {
 }
 
 void *mem_mark(void) {
+	printf("Mem mark 0x%x\n", &hunk[bump_len]);
 	return &hunk[bump_len];
 }
 

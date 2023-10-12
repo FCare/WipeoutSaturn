@@ -38,7 +38,7 @@ uint8_t *file_load(const char *path, uint32_t *bytes_read) {
 
 	*bytes_read = fread(bytes, 1, size, f);
 	fclose(f);
-	
+
 	error_if(*bytes_read != size, "Could not read file: %s", path);
 	return bytes;
 }
@@ -50,7 +50,7 @@ uint32_t file_store(const char *path, void *bytes, int32_t len) {
 	if (fwrite(bytes, 1, len, f) != len) {
 		die("Could not write file file %s", path);
 	}
-	
+
 	fclose(f);
 	return len;
 }

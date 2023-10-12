@@ -254,22 +254,18 @@ cmp_t *image_load_compressed(char *name) {
 	return cmp;
 }
 
-uint8_t* image_get_saturn_font_texture(char *name) {
-	printf("load: %s\n", name);
-	return platform_load_saturn_asset(name);
-}
-
 saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
 	printf("load: %s\n", name);
-	uint16_t *buf = (uint16_t*)platform_load_saturn_asset(name);
+	int texture;
+	uint16_t *buf = (uint16_t*)platform_load_saturn_asset(name, &texture);
 
-	saturn_image_ctrl_t list;
+	saturn_image_ctrl_t *list = mem_bump(sizeof(saturn_image_ctrl_t));
 	int offset = 0;
-	list.nb_palettes = buf[offset++];
-	list.pal = mem_bump(sizeof(character_t*)*list.nb_palettes);
-	for (int i =0; i<list.nb_palettes; i++) {
-		list.pal[i] = &buf[offset];
-		switch(list.pal[i]->format) {
+	list->nb_palettes = buf[offset++];
+	list->pal = mem_bump(sizeof(character_t*)*list->nb_palettes);
+	for (int i =0; i<list->nb_palettes; i++) {
+		list->pal[i] = &buf[offset];
+		switch(list->pal[i]->format) {
 			case COLOR_BANK_16_COL:
 				offset += 16;
 				break;
@@ -286,21 +282,23 @@ saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
 				break;
 			}
 	}
-	list.nb_characters = buf[offset++];
-	list.character = mem_bump(sizeof(character_t*)*list.nb_characters);
-	for (int i =0; i<list.nb_characters; i++) {
-		list.character[i] = &buf[offset];
-		offset += list.character[i]->length;
+	list->nb_characters = buf[offset++];
+	list->character = mem_bump(sizeof(character_t*)*list->nb_characters);
+	for (int i =0; i<list->nb_characters; i++) {
+		list->character[i] = &buf[offset];
+		offset += list->character[i]->length;
 	}
-	return &list;
+	return list;
 }
 
 uint16_t image_get_texture(char *name) {
 	printf("load: %s\n", name);
 	uint32_t size;
+
 	uint8_t *bytes = platform_load_asset(name, &size);
 	image_t *image = image_load_from_bytes(bytes, false);
 	uint16_t texture_index = render_texture_create(image->width, image->height, image->pixels);
+
 	mem_temp_free(image);
 	mem_temp_free(bytes);
 

@@ -613,13 +613,17 @@ void game_update(void) {
 	if (scene_next != GAME_SCENE_NONE) {
 		scene_current = scene_next;
 		scene_next = GAME_SCENE_NONE;
+
 		render_textures_reset(global_textures_len);
+
 		mem_reset(global_mem_mark);
+
 		system_reset_cycle_time();
 
 		if (scene_current != GAME_SCENE_NONE) {
 			game_scenes[scene_current].init();
 		}
+
 	}
 
 	if (scene_current != GAME_SCENE_NONE) {

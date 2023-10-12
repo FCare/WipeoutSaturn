@@ -7,6 +7,8 @@
 #include "utils.h"
 #include "mem.h"
 
+#include "../wipeout/game.h"
+
 #define NEAR_PLANE 128.0
 #define FAR_PLANE (RENDER_FADEOUT_FAR)
 #define TEXTURES_MAX 1024
@@ -207,6 +209,29 @@ void render_push_quads(quads_t *quad, uint16_t texture_index) {
   render_push_native_quads(quad, rgba(128,128,128,255), texture_index);
 }
 
+void render_push_stripe_saturn(quads_saturn_t *quad, uint16_t texture_index) {
+  LOGD("%s\n", __FUNCTION__);
+
+  vec3_t temp = quad->vertices[1].pos;
+  quad->vertices[1].pos = quad->vertices[2].pos;
+  quad->vertices[2].pos = quad->vertices[3].pos;
+  quad->vertices[3].pos = temp;
+
+  nb_planes++;
+  fix16_t minZ = FIX16_ZERO;
+  for (int i = 0; i<4; i++) {
+    if (quad->vertices[i].pos.z >= FIX16_ONE) {
+      LOGD("discard due to Z=%d\n", (uint32_t)quad->vertices[i].pos.z);
+      return;
+    }
+    minZ = max(minZ, quad->vertices[i].pos.z);
+  }
+  currentminZ = min(currentminZ, minZ);
+  //Add a quad to the vdp1 list v0,v1,v2,v3
+  render_vdp1_add_saturn(quad, quad->vertices[0].color, RENDER_NO_TEXTURE);
+}
+
+
 void render_push_stripe(quads_t *quad, uint16_t texture_index) {
   LOGD("%s\n", __FUNCTION__);
 
@@ -225,6 +250,28 @@ void render_push_stripe(quads_t *quad, uint16_t texture_index) {
   quad->vertices[3].uv.y = 1;
 
   render_push_native_quads(quad, quad->vertices[0].color, RENDER_NO_TEXTURE);
+}
+void render_push_tris_saturn(tris_saturn_t tris, uint16_t texture){
+  LOGD("%s\n", __FUNCTION__);
+  fix16_t minZ = FIX16_ZERO;
+  nb_planes++;
+  for (int i = 0; i<3; i++) {
+    if (tris.vertices[i].pos.z >= FIX16_ONE) {
+      LOGD("discard due to Z=%d\n", (uint32_t)tris.vertices[i].pos.z);
+      return;
+    }
+    minZ = min(minZ, tris.vertices[i].pos.z);
+  }
+
+  currentminZ = min(currentminZ, minZ);
+
+  quads_saturn_t q= (quads_saturn_t){
+    .vertices = {
+      tris.vertices[0], tris.vertices[1], tris.vertices[1], tris.vertices[2]
+    }
+  };
+  //Add a quad to the vdp1 list v0,v1,v2,v3
+  render_vdp1_add_saturn(&q,  q.vertices[0].color, RENDER_NO_TEXTURE);
 }
 
 void render_push_tris(tris_t tris, uint16_t texture_index){
@@ -370,18 +417,17 @@ uint16_t render_texture_create(uint32_t width, uint32_t height, rgba_t *pixels){
   else
     LOGD("Need %d kB\n", byte_size/1024);
   LOGD("Create Texture(%dx%d)\n", width, height);
-  rgb1555_t *buffer = (rgb1555_t *)tex_bump(byte_size);
+  uint16_t texture = allocate_tex(width, height, byte_size);
+  rgb1555_t *buffer = get_tex(texture)->pixels;
+  printf("Buffer is 0x%x to 0x%x\n", buffer, &buffer[width*height]);
 
   for (uint32_t i=0; i<width*height; i++) {
     buffer[i] = convert_to_rgb(pixels[i]);
   }
 
-	return allocate_tex(width, height, buffer);
+	return texture;
 }
 
-uint16_t render_texture_create_555(uint32_t width, uint32_t height, rgb1555_t *pixels){
-    return allocate_tex(width, height, pixels);
-}
 vec2i_t render_texture_size(uint16_t texture){
   LOGD("%s\n", __FUNCTION__);
   return get_tex(texture)->size;
@@ -394,6 +440,7 @@ void render_texture_replace_pixels(uint16_t texture_index, rgba_t *pixels){
   }
 }
 uint16_t render_textures_len(void){
+  printf("Return tex length 0x%x\n", tex_length());
   return tex_length();
 }
 void render_textures_reset(uint16_t len){

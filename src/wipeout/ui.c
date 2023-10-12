@@ -70,31 +70,26 @@ uint16_t icon_textures[UI_ICON_MAX];
 
 
 void ui_load(void) {
-	char_set[UI_SIZE_16].image = (saturn_font_t*) image_get_saturn_font_texture("wipeout/textures/fonts/fonts_16.stf");
+	uint16_t texture;
+	char_set[UI_SIZE_16].image = (saturn_font_t*) platform_load_saturn_asset("wipeout/textures/fonts/fonts_16.stf", &texture);
 	char_set[UI_SIZE_16].tex = mem_bump(sizeof(uint16_t) * char_set[UI_SIZE_16].image->nbQuads);
 	for (int i =0; i<char_set[UI_SIZE_16].image->nbQuads; i++) {
 		font_character_t * char_glyph = &char_set[UI_SIZE_16].image->character[i];
-		int32_t data_chunk = (int)(char_set[UI_SIZE_16].image) + (int)char_glyph->offset;
-		rgb1555_t *buffer = (rgb1555_t *)(data_chunk);
-		char_set[UI_SIZE_16].tex[i] = render_texture_create_555(char_glyph->stride, char_glyph->height, buffer);
+		char_set[UI_SIZE_16].tex[i] = create_sub_texture(char_glyph->offset/2, char_glyph->stride, char_glyph->height, texture);
 	}
 
-	char_set[UI_SIZE_12].image = (saturn_font_t*) image_get_saturn_font_texture("wipeout/textures/fonts/fonts_12.stf");
+	char_set[UI_SIZE_12].image = (saturn_font_t*) platform_load_saturn_asset("wipeout/textures/fonts/fonts_12.stf", &texture);
 	char_set[UI_SIZE_12].tex = mem_bump(sizeof(uint16_t) * char_set[UI_SIZE_12].image->nbQuads);
 	for (int i =0; i<char_set[UI_SIZE_12].image->nbQuads; i++) {
 		font_character_t * char_glyph = &char_set[UI_SIZE_12].image->character[i];
-		int32_t data_chunk = (int)(char_set[UI_SIZE_12].image) + (int)char_glyph->offset;
-		rgb1555_t *buffer = (rgb1555_t *)(data_chunk);
-		char_set[UI_SIZE_12].tex[i] = render_texture_create_555(char_glyph->stride, char_glyph->height, buffer);
+		char_set[UI_SIZE_12].tex[i] = create_sub_texture(char_glyph->offset/2, char_glyph->stride, char_glyph->height, texture);
 	}
 
-	char_set[UI_SIZE_8].image = (saturn_font_t*) image_get_saturn_font_texture("wipeout/textures/fonts/fonts_8.stf");
+	char_set[UI_SIZE_8].image = (saturn_font_t*) platform_load_saturn_asset("wipeout/textures/fonts/fonts_8.stf", &texture);
 	char_set[UI_SIZE_8].tex = mem_bump(sizeof(uint16_t) * char_set[UI_SIZE_8].image->nbQuads);
 	for (int i =0; i<char_set[UI_SIZE_8].image->nbQuads; i++) {
 		font_character_t * char_glyph = &char_set[UI_SIZE_8].image->character[i];
-		int32_t data_chunk = (int)(char_set[UI_SIZE_8].image) + (int)char_glyph->offset;
-		rgb1555_t *buffer = (rgb1555_t *)(data_chunk);
-		char_set[UI_SIZE_8].tex[i] = render_texture_create_555(char_glyph->stride, char_glyph->height, buffer);
+		char_set[UI_SIZE_8].tex[i] = create_sub_texture(char_glyph->offset/2, char_glyph->stride, char_glyph->height, texture);
 	}
 
 	// icon_textures[UI_ICON_HAND]    = texture_from_list(tl, 3);

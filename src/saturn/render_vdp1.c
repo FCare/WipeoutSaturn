@@ -83,6 +83,110 @@ void vdp1_init(void)
   vdp1_sync_interval_set(0);
 }
 
+void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t texture_index){
+  LOGD(
+    "vdp1 add saturn %dx%d %dx%d %dx%d %dx%d\n",
+    fix16_int32_to(quad->vertices[0].pos.x),
+    fix16_int32_to(quad->vertices[0].pos.y),
+    fix16_int32_to(quad->vertices[1].pos.x),
+    fix16_int32_to(quad->vertices[1].pos.y),
+    fix16_int32_to(quad->vertices[2].pos.x),
+    fix16_int32_to(quad->vertices[2].pos.y),
+    fix16_int32_to(quad->vertices[3].pos.x),
+    fix16_int32_to(quad->vertices[3].pos.y)
+  );
+
+  assert (nbCommand < cmdt_max-2);
+  // assert(canAllocateVdp1_saturn(texture_index, id, quad) != 0);
+
+  const vdp1_cmdt_draw_mode_t draw_mode = {
+          .color_mode           = VDP1_CMDT_CM_RGB_32768,
+          .trans_pixel_disable  = true,
+          .pre_clipping_disable = true,
+          .end_code_disable     = false
+  };
+  const vdp1_cmdt_draw_mode_t draw_mode_gouraud = {
+          .color_mode           = VDP1_CMDT_CM_RGB_32768,
+          .trans_pixel_disable  = true,
+          .pre_clipping_disable = true,
+          .end_code_disable     = false,
+          .cc_mode              = VDP1_CMDT_CC_GOURAUD
+  };
+
+
+  vdp1_cmdt_t *cmd = &cmdts[nbCommand];
+  memset(cmd, 0x0, sizeof(vdp1_cmdt_t));
+
+  chain[nbCommand].z = 0;
+  for (int i = 0; i<4; i++) {
+    chain[nbCommand].z += quad->vertices[i].pos.z;
+  }
+  chain[nbCommand].z >>= 2;
+
+  vec2i_t size;
+
+  quads_t q;
+  q.vertices[0].uv.x = 0;
+  q.vertices[0].uv.y = 0;
+  q.vertices[1].uv.x = 7;
+  q.vertices[1].uv.y = 0;
+  q.vertices[2].uv.x = 7;
+  q.vertices[2].uv.y = 1;
+  q.vertices[3].uv.x = 0;
+  q.vertices[3].uv.y = 1;
+
+  uint16_t*character = getVdp1VramAddress(texture_index, id, &q, &size); //a revoir parce qu'il ne faut copier suivant le UV
+  LOGD(
+    "after %dx%d %dx%d %dx%d %dx%d\n",
+    fix16_int32_to(quad->vertices[0].pos.x),
+    fix16_int32_to(quad->vertices[0].pos.y),
+    fix16_int32_to(quad->vertices[1].pos.x),
+    fix16_int32_to(quad->vertices[1].pos.y),
+    fix16_int32_to(quad->vertices[2].pos.x),
+    fix16_int32_to(quad->vertices[2].pos.y),
+    fix16_int32_to(quad->vertices[3].pos.x),
+    fix16_int32_to(quad->vertices[3].pos.y)
+  );
+  //Donc il faut transformer le UV en rectangle
+  vdp1_cmdt_end_clear(cmd);
+  vdp1_cmdt_distorted_sprite_set(cmd); //Use distorted by default but it can be normal or scaled
+  vdp1_cmdt_draw_mode_set(cmd, draw_mode);
+  vdp1_cmdt_char_size_set(cmd, size.x, size.y);
+  vdp1_cmdt_char_base_set(cmd, (vdp1_vram_t)character);
+  vdp1_cmdt_link_type_set(cmd, VDP1_CMDT_LINK_TYPE_JUMP_ASSIGN);
+  cmd->cmd_link = (uint16_t)((uint32_t)&cmdts[nbCommand+1]-(uint32_t)&cmdt_list->cmdts[0])>>3;
+  chain[nbCommand].id = nbCommand;
+
+  rgb1555_t gouraud = color;
+  if ((gouraud.r != 0x10) || (gouraud.g != 0x10) || (gouraud.b != 0x10)) {
+    //apply gouraud
+    //Shall not be shared between lists
+    vdp1_gouraud_table_t *gouraud_base;
+    gouraud_base = &_vdp1_vram_partitions.gouraud_base[gouraud_cmd];
+    gouraud_base->colors[0] = gouraud;
+    gouraud_base->colors[1] = gouraud;
+    gouraud_base->colors[2] = gouraud;
+    gouraud_base->colors[3] = gouraud;
+    gouraud_cmd++;
+    vdp1_cmdt_draw_mode_set(cmd, draw_mode_gouraud);
+
+   vdp1_cmdt_gouraud_base_set(cmd, (uint32_t)gouraud_base);
+  }
+
+  cmd->cmd_xa = fix16_int32_to(quad->vertices[0].pos.x);
+  cmd->cmd_ya = fix16_int32_to(quad->vertices[0].pos.y);
+  cmd->cmd_xb = fix16_int32_to(quad->vertices[1].pos.x);
+  cmd->cmd_yb = fix16_int32_to(quad->vertices[1].pos.y);
+  cmd->cmd_xc = fix16_int32_to(quad->vertices[2].pos.x);
+  cmd->cmd_yc = fix16_int32_to(quad->vertices[2].pos.y);
+  cmd->cmd_xd = fix16_int32_to(quad->vertices[3].pos.x);
+  cmd->cmd_yd = fix16_int32_to(quad->vertices[3].pos.y);
+
+  LOGD("####Add CMD########\n");
+
+  nbCommand++;
+}
+
 void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
 {
   LOGD(

@@ -49,6 +49,17 @@ static void draw_model(Object *model, vec2_t offset, vec3_t pos, fix16_t rotatio
 	render_set_screen_position(vec2_fix16(FIX16_ZERO, FIX16_ZERO));
 }
 
+static void draw_saturn_model(Object_Saturn *model, vec2_t offset, vec3_t pos, fix16_t rotation) {
+	printf("prim len before = %d\n",model->info->primitives_len);
+	render_set_view(vec3_fix16(FIX16_ZERO,FIX16_ZERO,FIX16_ZERO), vec3_fix16(FIX16_ZERO, -PLATFORM_PI, -PLATFORM_PI));
+	render_set_screen_position(offset);
+	mat4_t mat = mat4_identity();
+	mat4_set_translation(&mat, pos);
+	mat4_set_yaw_pitch_roll(&mat, vec3_fix16(FIX16_ZERO, rotation, PLATFORM_PI));
+	object_saturn_draw(model, &mat);
+	render_set_screen_position(vec2_fix16(FIX16_ZERO, FIX16_ZERO));
+}
+
 // -----------------------------------------------------------------------------
 // Main Menu
 
@@ -74,8 +85,9 @@ static void button_quit(menu_t *menu, int data) {
 }
 
 static void page_main_draw(menu_t *menu, int data) {
+	printf("prim len before = %d\n",g.ships[0].model->info->primitives_len);
 	switch (data) {
-		case 0: draw_model(g.ships[0].model, vec2(0, -0.1), vec3(0, 0, -700), system_cycle_time()); break;
+		case 0: draw_saturn_model(g.ships[0].model, vec2(0, -0.1), vec3(0, 0, -700), system_cycle_time()); break;
 		case 1: draw_model(models.misc.options, vec2(0, -0.2), vec3(0, 0, -700), system_cycle_time()); break;
 		case 2: draw_model(models.misc.msdos, vec2(0, -0.2), vec3(0, 0, -700), system_cycle_time()); break;
 	}
@@ -524,6 +536,7 @@ static void objects_unpack_imp(Object **dest_array, int len, Object *src) {
 void main_menu_init(void) {
 
 	// ships_load();
+
 	g.is_attract_mode = false;
 
 	ships_reset_exhaust_plumes();

@@ -30,7 +30,7 @@ void ships_load(void) {
 		int ship_index = def.ship_model_to_pilot[object_index];
 		g.ships[ship_index].model = ship_models->objects[object_index];
 		g.ships[ship_index].collision_model = collision_models->objects[object_index];
-printf("Plume on object %d ship %d %s\n", object_index, ship_index, ship_models->objects[object_index]->info->name);
+printf("Plume on object %d ship %d %s => %d\n", object_index, ship_index, g.ships[ship_index].model->info->name, g.ships[ship_index].model->info->vertices_len);
 		ship_init_exhaust_plume(&g.ships[ship_index]);
 	}
 
@@ -290,9 +290,9 @@ void ship_init_exhaust_plume(ship_t *self) {
 				indices[indices_len++] = prm->ft3.coords[2];
 
 				flags_add(prm->ft3.flag, PRM_TRANSLUCENT);
-				prm->ft3.color.r = 180;
-				prm->ft3.color.g = 97 ;
-				prm->ft3.color.b = 120;
+				prm->ft3.color.r = 180>>3;
+				prm->ft3.color.g = 97>>3 ;
+				prm->ft3.color.b = 120>>3;
 				prm->ft3.color.msb = 1; //140; //to be review here. Shall use mesh
 			}
 			break;
@@ -323,9 +323,9 @@ void ship_init_exhaust_plume(ship_t *self) {
 
 				flags_add(prm->gt3.flag, PRM_TRANSLUCENT);
 				for (int j = 0; j < 3; j++) {
-					prm->gt3.color[j].r = 180;
-					prm->gt3.color[j].g = 97 ;
-					prm->gt3.color[j].b = 120;
+					prm->gt3.color[j].r = 180>>3;
+					prm->gt3.color[j].g = 97>>3 ;
+					prm->gt3.color[j].b = 120>>3;
 					prm->gt3.color[j].msb = 1; //140; //to be review here. Shall use mesh
 				}
 			}
