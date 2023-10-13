@@ -15,7 +15,13 @@ typedef enum {
 
 typedef struct {
 	color_mode_t format;
-	rgb1555_t* palette;
+	rgb1555_t* pixels;
+	uint16_t index_in_file;
+} palette_t;
+
+typedef struct {
+	color_mode_t format;
+	palette_t palette;
 	int16_t width;
   int16_t height;
 	rgba_t *pixels;

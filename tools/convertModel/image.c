@@ -141,6 +141,7 @@ static cmp_t *image_load_compressed(char *name) {
 texture_list_t image_get_compressed_textures(char *name) {
 	cmp_t *cmp = image_load_compressed(name);
 	texture_list_t list = {.len = cmp->len};
+	int nbPalette = 0;
 
   list.texture = malloc(cmp->len* sizeof(texture_t));
 	for (int i = 0; i < cmp->len; i++) {
@@ -154,6 +155,8 @@ texture_list_t image_get_compressed_textures(char *name) {
 
 		list.texture[i] = texture_create(image->width, image->height, image->pixels);
 		list.texture[i]->id = i;
+		if (list.texture[i]->format != COLOR_BANK_RGB)
+			list.texture[i]->palette.index_in_file = nbPalette++;
 		// free(image);
 	}
 	free(cmp);

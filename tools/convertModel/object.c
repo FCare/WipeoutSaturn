@@ -105,7 +105,6 @@ Object *objects_load(char *name, texture_list_t *tl) {
 			int16_t prm_type = get_i16(bytes, &p);
 			int16_t prm_flag = get_i16(bytes, &p);
 
-			printf("Load[%d] %d\n", i, prm_type);
 			switch (prm_type) {
 			case PRM_TYPE_F3:
 				prm.ptr = mem_bump(sizeof(F3));
@@ -509,7 +508,6 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 		Prm poly = {.primitive = obj->primitives};
 		for (int i = 0; i < obj->primitives_len; i++) {
 			write_16((uint16_t)poly.primitive->type, fobj);
-			printf("Type %d 0x%x\n", poly.primitive->type, (uint32_t)ftell(fobj));
 			switch (poly.primitive->type) {
 				case PRM_TYPE_F3:
 					write_16((uint16_t)poly.f3->flag, fobj);
@@ -864,21 +862,25 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 	write_16((uint16_t)textures->len, ftex);
 	for (int i = 0; i < textures->len; i++) {
 		texture_t *tex = textures->texture[i];
-		write_16((uint16_t)tex->width, ftex);
-		write_16((uint16_t)tex->height, ftex);
 		write_16((uint16_t)tex->format, ftex);
+		write_16((uint16_t)1, ftex);
 		switch(tex->format) {
 			case COLOR_BANK_16_COL:
-				for (int j=0; j<16; j++) write_16((uint16_t)tex->palette[j], ftex);
+			case LOOKUP_TABLE_16_COL:
+				write_16((uint16_t)16, ftex);
+				for (int j=0; j<16; j++) write_16((uint16_t)tex->palette.pixels[j], ftex);
 				break;
 			case COLOR_BANK_64_COL:
-				for (int j=0; j<64; j++) write_16((uint16_t)tex->palette[j], ftex);
+				write_16((uint16_t)64, ftex);
+				for (int j=0; j<64; j++) write_16((uint16_t)tex->palette.pixels[j], ftex);
 				break;
 			case COLOR_BANK_128_COL:
-				for (int j=0; j<128; j++) write_16((uint16_t)tex->palette[j], ftex);
+			write_16((uint16_t)128, ftex);
+				for (int j=0; j<128; j++) write_16((uint16_t)tex->palette.pixels[j], ftex);
 				break;
 			case COLOR_BANK_256_COL:
-				for (int j=0; j<256; j++) write_16((uint16_t)tex->palette[j], ftex);
+			write_16((uint16_t)256, ftex);
+				for (int j=0; j<256; j++) write_16((uint16_t)tex->palette.pixels[j], ftex);
 				break;
 			default:
 				break;
