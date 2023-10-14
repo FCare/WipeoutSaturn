@@ -40,7 +40,7 @@ uint16_t allocate_tex(uint32_t width, uint32_t height, uint32_t size) {
 }
 
 render_texture_t* get_tex(uint16_t texture) {
-    error_if(texture >= textures_len, "Invalid texture %d", texture);
+    error_if(texture >= textures_len, "Invalid texture %d vs %d", texture,textures_len);
     return &textures[texture];
 }
 
@@ -51,5 +51,6 @@ uint16_t create_sub_texture(uint16_t offset, uint32_t width, uint32_t height, ui
 }
 
 uint16_t tex_length(void) {
+	printf("return tex length %d\n", textures_len);
   return textures_len;
 }

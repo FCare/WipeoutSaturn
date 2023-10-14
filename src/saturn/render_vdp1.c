@@ -83,7 +83,7 @@ void vdp1_init(void)
   vdp1_sync_interval_set(0);
 }
 
-void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t texture_index){
+void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t primitive_index, uint16_t texture_index, Object_Saturn *object){
   LOGD(
     "vdp1 add saturn %dx%d %dx%d %dx%d %dx%d\n",
     fix16_int32_to(quad->vertices[0].pos.x),
@@ -99,20 +99,6 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t text
   assert (nbCommand < cmdt_max-2);
   // assert(canAllocateVdp1_saturn(texture_index, id, quad) != 0);
 
-  const vdp1_cmdt_draw_mode_t draw_mode = {
-          .color_mode           = VDP1_CMDT_CM_RGB_32768,
-          .trans_pixel_disable  = true,
-          .pre_clipping_disable = true,
-          .end_code_disable     = false
-  };
-  const vdp1_cmdt_draw_mode_t draw_mode_gouraud = {
-          .color_mode           = VDP1_CMDT_CM_RGB_32768,
-          .trans_pixel_disable  = true,
-          .pre_clipping_disable = true,
-          .end_code_disable     = false,
-          .cc_mode              = VDP1_CMDT_CC_GOURAUD
-  };
-
 
   vdp1_cmdt_t *cmd = &cmdts[nbCommand];
   memset(cmd, 0x0, sizeof(vdp1_cmdt_t));
@@ -123,19 +109,7 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t text
   }
   chain[nbCommand].z >>= 2;
 
-  vec2i_t size;
 
-  quads_t q;
-  q.vertices[0].uv.x = 0;
-  q.vertices[0].uv.y = 0;
-  q.vertices[1].uv.x = 7;
-  q.vertices[1].uv.y = 0;
-  q.vertices[2].uv.x = 7;
-  q.vertices[2].uv.y = 1;
-  q.vertices[3].uv.x = 0;
-  q.vertices[3].uv.y = 1;
-
-  uint16_t*character = getVdp1VramAddress(texture_index, id, &q, &size); //a revoir parce qu'il ne faut copier suivant le UV
   LOGD(
     "after %dx%d %dx%d %dx%d %dx%d\n",
     fix16_int32_to(quad->vertices[0].pos.x),
@@ -149,6 +123,54 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t text
   );
   //Donc il faut transformer le UV en rectangle
   vdp1_cmdt_end_clear(cmd);
+
+  vdp1_cmdt_draw_mode_t draw_mode = {
+    .trans_pixel_disable  = true,
+    .pre_clipping_disable = true,
+    .end_code_disable     = false,
+  };
+
+  PRM_saturn *primitive = object->primitives[primitive_index];
+  uint16_t character_texture = object->image->character[primitive->texture]->texture;
+  printf("%d\n", __LINE__);
+  vec2i_t size = get_tex(character_texture)->size;
+  printf("%d\n", __LINE__);
+  uint16_t *character = getVdp1VramAddress_Saturn(character_texture, id); //a revoir parce qu'il ne faut copier suivant le UV
+  printf("%d\n", __LINE__);
+  uint16_t palette_texture = object->image->pal[primitive->palette]->texture;
+  printf("%d =>%d vs %d\n", __LINE__, palette_texture, object->image->nb_palettes);
+  uint16_t *palette = getVdp1VramAddress_Saturn(palette_texture, id);
+  printf("%d\n", __LINE__);
+
+  vdp1_cmdt_color_bank_t color_bank; //not used yet
+  switch(object->image->pal[primitive->palette]->format) {
+    case COLOR_BANK_16_COL 	:
+      die("Not supported\n");
+      // vdp1_cmdt_color_mode0_set(&draw_mode, palette);
+      break;
+    case LOOKUP_TABLE_16_COL:
+      vdp1_cmdt_color_mode1_set(&draw_mode, (uint32_t)palette);
+      break;
+    case COLOR_BANK_64_COL 	:
+      die("Not supported\n");
+      // vdp1_cmdt_color_mode2_set(&draw_mode, palette);
+      break;
+    case COLOR_BANK_128_COL :
+      die("Not supported\n");
+      // vdp1_cmdt_color_mode3_set(&draw_mode, palette);
+      break;
+    case COLOR_BANK_256_COL :
+      die("Not supported\n");
+      // vdp1_cmdt_color_mode4_set(&draw_mode, palette);
+      break;
+    case COLOR_BANK_RGB 		:
+    default:
+      // vdp1_cmdt_color_mode5_set(&draw_mode, palette);
+      break;
+  }
+
+  draw_mode.color_mode    = object->image->pal[texture_index]->format;
+
   vdp1_cmdt_distorted_sprite_set(cmd); //Use distorted by default but it can be normal or scaled
   vdp1_cmdt_draw_mode_set(cmd, draw_mode);
   vdp1_cmdt_char_size_set(cmd, size.x, size.y);
@@ -168,10 +190,11 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t text
     gouraud_base->colors[2] = gouraud;
     gouraud_base->colors[3] = gouraud;
     gouraud_cmd++;
-    vdp1_cmdt_draw_mode_set(cmd, draw_mode_gouraud);
+    draw_mode.cc_mode = VDP1_CMDT_CC_GOURAUD;
 
-   vdp1_cmdt_gouraud_base_set(cmd, (uint32_t)gouraud_base);
+    vdp1_cmdt_gouraud_base_set(cmd, (uint32_t)gouraud_base);
   }
+  vdp1_cmdt_draw_mode_set(cmd, draw_mode);
 
   cmd->cmd_xa = fix16_int32_to(quad->vertices[0].pos.x);
   cmd->cmd_ya = fix16_int32_to(quad->vertices[0].pos.y);

@@ -490,7 +490,6 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 				p += sizeof(FT3_S);
 				break;
 			case PRM_TYPE_FT4:
-			printf("Size is %d\n", sizeof(FT4_S));
 				p += sizeof(FT4_S);
 				break;
 			case PRM_TYPE_G3:
@@ -571,7 +570,7 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 
 	printf("Prim len = %d\n", primitives_len);
 
-	for (int i = 0; i < primitives_len; i++) {
+	for (uint16_t i = 0; i < primitives_len; i++) {
 		int coord0;
 		int coord1;
 		int coord2;
@@ -598,7 +597,7 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 						.color = poly->gt3.color[0]
 					},
 				}
-			}, poly->gt3.texture);
+			}, i, poly->gt3.texture, object);
 			break;
 
 		case PRM_TYPE_GT4:
@@ -628,7 +627,7 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 				}
 			};
 			printf("GT4\n");
-			render_push_stripe_saturn( &q1, object->image->textures[poly->gt4.texture]);
+			render_push_stripe_saturn( &q1, i, poly->gt4.texture, object);
 			break;
 
 		case PRM_TYPE_FT3:
@@ -651,7 +650,7 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 						.color = poly->ft3.color
 					},
 				}
-			}, poly->ft3.texture);
+			}, i, poly->ft3.texture, object);
 			break;
 
 		case PRM_TYPE_FT4:
@@ -681,7 +680,7 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 				}
 			};
 			printf("FT4 %d %d %d %d\n", coord0, coord1, coord2, coord3);
-			render_push_stripe_saturn( &q2, object->image->textures[poly->ft4.texture]);
+			render_push_stripe_saturn( &q2, i, poly->ft4.texture, object);
 			break;
 
 		case PRM_TYPE_G3:
@@ -704,7 +703,7 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 						.color = poly->g3.color[0]
 					},
 				}
-			}, RENDER_NO_TEXTURE);
+			}, i, RENDER_NO_TEXTURE, object);
 			break;
 
 		case PRM_TYPE_G4:
@@ -734,7 +733,7 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 				}
 			};
 			printf("Q3\n");
-			render_push_stripe_saturn( &q3, RENDER_NO_TEXTURE);
+			render_push_stripe_saturn( &q3, i,RENDER_NO_TEXTURE, object);
 			break;
 
 		case PRM_TYPE_F3:
@@ -757,7 +756,7 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 						.color = poly->f3.color
 					},
 				}
-			}, RENDER_NO_TEXTURE);
+			}, i, RENDER_NO_TEXTURE, object);
 			break;
 
 		case PRM_TYPE_F4:
@@ -787,7 +786,7 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 				}
 			};
 			printf("F4\n");
-			render_push_stripe_saturn( &q4, RENDER_NO_TEXTURE);
+			render_push_stripe_saturn( &q4, i, RENDER_NO_TEXTURE, object);
 			break;
 
 		case PRM_TYPE_TSPR:

@@ -4,6 +4,7 @@
 #include "utils.h"
 
 extern uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *q, vec2i_t *size);
+extern uint16_t* getVdp1VramAddress_Saturn(uint16_t texture_index, uint8_t id);
 extern void reset_vdp1_pool(uint8_t id);
 extern void clear_vdp1_pool(void);
 extern void init_vdp1_tex(void);

@@ -533,6 +533,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)poly.ft3->coords[1], fobj);
 					write_16((uint16_t)poly.ft3->coords[2], fobj);
 					write_16((uint16_t)poly.ft3->conv->id, fobj);
+					write_16((uint16_t)poly.ft3->conv->palette_id, fobj);
 					write_16(convert_to_rgb(poly.ft3->color), fobj);
 					poly.ft3 += 1;
 				break;
@@ -544,6 +545,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)poly.ft4->coords[2], fobj);
 					write_16((uint16_t)poly.ft4->coords[3], fobj);
 					write_16((uint16_t)poly.ft4->conv->id, fobj);
+					write_16((uint16_t)poly.ft4->conv->palette_id, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.ft4->color), fobj);
 					pad(fobj);
 					poly.ft4 += 1;
@@ -578,6 +580,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)poly.gt3->coords[1], fobj);
 					write_16((uint16_t)poly.gt3->coords[2], fobj);
 					write_16((uint16_t)poly.gt3->conv->id, fobj);
+					write_16((uint16_t)poly.gt3->conv->palette_id, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.gt3->color[0]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.gt3->color[1]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.gt3->color[2]), fobj);
@@ -590,6 +593,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)poly.gt4->coords[2], fobj);
 					write_16((uint16_t)poly.gt4->coords[3], fobj);
 					write_16((uint16_t)poly.gt4->conv->id, fobj);
+					write_16((uint16_t)poly.gt4->conv->palette_id, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.gt4->color[0]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.gt4->color[1]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.gt4->color[2]), fobj);
@@ -623,6 +627,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)poly.lsft3->coords[2], fobj);
 					write_fix((uint16_t)poly.lsft3->normal, fobj);
 					write_16((uint16_t)poly.lsft3->conv->id, fobj);
+					write_16((uint16_t)poly.lsft3->conv->palette_id, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsft3->color), fobj);
 					poly.lsft3 += 1;
 				break;
@@ -634,6 +639,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)poly.lsft4->coords[3], fobj);
 					write_fix((uint16_t)poly.lsft4->normal, fobj);
 					write_16((uint16_t)poly.lsft4->conv->id, fobj);
+					write_16((uint16_t)poly.lsft4->conv->palette_id, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsft4->color), fobj);
 					pad(fobj);
 					poly.lsft4 += 1;
@@ -678,6 +684,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_fix((uint16_t)poly.lsgt3->normals[1], fobj);
 					write_fix((uint16_t)poly.lsgt3->normals[2], fobj);
 					write_16((uint16_t)poly.lsgt3->conv->id, fobj);
+					write_16((uint16_t)poly.lsgt3->conv->palette_id, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsgt3->color[0]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsgt3->color[1]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsgt3->color[2]), fobj);
@@ -694,6 +701,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_fix((uint16_t)poly.lsgt4->normals[2], fobj);
 					write_fix((uint16_t)poly.lsgt4->normals[3], fobj);
 					write_16((uint16_t)poly.lsgt4->conv->id, fobj);
+					write_16((uint16_t)poly.lsgt4->conv->palette_id, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsgt4->color[0]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsgt4->color[1]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsgt4->color[2]), fobj);
@@ -707,6 +715,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)poly.spr->width, fobj);
 					write_16((uint16_t)poly.spr->height, fobj);
 					write_16((uint16_t)poly.spr->conv->id, fobj);
+					write_16((uint16_t)poly.spr->conv->palette_id, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.spr->color), fobj);
 					poly.spr += 1;
 				break;

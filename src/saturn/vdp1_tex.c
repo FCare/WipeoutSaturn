@@ -48,6 +48,31 @@ static uint8_t isSameUv(vec2_t *uv, quads_t *q) {
 	return 1;
 }
 
+uint16_t* getVdp1VramAddress_Saturn(uint16_t texture_index, uint8_t id){
+	render_texture_t* src = get_tex(texture_index);
+
+	for (uint16_t i=0; i<textures_len[id]; i++) {
+    if (textures[id][i].index == texture_index)
+		{
+			textures[id][i].used = 1;
+      return textures[id][i].pixels;
+    }
+  }
+
+	//Not found, bump a new one
+	uint16_t length = src->size.x*src->size.y*sizeof(rgb1555_t);
+	textures[id][textures_len[id]].used = 1;
+  textures[id][textures_len[id]].index = texture_index;
+  textures[id][textures_len[id]].pixels = vdp1_tex_bump(length, id);
+	rgb1555_t *src_buf = &src->pixels[0];
+	// LOGD("&&&&&&&&&&&&&&& Texture vdp1 from %d(0x%x) at %dx%d=>%dx%d!!!!!!!!!!!!!!!!ééééééééé\n", textures_len[id], textures[id][textures_len[id]].pixels, (int32_t)quad->vertices[0].uv.y, (int32_t)quad->vertices[0].uv.x, (int32_t)quad->vertices[3].uv.y, (int32_t)quad->vertices[3].uv.x);
+	scu_dma_transfer(0, (void *)&textures[id][textures_len[id]].pixels[0], &src_buf[0], length);
+	memset(&textures[id][textures_len[id]].pixels[0], 0, length);
+	scu_dma_transfer_wait(0);
+
+	return textures[id][textures_len[id]++].pixels;
+}
+
 uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *quad, vec2i_t *size) {
 	render_texture_t* src = get_tex(texture_index);
 	int orig_w = quad->vertices[1].uv.x - quad->vertices[0].uv.x + 1;

@@ -3,14 +3,13 @@
 
 #include "../types.h"
 
-#define COLOR_BANK_16_COL 	0
-#define LOOKUP_TABLE_16_COL 1
-#define COLOR_BANK_64_COL 	2
-#define COLOR_BANK_128_COL 	3
-#define COLOR_BANK_256_COL 	4
-#define COLOR_BANK_RGB 			5
+#define COLOR_BANK_16_COL 	VDP1_CMDT_CM_CB_16
+#define LOOKUP_TABLE_16_COL VDP1_CMDT_CM_CLUT_16
+#define COLOR_BANK_64_COL 	VDP1_CMDT_CM_CB_64
+#define COLOR_BANK_128_COL 	VDP1_CMDT_CM_CB_128
+#define COLOR_BANK_256_COL 	VDP1_CMDT_CM_CB_256
+#define COLOR_BANK_RGB 			VDP1_CMDT_CM_RGB_32768
 typedef uint16_t color_mode_t;
-
 
 typedef struct {
 	uint16_t start;
@@ -39,17 +38,22 @@ typedef struct {
 } saturn_font_t;
 
 typedef struct {
-	uint16_t width;
-	uint16_t height;
 	color_mode_t format;
+	union{
+		uint16_t height;
+		uint16_t texture;
+	};
+	uint16_t width;
 	rgb1555_t *pixels;
 } palette_t;
 
 typedef struct {
-	uint16_t id;
+	union{
+		uint16_t id;
+		uint16_t texture;
+	};
 	uint16_t width;
 	uint16_t height;
-	uint16_t palette_id;
 	uint16_t length;
 	rgb1555_t *pixels;
 } character_t;
@@ -59,7 +63,6 @@ typedef struct {
 	palette_t **pal;
 	uint16_t nb_characters;
 	character_t **character;
-	uint16_t *textures;
 } saturn_image_ctrl_t;
 
 typedef struct {
