@@ -271,6 +271,7 @@ saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
 		uint16_t delta = (uint16_t)list->character[i]->pixels - (uint16_t)buf;
 		printf("Create palette texture\n");
 		list->pal[i]->texture = create_sub_texture(delta , list->pal[i]->width, list->pal[i]->height, texture);
+		printf("Pal texture[%d] = %d\n", i, list->pal[i]->texture);
 		offset += 3;
 		switch(list->pal[i]->format) {
 			case COLOR_BANK_16_COL:

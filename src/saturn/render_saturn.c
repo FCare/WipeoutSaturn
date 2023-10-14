@@ -52,7 +52,7 @@ static void print_mat(mat4_t *m) {
 void render_init(vec2i_t size) {
   screen_size = size;
 
-  rgba_t white_pixels[64] = {
+  rgba_t white_pixels[8] = {
     rgba(128,128,128,255), rgba(128,128,128,255),
     rgba(128,128,128,255), rgba(128,128,128,255),
     rgba(128,128,128,255), rgba(128,128,128,255),
@@ -228,7 +228,7 @@ void render_push_stripe_saturn(quads_saturn_t *quad, uint16_t primitive_index, u
   }
   currentminZ = min(currentminZ, minZ);
   //Add a quad to the vdp1 list v0,v1,v2,v3
-  render_vdp1_add_saturn(quad, quad->vertices[0].color, primitive_index, texture_index, object);
+  render_vdp1_add_saturn(quad, quad->vertices[0].color, primitive_index, RENDER_NO_TEXTURE, object);
 }
 
 
@@ -251,7 +251,7 @@ void render_push_stripe(quads_t *quad, uint16_t texture_index) {
 
   render_push_native_quads(quad, quad->vertices[0].color, RENDER_NO_TEXTURE);
 }
-void render_push_tris_saturn(tris_saturn_t tris, uint16_t primitive_index, uint16_t texture, Object_Saturn *object){
+void render_push_tris_saturn(tris_saturn_t tris, uint16_t primitive_index, uint16_t texture_index, Object_Saturn *object){
   LOGD("%s\n", __FUNCTION__);
   fix16_t minZ = FIX16_ZERO;
   nb_planes++;

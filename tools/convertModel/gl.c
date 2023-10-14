@@ -227,10 +227,10 @@ static void render(void)
       case LOOKUP_TABLE_16_COL:
       {
         g_resources.dstTexture->length = g_resources.dstTexture->width*g_resources.dstTexture->height;
-        g_resources.dstTexture->pixels = malloc(g_resources.dstTexture->length*2);
-        printf("Setup palette_id = %d\n",g_resources.srcTexture->palette.index_in_file);
+        g_resources.dstTexture->pixels = malloc(g_resources.dstTexture->length/2);
+        printf("Setup palette_id = %d %dx%d\n",g_resources.srcTexture->palette.index_in_file, g_resources.dstTexture->width, g_resources.dstTexture->height);
         g_resources.dstTexture->palette_id = g_resources.srcTexture->palette.index_in_file;
-        for (int i=0; i<g_resources.dstTexture->height*g_resources.dstTexture->width; i+=4) {
+        for (int i=0; i<g_resources.dstTexture->height*g_resources.dstTexture->width/4; i++) {
           rgb1555_t a = convert_to_rgb(out[i]);
           rgb1555_t b = convert_to_rgb(out[i+1]);
           rgb1555_t c = convert_to_rgb(out[i+2]);
@@ -298,12 +298,44 @@ static void idle(void) {
 
 void gl_generate_texture_from_tris(render_texture_t *out, tris_t *t, texture_t *texture)
 {
-  int16_t left = min(min(t->vertices[0].uv.x, t->vertices[1].uv.x), t->vertices[2].uv.x);
-  int16_t right = max(max(t->vertices[0].uv.x, t->vertices[1].uv.x), t->vertices[2].uv.x);
-  int16_t bottom = min(min(t->vertices[0].uv.y, t->vertices[1].uv.y), t->vertices[2].uv.y);
-  int16_t top = max(max(t->vertices[0].uv.y, t->vertices[1].uv.y), t->vertices[2].uv.y);
+
+  printf("uv=[%dx%d %dx%d %dx%d]\n", t->vertices[0].uv.x,t->vertices[0].uv.y,t->vertices[1].uv.x,t->vertices[1].uv.y, t->vertices[2].uv.x,t->vertices[2].uv.y);
+  int16_t left_uv = min(min(t->vertices[0].uv.x, t->vertices[1].uv.x), t->vertices[2].uv.x);
+  int16_t right_uv = max(max(t->vertices[0].uv.x, t->vertices[1].uv.x), t->vertices[2].uv.x);
+  int16_t bottom_uv = min(min(t->vertices[0].uv.y, t->vertices[1].uv.y), t->vertices[2].uv.y);
+  int16_t top_uv = max(max(t->vertices[0].uv.y, t->vertices[1].uv.y), t->vertices[2].uv.y);
+  int16_t nb_pix_uv = abs((right_uv - left_uv) * (top_uv-bottom_uv));
+
+  printf("pos=[%dx%d %dx%d %dx%d]\n", t->vertices[0].pos.x,t->vertices[0].pos.y,t->vertices[1].pos.x,t->vertices[1].pos.y, t->vertices[2].pos.x,t->vertices[2].pos.y);
+  int16_t left_pos = min(min(t->vertices[0].pos.x, t->vertices[1].pos.x), t->vertices[2].pos.x);
+  int16_t right_pos = max(max(t->vertices[0].pos.x, t->vertices[1].pos.x), t->vertices[2].pos.x);
+  int16_t bottom_pos = min(min(t->vertices[0].pos.y, t->vertices[1].pos.y), t->vertices[2].pos.y);
+  int16_t top_pos = max(max(t->vertices[0].pos.y, t->vertices[1].pos.y), t->vertices[2].pos.y);
+  int16_t nb_pix_pos = abs((right_pos - left_pos) * (top_pos-bottom_pos));
+
+  int16_t left = left_uv;
+  int16_t right = right_uv;
+  int16_t bottom = bottom_uv;
+  int16_t top = top_uv;
+
+  // if (nb_pix_pos < nb_pix_uv) {
+  //   left = left_pos;
+  //   right = right_pos;
+  //   bottom = bottom_pos;
+  //   top = top_pos;
+  // }
+
   int16_t width = ((right-left)+0x7)& ~0x7;
   int16_t height = (top-bottom);
+
+
+  if (width*height > 256) {
+    double ratio = width/256.0;
+    width = ((int)(width * ratio)+0x7)& ~0x7;
+    if (width == 0) width = 8;
+    height = 256/width;
+  }
+  printf("Got %dx%d => %d\n", width, height, width*height*2);
 
   g_vertex_buffer_data[0] = -1.0f;
   g_vertex_buffer_data[1] = (float)height/120.0f - 1.0f;
@@ -340,6 +372,15 @@ void gl_generate_texture_from_quad(render_texture_t *out, quads_t *t, texture_t 
   int16_t top = max(max(max(t->vertices[0].uv.y, t->vertices[1].uv.y), t->vertices[2].uv.y), t->vertices[3].uv.y);
   int16_t width = ((right-left)+0x7)& ~0x7;
   int16_t height = (top-bottom);
+
+
+    if (width*height > 256) {
+      double ratio = width/256.0;
+      width = ((int)(width * ratio)+0x7)& ~0x7;
+      if (width == 0) width = 8;
+      height = 256/width;
+    }
+    printf("Got %dx%d => %d\n", width, height, width*height*2);
 
   g_vertex_buffer_data[0] = -1.0f;
   g_vertex_buffer_data[1] = (float)height/120.0f - 1.0f;

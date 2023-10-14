@@ -144,6 +144,7 @@ texture_list_t image_get_compressed_textures(char *name) {
 	int nbPalette = 0;
 
   list.texture = malloc(cmp->len* sizeof(texture_t));
+	printf("Comp len = %d\n", cmp->len);
 	for (int i = 0; i < cmp->len; i++) {
 		int32_t width, height;
 		image_t *image = image_load_from_bytes(cmp->entries[i], false);

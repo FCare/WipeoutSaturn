@@ -468,6 +468,7 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 	Object_Saturn_list *list = mem_bump(sizeof(Object_Saturn_list));
 	list->objects = mem_bump(sizeof(Object_Saturn*)*length);
 	list->length = length;
+	printf("Input Nb Objects = %d\n", length);
 	for(int i = 0; i < length; i++) {
 		Object_Saturn *object = mem_bump(sizeof(Object_Saturn));
 		object->info = (object_info *)&bytes[p/2];
@@ -476,9 +477,11 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 		object->image = tl;
 		p+=sizeof(object_info);
 		object->primitives = mem_bump(sizeof(PRM_saturn*)*object->info->primitives_len);
+		printf("Input primitives %d @0x%x\n", object->info->primitives_len, p);
 		for (int j=0; j< object->info->primitives_len; j++) {
 			object->primitives[j] = (PRM_saturn*)&bytes[p/2];
 			PRM_saturn *prm = object->primitives[j];
+			printf("Primitive type %d\n", prm->type);
 			switch (prm->type) {
 			case PRM_TYPE_F3:
 				p += sizeof(F3_S);
@@ -487,9 +490,11 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 				p += sizeof(F4_S);
 				break;
 			case PRM_TYPE_FT3:
+			printf("palette prim[%d] = %d\n", j, prm->palette);
 				p += sizeof(FT3_S);
 				break;
 			case PRM_TYPE_FT4:
+			printf("palette prim[%d] = %d (0x%x 0x%x)\n", j, prm->palette, p, sizeof(FT4_S));
 				p += sizeof(FT4_S);
 				break;
 			case PRM_TYPE_G3:
@@ -499,9 +504,11 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 				p += sizeof(G4_S);
 				break;
 			case PRM_TYPE_GT3:
+			printf("palette prim[%d] = %d\n", j, prm->palette);
 				p += sizeof(GT3_S);
 				break;
 			case PRM_TYPE_GT4:
+			printf("palette prim[%d] = %d\n", j, prm->palette);
 				p += sizeof(GT4_S);
 				break;
 			case PRM_TYPE_LSF3:
@@ -511,9 +518,11 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 				p += sizeof(LSF4_S);
 				break;
 			case PRM_TYPE_LSFT3:
+			printf("palette prim[%d] = %d\n", j, prm->palette);
 				p += sizeof(LSFT3_S);
 				break;
 			case PRM_TYPE_LSFT4:
+			printf("palette prim[%d] = %d\n", j, prm->palette);
 				p += sizeof(LSFT4_S);
 				break;
 			case PRM_TYPE_LSG3:
@@ -523,9 +532,11 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 				p += sizeof(LSG4_S);
 				break;
 			case PRM_TYPE_LSGT3:
+			printf("palette prim[%d] = %d\n", j, prm->palette);
 				p += sizeof(LSGT3_S);
 				break;
 			case PRM_TYPE_LSGT4:
+			printf("palette prim[%d] = %d\n", j, prm->palette);
 				p += sizeof(LSGT4_S);
 				break;
 			case PRM_TYPE_TSPR:
