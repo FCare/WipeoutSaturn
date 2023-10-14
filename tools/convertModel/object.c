@@ -485,6 +485,90 @@ void pad(FILE *f) {
 	// fwrite(<&z, 2, sizeof(uint8_t), f);
 }
 
+uint16_t getNbCharacters(Object *obj) {
+	uint16_t nb_texture = 0;
+	Prm poly = {.primitive = obj->primitives};
+	for (int i = 0; i < obj->primitives_len; i++) {
+		switch (poly.primitive->type) {
+			case PRM_TYPE_F3:
+				poly.f3 += 1;
+			break;
+			case PRM_TYPE_F4:
+				poly.f4 += 1;
+			break;
+			case PRM_TYPE_FT3:
+				nb_texture++;
+				poly.ft3 += 1;
+			break;
+			case PRM_TYPE_FT4:
+				nb_texture++;
+				poly.ft4 += 1;
+			break;
+			case PRM_TYPE_G3:
+				poly.g3 += 1;
+			break;
+			case PRM_TYPE_G4:
+				poly.g4 += 1;
+			break;
+			case PRM_TYPE_GT3:
+				nb_texture++;
+				poly.gt3 += 1;
+			break;
+			case PRM_TYPE_GT4:
+				nb_texture++;
+				poly.gt4 += 1;
+			break;
+			case PRM_TYPE_LSF3:
+				poly.lsf3 += 1;
+			break;
+			case PRM_TYPE_LSF4:
+				poly.lsf4 += 1;
+			break;
+			case PRM_TYPE_LSFT3:
+				nb_texture++;
+				poly.lsft3 += 1;
+			break;
+			case PRM_TYPE_LSFT4:
+				nb_texture++;
+				poly.lsft4 += 1;
+			break;
+			case PRM_TYPE_LSG3:
+				poly.lsg3 += 1;
+			break;
+			case PRM_TYPE_LSG4:
+				poly.lsg4 += 1;
+			break;
+			case PRM_TYPE_LSGT3:
+				nb_texture++;
+				poly.lsgt3 += 1;
+			break;
+			case PRM_TYPE_LSGT4:
+				nb_texture++;
+				poly.lsgt4 += 1;
+			break;
+			case PRM_TYPE_TSPR:
+			case PRM_TYPE_BSPR:
+				nb_texture++;
+				poly.spr += 1;
+			break;
+			case PRM_TYPE_SPLINE:
+				poly.spline += 1;
+			break;
+			case PRM_TYPE_POINT_LIGHT:
+				poly.pointLight += 1;
+			break;
+			case PRM_TYPE_SPOT_LIGHT:
+				poly.spotLight += 1;
+			break;
+			case PRM_TYPE_INFINITE_LIGHT:
+				poly.infiniteLight += 1;
+			break;
+			default:
+				die("bad primitive type\n");
+		}
+	}
+	return nb_texture;
+}
 
 void objects_save(const char *objectPath, const char *texturePath, Object** model, int nb_objects, texture_list_t *textures)
 {
@@ -793,93 +877,6 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 		}
 	}
 
-	for (int n=0; n<nb_objects; n++) {
-		uint16_t tmp;
-		uint32_t tmp32;
-		Object * obj = model[n];
-		Prm poly = {.primitive = obj->primitives};
-		for (int i = 0; i < obj->primitives_len; i++) {
-			switch (poly.primitive->type) {
-				case PRM_TYPE_F3:
-					poly.f3 += 1;
-				break;
-				case PRM_TYPE_F4:
-					poly.f4 += 1;
-				break;
-				case PRM_TYPE_FT3:
-					nb_texture++;
-					poly.ft3 += 1;
-				break;
-				case PRM_TYPE_FT4:
-					nb_texture++;
-					poly.ft4 += 1;
-				break;
-				case PRM_TYPE_G3:
-					poly.g3 += 1;
-				break;
-				case PRM_TYPE_G4:
-					poly.g4 += 1;
-				break;
-				case PRM_TYPE_GT3:
-					nb_texture++;
-					poly.gt3 += 1;
-				break;
-				case PRM_TYPE_GT4:
-					nb_texture++;
-					poly.gt4 += 1;
-				break;
-				case PRM_TYPE_LSF3:
-					poly.lsf3 += 1;
-				break;
-				case PRM_TYPE_LSF4:
-					poly.lsf4 += 1;
-				break;
-				case PRM_TYPE_LSFT3:
-					nb_texture++;
-					poly.lsft3 += 1;
-				break;
-				case PRM_TYPE_LSFT4:
-					nb_texture++;
-					poly.lsft4 += 1;
-				break;
-				case PRM_TYPE_LSG3:
-					poly.lsg3 += 1;
-				break;
-				case PRM_TYPE_LSG4:
-					poly.lsg4 += 1;
-				break;
-				case PRM_TYPE_LSGT3:
-					nb_texture++;
-					poly.lsgt3 += 1;
-				break;
-				case PRM_TYPE_LSGT4:
-					nb_texture++;
-					poly.lsgt4 += 1;
-				break;
-				case PRM_TYPE_TSPR:
-				case PRM_TYPE_BSPR:
-					nb_texture++;
-					poly.spr += 1;
-				break;
-				case PRM_TYPE_SPLINE:
-					poly.spline += 1;
-				break;
-				case PRM_TYPE_POINT_LIGHT:
-					poly.pointLight += 1;
-				break;
-				case PRM_TYPE_SPOT_LIGHT:
-					poly.spotLight += 1;
-				break;
-				case PRM_TYPE_INFINITE_LIGHT:
-					poly.infiniteLight += 1;
-				break;
-				default:
-					die("bad primitive type\n");
-			}
-		}
-		printf("Object %d => nb_texture = %d\n", n, nb_texture);
-	}
-
 	write_16((uint16_t)textures->len, ftex);
 	printf("Output palette nb %d\n",textures->len);
 	for (int i = 0; i < textures->len; i++) {
@@ -908,11 +905,14 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				break;
 		}
 	}
-	write_16((uint16_t)nb_texture, ftex);
+	printf("Object %d is at 0x%x\n", nb_objects, ftell(ftex));
+	write_16((uint16_t)nb_objects, ftex);
 	for (int n=0; n<nb_objects; n++) {
 		uint16_t tmp;
 		uint32_t tmp32;
 		Object * obj = model[n];
+		int nb_texture = getNbCharacters(obj);
+		write_16((uint16_t)nb_texture, ftex);
 		Prm poly = {.primitive = obj->primitives};
 		for (int i = 0; i < obj->primitives_len; i++) {
 			switch (poly.primitive->type) {

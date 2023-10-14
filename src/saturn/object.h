@@ -281,7 +281,8 @@ typedef struct {
 
 typedef struct {
 	object_info *info;
-	saturn_image_ctrl_t *image;
+	character_list_t *characters;
+	palette_t **pal;
 	PRM_saturn **primitives;
 	fix16_vec3_t *vertices;
 	fix16_vec3_t *normals;

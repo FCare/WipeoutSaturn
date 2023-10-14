@@ -145,21 +145,19 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t prim
     character = getVdp1VramAddress(texture_index, id, &q, &size);
   } else {
     PRM_saturn *primitive = object->primitives[primitive_index];
-    error_if(primitive_index > object->image->nb_characters, "primtive index %d is out of bounds %d\n", primitive_index, object->image->nb_characters);
-    uint16_t character_texture = object->image->character[primitive_index]->texture;
+    error_if(primitive_index > object->characters->nb_characters, "primtive index %d is out of bounds %d\n", primitive_index, object->characters->nb_characters);
+    uint16_t character_texture = object->characters->character[primitive_index]->texture;
     printf("%d\n", __LINE__);
     size = get_tex(character_texture)->size;
     printf("%d\n", __LINE__);
     character = getVdp1VramAddress_Saturn(character_texture, id); //a revoir parce qu'il ne faut copier suivant le UV
     printf("%d\n", __LINE__);
-    uint16_t palette_texture = object->image->pal[primitive->palette]->texture;
-    error_if(primitive->palette > object->image->nb_palettes, "primitive %d palette index %d is out of bounds %d\n", primitive_index, primitive->palette, object->image->nb_palettes);
-    printf("%d %d=>%d vs %d\n", __LINE__, primitive->palette, palette_texture, object->image->nb_palettes);
+    uint16_t palette_texture = object->pal[primitive->palette]->texture;
     uint16_t *palette = getVdp1VramAddress_Saturn(palette_texture, id);
     printf("%d\n", __LINE__);
 
     vdp1_cmdt_color_bank_t color_bank; //not used yet
-    switch(object->image->pal[primitive->palette]->format) {
+    switch(object->pal[primitive->palette]->format) {
       case COLOR_BANK_16_COL 	:
       die("Not supported\n");
       // vdp1_cmdt_color_mode0_set(&draw_mode, palette);
@@ -184,7 +182,7 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t prim
       // vdp1_cmdt_color_mode5_set(&draw_mode, palette);
       break;
     }
-    draw_mode.color_mode    = object->image->pal[primitive->palette]->format;
+    draw_mode.color_mode    = object->pal[primitive->palette]->format;
   }
 
   vdp1_cmdt_distorted_sprite_set(cmd); //Use distorted by default but it can be normal or scaled
@@ -228,6 +226,7 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t prim
 
 void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
 {
+  return;
   LOGD(
     "vdp1 add %dx%d %dx%d %dx%d %dx%d\n",
     fix16_int32_to(quad->vertices[0].pos.x),

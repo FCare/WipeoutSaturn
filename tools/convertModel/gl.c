@@ -187,7 +187,7 @@ int nbImage = 0;
 static void render(void)
 {
   if (g_resources.ready != 0) {
-    g_resources.dstTexture->id = nbImage;
+    g_resources.dstTexture->id = 0;
     nbImage++;
     update_buffer(
       g_resources.vertex_buffer,

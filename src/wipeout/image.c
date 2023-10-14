@@ -268,12 +268,12 @@ saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
 	for (int i =0; i<list->nb_palettes; i++) {
 		list->pal[i] = (palette_t *)&buf[offset];
 		printf("palette[%d] => size %dx1 0x%x\n",i, list->pal[i]->width, list->pal[i]);
-		uint16_t delta = (uint16_t)list->character[i]->pixels - (uint16_t)buf;
 		printf("Create palette texture\n");
-		list->pal[i]->texture = create_sub_texture(delta , list->pal[i]->width, 1, texture);
 		printf("Pal texture[%d] = %d\n", i, list->pal[i]->texture);
 		offset += 3;
 		list->pal[i]->pixels = (rgb1555_t *)&buf[offset];
+		uint16_t delta = (uint16_t)list->pal[i]->pixels - (uint16_t)buf;
+		list->pal[i]->texture = create_sub_texture(delta , list->pal[i]->width, 1, texture);
 		switch(list->pal[i]->format) {
 			case COLOR_BANK_16_COL:
 			case LOOKUP_TABLE_16_COL:
@@ -292,16 +292,25 @@ saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
 				break;
 			}
 	}
-	printf("offset = %d\n", offset);
-	list->nb_characters = buf[offset++];
-	list->character = mem_bump(sizeof(character_t*)*list->nb_characters);
-	for (int i =0; i<list->nb_characters; i++) {
-		list->character[i] = (character_t *)&buf[offset];
-		offset += 4;
-		list->character[i]->pixels = (rgb1555_t *)&buf[offset];
-		uint16_t delta = (uint16_t)list->character[i]->pixels - (uint16_t)buf;
-		list->character[i]->texture = create_sub_texture(delta , list->character[i]->width, list->character[i]->height, texture);
-		offset += list->character[i]->length;
+	printf("offset = 0x%x\n", offset);
+	list->nb_objects = buf[offset++];
+	printf("nb obj = %d\n", list->nb_objects);
+	list->characters = mem_bump(sizeof(character_list_t)*list->nb_objects);
+	for (int n =0; n<list->nb_objects; n++) {
+		character_list_t *ch_list = &list->characters[n];
+		ch_list->nb_characters = buf[offset++];
+		printf("%d nb_characters = %d 0x%x\n", n, ch_list->nb_characters, offset);
+		ch_list->character = mem_bump(sizeof(character_t*)*ch_list->nb_characters);
+		for (int i =0; i<ch_list->nb_characters; i++) {
+			ch_list->character[i] = (character_t *)&buf[offset];
+			offset += 5;
+			ch_list->character[i]->pixels = (rgb1555_t *)&buf[offset];
+			uint16_t delta = (uint16_t)ch_list->character[i]->pixels - (uint16_t)buf;
+			ch_list->character[i]->texture = create_sub_texture(delta , ch_list->character[i]->width, ch_list->character[i]->height, texture);
+			printf("%dx%d %d\n", ch_list->character[i]->width, ch_list->character[i]->height, ch_list->character[i]->length);
+			offset += ch_list->character[i]->length;
+		}
+		printf("done %d\n", n);
 	}
 	return list;
 }

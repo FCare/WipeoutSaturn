@@ -16,6 +16,14 @@
 #include "object.h"
 
 
+void character_ctrl_dump(character_list_t * ch_list) {
+	printf("\t************** %d characters ***************\n", ch_list->nb_characters);
+	for (int char_id = 0; char_id < ch_list->nb_characters; char_id++) {
+		character_t *character = ch_list->character[char_id];
+		printf("\t\character[%d] 0x%x: id %d, size %dx%d, length %d, texture %d\n", char_id, character, character->id, character->width, character->height, character->length, character->texture);
+	}
+}
+
 void image_ctrl_dump(saturn_image_ctrl_t * img) {
 	printf("\t************** %d Palettes ***************\n", img->nb_palettes);
 	for(int plt_id=0; plt_id < img->nb_palettes; plt_id++) {
@@ -27,10 +35,10 @@ void image_ctrl_dump(saturn_image_ctrl_t * img) {
 		}
 		printf("\n");
 	}
-	printf("\t************** %d characters ***************\n", img->nb_characters);
-	for (int char_id = 0; char_id < img->nb_characters; char_id++) {
-		character_t *character = img->character[char_id];
-		printf("\t\character[%d] 0x%x: id %d, size %dx%d, length %d, texture %d\n", char_id, character, character->id, character->width, character->height, character->length, character->texture);
+	for (int obj_id = 0; obj_id < img->nb_objects; obj_id++){
+		printf("\t************** objects %d/%d***************\n", obj_id, img->nb_objects);
+		character_list_t *ch_list = &img->characters[obj_id];
+		character_ctrl_dump(ch_list);
 	}
 }
 
@@ -38,7 +46,7 @@ void object_dump_saturn(Object_Saturn *obj) {
 	printf("\t================ %s ===============\n", obj->info->name);
 	printf("\tsize: vertices:%d normals:%d primitives:%d\n", obj->info->vertices_len, obj->info->normals_len, obj->info->primitives_len);
 	printf("\tflags: 0x%x, origine %x %x %x\n", obj->info->flags, obj->info->origin.x, obj->info->origin.y, obj->info->origin.z);
-	image_ctrl_dump(obj->image);
+	character_ctrl_dump(obj->characters);
 }
 
 void all_object_dump_saturn(Object_Saturn_list* list) {
@@ -509,7 +517,8 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 		object->info = (object_info *)&bytes[p/2];
 		list->objects[i] = object;
 		LOGD("Object[%d]@0x%x %s\n", i, p, list->objects[i]->info->name);
-		object->image = tl;
+		object->characters = &tl->characters[i];
+		object->pal = tl->pal;
 		p+=sizeof(object_info);
 		object->primitives = mem_bump(sizeof(PRM_saturn*)*object->info->primitives_len);
 		printf("Input primitives %d @0x%x\n", object->info->primitives_len, p);

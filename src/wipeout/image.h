@@ -51,15 +51,21 @@ typedef struct {
 	};
 	uint16_t width;
 	uint16_t height;
+	uint16_t palette_id;
 	uint16_t length;
 	rgb1555_t *pixels;
 } character_t;
 
 typedef struct {
-	uint16_t nb_palettes;
-	palette_t **pal;
 	uint16_t nb_characters;
 	character_t **character;
+} character_list_t;
+
+typedef struct {
+	uint16_t nb_palettes;
+	palette_t **pal;
+	uint16_t nb_objects;
+	character_list_t *characters;
 } saturn_image_ctrl_t;
 
 typedef struct {
