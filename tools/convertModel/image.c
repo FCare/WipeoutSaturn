@@ -159,6 +159,7 @@ texture_list_t image_get_compressed_textures(char *name) {
 			list.texture[i]->palette.index_in_file = nbPalette++;
 		// free(image);
 	}
+	printf("Found %d palettes\n", nbPalette);
 	free(cmp);
 	return list;
 }

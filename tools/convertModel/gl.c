@@ -188,7 +188,6 @@ static void render(void)
 {
   if (g_resources.ready != 0) {
     g_resources.dstTexture->id = nbImage;
-    g_resources.dstTexture->palette_id = g_resources.srcTexture->id; //doit etre faux
     nbImage++;
     update_buffer(
       g_resources.vertex_buffer,
@@ -222,12 +221,14 @@ static void render(void)
     rgba_t *out=malloc(sizeof(rgba_t)*g_resources.dstTexture->width*g_resources.dstTexture->height);
     glReadPixels(0,0, g_resources.dstTexture->width, g_resources.dstTexture->height, GL_RGBA, GL_UNSIGNED_BYTE, out);
     int paletteSize = 0;
+    printf("Write format = %d\n", g_resources.srcTexture->format);
     switch (g_resources.srcTexture->format) {
-      COLOR_BANK_16_COL:
-      LOOKUP_TABLE_16_COL:
+      case COLOR_BANK_16_COL:
+      case LOOKUP_TABLE_16_COL:
       {
-        g_resources.dstTexture->length = g_resources.dstTexture->width*g_resources.dstTexture->height/4;
+        g_resources.dstTexture->length = g_resources.dstTexture->width*g_resources.dstTexture->height;
         g_resources.dstTexture->pixels = malloc(g_resources.dstTexture->length*2);
+        printf("Setup palette_id = %d\n",g_resources.srcTexture->palette.index_in_file);
         g_resources.dstTexture->palette_id = g_resources.srcTexture->palette.index_in_file;
         for (int i=0; i<g_resources.dstTexture->height*g_resources.dstTexture->width; i+=4) {
           rgb1555_t a = convert_to_rgb(out[i]);
@@ -264,7 +265,7 @@ static void render(void)
       //     }
       //   }
       //   break;
-    	COLOR_BANK_RGB:
+    	case COLOR_BANK_RGB:
       {
         g_resources.dstTexture->length = g_resources.dstTexture->width*g_resources.dstTexture->height;
         g_resources.dstTexture->pixels = malloc(sizeof(rgb1555_t)*g_resources.dstTexture->width*g_resources.dstTexture->height);

@@ -267,13 +267,14 @@ saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
 	list->pal = mem_bump(sizeof(palette_t*)*list->nb_palettes);
 	for (int i =0; i<list->nb_palettes; i++) {
 		list->pal[i] = (palette_t *)&buf[offset];
-		printf("size %dx%d\n", list->pal[i]->width, list->pal[i]->height);
+		printf("palette[%d] => size %dx%d\n",i, list->pal[i]->width, list->pal[i]->height);
 		uint16_t delta = (uint16_t)list->character[i]->pixels - (uint16_t)buf;
 		printf("Create palette texture\n");
 		list->pal[i]->texture = create_sub_texture(delta , list->pal[i]->width, list->pal[i]->height, texture);
 		offset += 3;
 		switch(list->pal[i]->format) {
 			case COLOR_BANK_16_COL:
+			case LOOKUP_TABLE_16_COL:
 				offset += 16;
 				break;
 			case COLOR_BANK_64_COL:

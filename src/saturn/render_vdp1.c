@@ -131,14 +131,14 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t prim
   };
 
   PRM_saturn *primitive = object->primitives[primitive_index];
-  uint16_t character_texture = object->image->character[primitive->texture]->texture;
+  uint16_t character_texture = object->image->character[primitive_index]->texture;
   printf("%d\n", __LINE__);
   vec2i_t size = get_tex(character_texture)->size;
   printf("%d\n", __LINE__);
   uint16_t *character = getVdp1VramAddress_Saturn(character_texture, id); //a revoir parce qu'il ne faut copier suivant le UV
   printf("%d\n", __LINE__);
   uint16_t palette_texture = object->image->pal[primitive->palette]->texture;
-  printf("%d =>%d vs %d\n", __LINE__, palette_texture, object->image->nb_palettes);
+  printf("%d %d=>%d vs %d\n", __LINE__, primitive->palette, palette_texture, object->image->nb_palettes);
   uint16_t *palette = getVdp1VramAddress_Saturn(palette_texture, id);
   printf("%d\n", __LINE__);
 
