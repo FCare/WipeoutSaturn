@@ -15,6 +15,41 @@
 #include "hud.h"
 #include "object.h"
 
+
+void image_ctrl_dump(saturn_image_ctrl_t * img) {
+	printf("\t************** %d Palettes ***************\n", img->nb_palettes);
+	for(int plt_id=0; plt_id < img->nb_palettes; plt_id++) {
+		palette_t *plt = img->pal[plt_id];
+		printf("\t\tpalette[%d] 0x%x: format %d, size %dx1, texture %d\n", plt_id, img->pal[plt_id], plt->format, plt->width, plt->texture);
+		printf("\t\t\t");
+		for (int w = 0; w < plt->width; w++) {
+			printf("0x%x ", plt->pixels[plt->width+w]);
+		}
+		printf("\n");
+	}
+	printf("\t************** %d characters ***************\n", img->nb_characters);
+	for (int char_id = 0; char_id < img->nb_characters; char_id++) {
+		character_t *character = img->character[char_id];
+		printf("\t\character[%d] 0x%x: id %d, size %dx%d, length %d, texture %d\n", char_id, character, character->id, character->width, character->height, character->length, character->texture);
+	}
+}
+
+void object_dump_saturn(Object_Saturn *obj) {
+	printf("\t================ %s ===============\n", obj->info->name);
+	printf("\tsize: vertices:%d normals:%d primitives:%d\n", obj->info->vertices_len, obj->info->normals_len, obj->info->primitives_len);
+	printf("\tflags: 0x%x, origine %x %x %x\n", obj->info->flags, obj->info->origin.x, obj->info->origin.y, obj->info->origin.z);
+	image_ctrl_dump(obj->image);
+}
+
+void all_object_dump_saturn(Object_Saturn_list* list) {
+	printf("============ %d objects ===============\n", list->length);
+
+	for (int obj_id = 0; obj_id<list->length; obj_id++) {
+		Object_Saturn *obj = list->objects[obj_id];
+		object_dump_saturn(obj);
+	}
+}
+
 Object *objects_load(char *name, texture_list_t tl) {
 	uint32_t length = 0;
 	printf("load: %s\n", name);

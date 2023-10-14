@@ -877,6 +877,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					die("bad primitive type\n");
 			}
 		}
+		printf("Object %d => nb_texture = %d\n", n, nb_texture);
 	}
 
 	write_16((uint16_t)textures->len, ftex);
@@ -907,7 +908,6 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				break;
 		}
 	}
-	printf("Output character nb %d\n",nb_texture);
 	write_16((uint16_t)nb_texture, ftex);
 	for (int n=0; n<nb_objects; n++) {
 		uint16_t tmp;

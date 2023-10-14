@@ -228,7 +228,7 @@ void render_push_stripe_saturn(quads_saturn_t *quad, uint16_t primitive_index, u
   }
   currentminZ = min(currentminZ, minZ);
   //Add a quad to the vdp1 list v0,v1,v2,v3
-  render_vdp1_add_saturn(quad, quad->vertices[0].color, primitive_index, RENDER_NO_TEXTURE, object);
+  render_vdp1_add_saturn(quad, quad->vertices[0].color, primitive_index, texture_index, object);
 }
 
 
@@ -271,7 +271,7 @@ void render_push_tris_saturn(tris_saturn_t tris, uint16_t primitive_index, uint1
     }
   };
   //Add a quad to the vdp1 list v0,v1,v2,v3
-  render_vdp1_add_saturn(&q,  q.vertices[0].color, primitive_index, RENDER_NO_TEXTURE, object);
+  render_vdp1_add_saturn(&q,  q.vertices[0].color, primitive_index, texture_index, object);
 }
 
 void render_push_tris(tris_t tris, uint16_t texture_index){

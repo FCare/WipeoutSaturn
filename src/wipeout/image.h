@@ -39,10 +39,7 @@ typedef struct {
 
 typedef struct {
 	color_mode_t format;
-	union{
-		uint16_t height;
-		uint16_t texture;
-	};
+	uint16_t texture;
 	uint16_t width;
 	rgb1555_t *pixels;
 } palette_t;
