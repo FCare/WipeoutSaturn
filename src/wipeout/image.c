@@ -302,6 +302,7 @@ saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
 		printf("%d nb_characters = %d 0x%x\n", n, ch_list->nb_characters, offset);
 		ch_list->character = mem_bump(sizeof(character_t*)*ch_list->nb_characters);
 		for (int i =0; i<ch_list->nb_characters; i++) {
+			printf("Read character[%d] at offset @x%x\n", i, offset*2);
 			ch_list->character[i] = (character_t *)&buf[offset];
 			offset += 5;
 			ch_list->character[i]->pixels = (rgb1555_t *)&buf[offset];

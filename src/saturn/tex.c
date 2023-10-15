@@ -33,6 +33,7 @@ void tex_reset(uint16_t len) {
 }
 
 uint16_t allocate_tex(uint32_t width, uint32_t height, uint32_t size) {
+		error_if(textures_len == TEXTURES_MAX, "Not enough texture available");
 		rgb1555_t *buffer = (rgb1555_t *)tex_bump(size);
     uint16_t texture_index = textures_len;
     textures[textures_len++] = (render_texture_t){.size = vec2i(width, height), .pixels = buffer};
@@ -45,6 +46,7 @@ render_texture_t* get_tex(uint16_t texture) {
 }
 
 uint16_t create_sub_texture(uint16_t offset, uint32_t width, uint32_t height, uint16_t parent) {
+	error_if(textures_len == TEXTURES_MAX, "Not enough texture available");
 	uint16_t texture_index = textures_len;
 	textures[textures_len++] = (render_texture_t){.size = vec2i(width, height), .pixels = &(get_tex(parent)->pixels[offset])};
 	return texture_index;

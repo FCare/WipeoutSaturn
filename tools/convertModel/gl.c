@@ -328,13 +328,15 @@ void gl_generate_texture_from_tris(render_texture_t *out, tris_t *t, texture_t *
   int16_t width = ((right-left)+0x7)& ~0x7;
   int16_t height = (top-bottom);
 
-
   if (width*height > 256) {
     double ratio = width/256.0;
     width = ((int)(width * ratio)+0x7)& ~0x7;
     if (width == 0) width = 8;
     height = 256/width;
   }
+  if (width == 0) width = 8;
+  if (height == 0) height = 1;
+
   printf("Got %dx%d => %d\n", width, height, width*height*2);
 
   g_vertex_buffer_data[0] = -1.0f;
