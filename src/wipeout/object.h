@@ -382,7 +382,7 @@ typedef union Prm {
 Object *objects_load(char *name, texture_list_t tl);
 void object_draw(Object *object, mat4_t *mat);
 
-void render_push_tris_saturn(tris_saturn_t tris, uint16_t primitive_index, uint16_t texture, Object_Saturn *object);
-void render_push_stripe_saturn(quads_saturn_t *quad, uint16_t primitive_index, uint16_t texture_index, Object_Saturn *object);
+void render_push_tris_saturn(tris_saturn_t tris, uint16_t texture, Object_Saturn *object);
+void render_push_stripe_saturn(quads_saturn_t *quad, uint16_t texture_index, Object_Saturn *object);
 
 #endif

@@ -83,7 +83,7 @@ void vdp1_init(void)
   vdp1_sync_interval_set(0);
 }
 
-void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t primitive_index, uint16_t texture_index, Object_Saturn *object){
+void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t texture_index, Object_Saturn *object){
   uint16_t *character;
   vec2i_t size;
   LOGD(
@@ -132,6 +132,7 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t prim
   };
 
   if (texture_index == RENDER_NO_TEXTURE) {
+    printf("No color\n");
     draw_mode.color_mode = VDP1_CMDT_CM_RGB_32768;
     quads_t q;
     q.vertices[0].uv.x = 0;
@@ -144,26 +145,29 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t prim
     q.vertices[3].uv.y = 1;
     character = getVdp1VramAddress(texture_index, id, &q, &size);
   } else {
-    PRM_saturn *primitive = object->primitives[primitive_index];
-    error_if(primitive_index > object->characters->nb_characters, "primtive index %d is out of bounds %d\n", primitive_index, object->characters->nb_characters);
-    uint16_t character_texture = object->characters->character[primitive_index]->texture;
+    error_if(texture_index > object->characters->nb_characters, "texture index %d is out of bounds %d\n", texture_index, object->characters->nb_characters);
+    character_t *chrt = object->characters->character[texture_index];
+    uint16_t character_texture = chrt->texture;
     printf("%d\n", __LINE__);
     size = get_tex(character_texture)->size;
     printf("%d\n", __LINE__);
     character = getVdp1VramAddress_Saturn(character_texture, id); //a revoir parce qu'il ne faut copier suivant le UV
     printf("%d\n", __LINE__);
-    uint16_t palette_texture = object->pal[primitive->palette]->texture;
+    palette_t *plt = object->pal[chrt->palette_id];
+    uint16_t palette_texture = plt->texture;
+    printf("Palette = %d\n", palette_texture);
     uint16_t *palette = getVdp1VramAddress_Saturn(palette_texture, id);
+    printf("Palette addr = 0x%x\n", palette);
     printf("%d\n", __LINE__);
 
     vdp1_cmdt_color_bank_t color_bank; //not used yet
-    switch(object->pal[primitive->palette]->format) {
+    switch(plt->format) {
       case COLOR_BANK_16_COL 	:
       die("Not supported\n");
       // vdp1_cmdt_color_mode0_set(&draw_mode, palette);
       break;
       case LOOKUP_TABLE_16_COL:
-      vdp1_cmdt_color_mode1_set(&draw_mode, (uint32_t)palette);
+      vdp1_cmdt_color_mode1_set(cmd, (uint32_t)palette);
       break;
       case COLOR_BANK_64_COL 	:
       die("Not supported\n");
@@ -182,7 +186,7 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t prim
       // vdp1_cmdt_color_mode5_set(&draw_mode, palette);
       break;
     }
-    draw_mode.color_mode    = object->pal[primitive->palette]->format;
+    draw_mode.color_mode    = plt->format;
   }
 
   vdp1_cmdt_distorted_sprite_set(cmd); //Use distorted by default but it can be normal or scaled

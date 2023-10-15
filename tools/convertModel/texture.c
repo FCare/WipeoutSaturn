@@ -59,6 +59,7 @@ texture_t *texture_create(uint32_t width, uint32_t height, rgba_t *pixels){
     }
     if (found==0){
       if (nb_color < 256) palette[nb_color] = color;
+      printf("Add color %x\n", color);
       nb_color++;
     }
   }
