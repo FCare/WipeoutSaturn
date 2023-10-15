@@ -226,7 +226,6 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t text
 
 void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
 {
-  return;
   LOGD(
     "vdp1 add %dx%d %dx%d %dx%d %dx%d\n",
     fix16_int32_to(quad->vertices[0].pos.x),
