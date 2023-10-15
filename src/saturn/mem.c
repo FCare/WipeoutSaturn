@@ -62,7 +62,7 @@ void mem_reset(void *p) {
 // and aftewards free A then B.
 
 void *mem_temp_alloc(uint32_t size) {
-	size = ((size + 7) >> 3) << 3; // allign to 8 bytes
+	size = (size + 0x7)&~0x7; // allign to 8 bytes
 
   error_if(temp_len + size >= TEMP_MEM_HUNK_BYTES, "Failed to allocate %d bytes in temp mem (%d)", size, temp_len);
 	error_if(temp_objects_len >= MEM_TEMP_OBJECTS_MAX, "MEM_TEMP_OBJECTS_MAX reached");
@@ -79,7 +79,7 @@ void *mem_temp_alloc(uint32_t size) {
 
 void mem_temp_free(void *p) {
 	uint32_t offset = (uint8_t *)&temp_hunk[TEMP_MEM_HUNK_BYTES] - (uint8_t *)p;
-	error_if(offset > TEMP_MEM_HUNK_BYTES, "Object 0x%p not in temp hunk", p);
+	error_if(offset > TEMP_MEM_HUNK_BYTES, "Object 0x%p not in temp hunk (%x %x)", p, offset, TEMP_MEM_HUNK_BYTES);
 
 	bool found = false;
 	uint32_t remaining_max = 0;

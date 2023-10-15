@@ -152,15 +152,10 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t text
     size = get_tex(character_texture)->size;
 
     error_if((size.x*size.y > 256), "texture index %d (character texture %d) is too big %dx%d\n", texture_index, character_texture, size.x, size.y);
-    printf("%d\n", __LINE__);
-    character = getVdp1VramAddress_Saturn(character_texture, id); //a revoir parce qu'il ne faut copier suivant le UV
-    printf("%d\n", __LINE__);
+    character = getVdp1VramAddress_Saturn(character_texture, id);
     palette_t *plt = object->pal[chrt->palette_id];
     uint16_t palette_texture = plt->texture;
-    printf("Palette = %d\n", palette_texture);
     uint16_t *palette = getVdp1VramAddress_Saturn(palette_texture, id);
-    printf("Palette addr = 0x%x\n", palette);
-    printf("%d\n", __LINE__);
 
     vdp1_cmdt_color_bank_t color_bank; //not used yet
     switch(plt->format) {
@@ -224,7 +219,6 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t text
   cmd->cmd_yc = fix16_int32_to(quad->vertices[2].pos.y);
   cmd->cmd_xd = fix16_int32_to(quad->vertices[3].pos.x);
   cmd->cmd_yd = fix16_int32_to(quad->vertices[3].pos.y);
-
   LOGD("####Add CMD########\n");
 
   nbCommand++;

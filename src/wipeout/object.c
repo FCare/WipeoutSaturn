@@ -641,7 +641,6 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 		int coord2;
 		int coord3;
 		PRM_saturn *poly = object->primitives[i];
-		printf("render %d\n", poly->type);
 		switch (poly->type) {
 		case PRM_TYPE_GT3:
 			coord0 = poly->gt3.coords[0];

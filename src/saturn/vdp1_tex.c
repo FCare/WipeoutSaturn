@@ -3,7 +3,7 @@
 #include "map.h"
 #include "tex.h"
 
-#define VDP1_TEXTURES_MAX  64
+#define VDP1_TEXTURES_MAX  128
 
 typedef struct {
 	vec2i_t size;
@@ -51,7 +51,6 @@ static uint8_t isSameUv(vec2_t *uv, quads_t *q) {
 
 uint16_t* getVdp1VramAddress_Saturn(uint16_t texture_index, uint8_t id){
 	render_texture_t* src = get_tex(texture_index);
-	printf("Texture %d point to 0x%x\n", texture_index, src->pixels);
 	for (uint16_t i=0; i<textures_len[id]; i++) {
     if (textures[id][i].index == texture_index)
 		{
@@ -59,10 +58,9 @@ uint16_t* getVdp1VramAddress_Saturn(uint16_t texture_index, uint8_t id){
       return textures[id][i].pixels;
     }
   }
-
+	error_if (textures_len[id] == VDP1_TEXTURES_MAX, "Vdp1 has no more texture available\n");
 	//Not found, bump a new one
 	uint16_t length = src->size.x*src->size.y*sizeof(rgb1555_t);
-	printf("Copy %d bytes (%dx%d)\n", length, src->size.x, src->size.y);
 	textures[id][textures_len[id]].used = 1;
   textures[id][textures_len[id]].index = texture_index;
   textures[id][textures_len[id]].pixels = vdp1_tex_bump(length, id);
