@@ -48,7 +48,7 @@ render_texture_t* get_tex(uint16_t texture) {
 uint16_t create_sub_texture(uint16_t offset, uint32_t width, uint32_t height, uint16_t parent) {
 	error_if(textures_len == TEXTURES_MAX, "Not enough texture available");
 	uint16_t texture_index = textures_len;
-	textures[textures_len++] = (render_texture_t){.size = vec2i(width, height), .pixels = &(get_tex(parent)->pixels[offset])};
+	textures[textures_len++] = (render_texture_t){.size = vec2i(width, height), .pixels = &(get_tex(parent)->pixels[offset/sizeof(rgb1555_t)])};
 	return texture_index;
 }
 

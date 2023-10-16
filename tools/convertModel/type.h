@@ -85,4 +85,6 @@ extern uint32_t get_u32_le(uint8_t *bytes, uint32_t *p);
 #define get_i32(BYTES, P) ((int32_t)get_u32(BYTES, P))
 #define get_i32_le(BYTES, P) ((int32_t)get_u32_le(BYTES, P))
 
+extern rgb1555_t rgb155_from_u32(uint32_t v);
+
 #endif

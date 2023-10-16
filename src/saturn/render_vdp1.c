@@ -151,7 +151,7 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t text
     printf("%d\n", __LINE__);
     size = get_tex(character_texture)->size;
 
-    error_if((size.x*size.y > 256), "texture index %d (character texture %d) is too big %dx%d\n", texture_index, character_texture, size.x, size.y);
+    // error_if((size.x*size.y > 256), "texture index %d (character texture %d) is too big %dx%d\n", texture_index, character_texture, size.x, size.y);
     character = getVdp1VramAddress_Saturn(character_texture, id);
     palette_t *plt = object->pal[chrt->palette_id];
     uint16_t palette_texture = plt->texture;

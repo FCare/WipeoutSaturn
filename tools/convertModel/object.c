@@ -145,7 +145,6 @@ Object *objects_load(char *name, texture_list_t *tl) {
 				break;
 
 			case PRM_TYPE_FT4:
-				printf("Flag is 0x%x @ 0x%x\n", prm_flag, p);
 				prm.ptr = mem_bump(sizeof(FT4));
 				prm.ft4->coords[0] = get_i16(bytes, &p);
 				prm.ft4->coords[1] = get_i16(bytes, &p);
@@ -1134,6 +1133,7 @@ void object_draw(Object *object) {
 			break;
 
 		case PRM_TYPE_GT4:
+		printf("Gt4\n");
 			coord0 = poly.gt4->coords[0];
 			coord1 = poly.gt4->coords[1];
 			coord2 = poly.gt4->coords[2];
@@ -1198,6 +1198,7 @@ void object_draw(Object *object) {
 			break;
 
 		case PRM_TYPE_FT4:
+		printf("FT4\n");
 			coord0 = poly.ft4->coords[0];
 			coord1 = poly.ft4->coords[1];
 			coord2 = poly.ft4->coords[2];

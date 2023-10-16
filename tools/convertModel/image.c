@@ -7,6 +7,8 @@
 #include "lzss.h"
 #include "texture.h"
 
+#define SAVE_EXTRACT
+
 #define TIM_TYPE_PALETTED_4_BPP 0x08
 #define TIM_TYPE_PALETTED_8_BPP 0x09
 #define TIM_TYPE_TRUE_COLOR_16_BPP 0x02
@@ -159,6 +161,12 @@ texture_list_t image_get_compressed_textures(char *name) {
 		if (list.texture[i]->format != COLOR_BANK_RGB)
 			list.texture[i]->palette.index_in_file = nbPalette++;
 		// free(image);
+
+#ifdef SAVE_EXTRACT
+	char png_name[1024] = {0};
+	sprintf(png_name, "origin_%d.png", i);
+	stbi_write_png(png_name, image->width, image->height, 4, image->pixels, 0);
+#endif
 	}
 	printf("Found %d palettes\n", nbPalette);
 	free(cmp);

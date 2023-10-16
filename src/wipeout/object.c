@@ -622,6 +622,8 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 	return list;
 }
 
+int nb_texture = 0;
+
 void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 	vec3_t *vertex = mem_temp_alloc(object->info->vertices_len * sizeof(vec3_t));
 
@@ -634,6 +636,51 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 	// TODO: check for PRM_SINGLE_SIDED
 
 	printf("Prim len = %d\n", primitives_len);
+
+	//DEBUT DE TEST
+
+		quads_saturn_t test = {
+			.vertices = {
+				{
+					.pos = vec3(-40,-40, -600),
+					.color = (rgb1555_t){
+							.r = 0x10,
+							.g = 0x10,
+							.b = 0x10
+					}
+				},
+				{
+					.pos = vec3(0,-40, -600),
+					.color = (rgb1555_t){
+							.r = 0x10,
+							.g = 0x10,
+							.b = 0x10
+					}
+				},
+				{
+					.pos = vec3(-40,0, -600),
+					.color = (rgb1555_t){
+						.r = 0x10,
+						.g = 0x10,
+						.b = 0x10
+					}
+				},
+				{
+					.pos = vec3(0 ,0, -600),
+					.color = (rgb1555_t){
+							.r = 0x10,
+							.g = 0x10,
+							.b = 0x10
+					}
+				},
+			}
+		};
+		render_push_stripe_saturn(&test, (nb_texture++/60)%75, object);
+
+			mem_temp_free(vertex);
+
+			return;
+			//FIN DE TEST
 
 	for (uint16_t i = 0; i < primitives_len; i++) {
 		int coord0;

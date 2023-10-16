@@ -6,9 +6,6 @@
 #define TEXTURES_MAX 1024
 
 static texture_t textures[TEXTURES_MAX];
-
-static rgb1555_t palette[256];
-static uint16_t palette_length;
 static uint16_t textures_len = 0;
 
 static rgb1555_t RGB888_RGB1555(uint8_t msb, uint8_t r, uint8_t g, uint8_t b) {
@@ -33,33 +30,21 @@ static texture_t *allocate_tex(uint32_t width, uint32_t height, rgba_t *buffer) 
     return ret;
 }
 
-static void updatePalette(rgb1555_t pix) {
-	for (int i=0; i< 256; i++) {
-		if (palette[i] == pix) return;
-	}
-	if (palette_length >= 256) {
-		palette_length++;
-	} else {
-		palette[palette_length++] = pix;
-	}
-}
-
 texture_t *texture_create(uint32_t width, uint32_t height, rgba_t *pixels){
   uint32_t byte_size = width * height * sizeof(rgb1555_t);
-  rgb1555_t palette[256];
+  rgb1555_t palette[16] = {0};
   uint16_t nb_color = 0;
   for (int i=0; i<width*height; i++) {
     rgb1555_t color = convert_to_rgb(pixels[i]);
     int found = 0;
-    for (int j=0; j<256; j++) {
+    for (int j=0; j<16; j++) {
       if (color == palette[j]) {
         found = 1;
         break;
       }
     }
     if (found==0){
-      if (nb_color < 256) palette[nb_color] = color;
-      printf("Add color %x\n", color);
+      if (nb_color < 16) palette[nb_color] = color;
       nb_color++;
     }
   }

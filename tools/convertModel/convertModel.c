@@ -67,6 +67,7 @@ int main(int argc, char *argv[]) {
   outputObject = replace_ext(argv[2], ".smf");
 
 	textures = image_get_compressed_textures(argv[1]);
+
 	Object *models = objects_load(argv[2], &textures);
 
 	int object_index;

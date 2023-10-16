@@ -35,3 +35,13 @@ uint32_t get_u32_le(uint8_t *bytes, uint32_t *p) {
 	v |= bytes[(*p)++] << 24;
 	return v;
 }
+
+rgb1555_t rgb155_from_u32(uint32_t v) {
+	rgba_t val;
+	val.a = v & 0xFF;
+	val.b = (v>>8) & 0xFF;
+	val.g = (v>>16) & 0xFF;
+	val.r = (v>24) & 0xFF;
+	printf("%x %x %x %x\n", val.a, val.b, val.g, val.r);
+  return convert_to_rgb(val);
+}

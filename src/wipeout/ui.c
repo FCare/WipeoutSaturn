@@ -75,21 +75,21 @@ void ui_load(void) {
 	char_set[UI_SIZE_16].tex = mem_bump(sizeof(uint16_t) * char_set[UI_SIZE_16].image->nbQuads);
 	for (int i =0; i<char_set[UI_SIZE_16].image->nbQuads; i++) {
 		font_character_t * char_glyph = &char_set[UI_SIZE_16].image->character[i];
-		char_set[UI_SIZE_16].tex[i] = create_sub_texture(char_glyph->offset/2, char_glyph->stride, char_glyph->height, texture);
+		char_set[UI_SIZE_16].tex[i] = create_sub_texture(char_glyph->offset, char_glyph->stride, char_glyph->height, texture);
 	}
 
 	char_set[UI_SIZE_12].image = (saturn_font_t*) platform_load_saturn_asset("wipeout/textures/fonts/fonts_12.stf", &texture);
 	char_set[UI_SIZE_12].tex = mem_bump(sizeof(uint16_t) * char_set[UI_SIZE_12].image->nbQuads);
 	for (int i =0; i<char_set[UI_SIZE_12].image->nbQuads; i++) {
 		font_character_t * char_glyph = &char_set[UI_SIZE_12].image->character[i];
-		char_set[UI_SIZE_12].tex[i] = create_sub_texture(char_glyph->offset/2, char_glyph->stride, char_glyph->height, texture);
+		char_set[UI_SIZE_12].tex[i] = create_sub_texture(char_glyph->offset, char_glyph->stride, char_glyph->height, texture);
 	}
 
 	char_set[UI_SIZE_8].image = (saturn_font_t*) platform_load_saturn_asset("wipeout/textures/fonts/fonts_8.stf", &texture);
 	char_set[UI_SIZE_8].tex = mem_bump(sizeof(uint16_t) * char_set[UI_SIZE_8].image->nbQuads);
 	for (int i =0; i<char_set[UI_SIZE_8].image->nbQuads; i++) {
 		font_character_t * char_glyph = &char_set[UI_SIZE_8].image->character[i];
-		char_set[UI_SIZE_8].tex[i] = create_sub_texture(char_glyph->offset/2, char_glyph->stride, char_glyph->height, texture);
+		char_set[UI_SIZE_8].tex[i] = create_sub_texture(char_glyph->offset, char_glyph->stride, char_glyph->height, texture);
 	}
 
 	// icon_textures[UI_ICON_HAND]    = texture_from_list(tl, 3);
