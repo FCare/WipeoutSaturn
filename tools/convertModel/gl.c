@@ -242,8 +242,8 @@ static void render(void)
       case COLOR_BANK_16_COL:
       case LOOKUP_TABLE_16_COL:
       {
-        g_resources.dstTexture->length = g_resources.dstTexture->width*g_resources.dstTexture->height;
-        g_resources.dstTexture->pixels = malloc(g_resources.dstTexture->length/2);
+        g_resources.dstTexture->length = g_resources.dstTexture->width*g_resources.dstTexture->height/4;
+        g_resources.dstTexture->pixels = malloc(g_resources.dstTexture->length*sizeof(rgb1555_t));
         printf("Setup palette_id = %d %dx%d\n",g_resources.srcTexture->palette.index_in_file, g_resources.dstTexture->width, g_resources.dstTexture->height);
         g_resources.dstTexture->palette_id = g_resources.srcTexture->palette.index_in_file;
         printf("Nb pix = %d format %d\n", g_resources.dstTexture->height*g_resources.dstTexture->width, g_resources.srcTexture->format);
@@ -252,17 +252,17 @@ static void render(void)
           rgb1555_t b = out[i+1]&0xFFFF;
           rgb1555_t c = out[i+2]&0xFFFF;
           rgb1555_t d = out[i+3]&0xFFFF;
-          int8_t outa = -1;
-          int8_t outb = -1;
-          int8_t outc = -1;
-          int8_t outd = -1;
+          uint8_t outa = 0xFF;
+          uint8_t outb = 0xFF;
+          uint8_t outc = 0xFF;
+          uint8_t outd = 0xFF;
           for (int j=0; j<16; j++) {
             if (a == g_resources.srcTexture->palette.pixels[j]) outa = j;
             if (b == g_resources.srcTexture->palette.pixels[j]) outb = j;
             if (c == g_resources.srcTexture->palette.pixels[j]) outc = j;
             if (d == g_resources.srcTexture->palette.pixels[j]) outd = j;
           }
-          if ((outa == -1)||(outb == -1)||(outc == -1)||(outd == -1))
+          if ((outa == 0xFF)||(outb == 0xFF)||(outc == 0xFF)||(outd == 0xFF))
           {
             printf("Error pixel not matched on palette - should not happen - texture %d loop %d\n", nbImage, i);
             printf("Pix 0x%x 0x%x 0x%x 0x%x\n", a, b, c, d);
@@ -308,8 +308,31 @@ static void render(void)
     }
 #ifdef SAVE_EXTRACT
     char png_name[1024] = {0};
-		sprintf(png_name, "%d.png", nbImage);
+		sprintf(png_name, "char_%d.png", nbImage);
 		stbi_write_png(png_name, g_resources.dstTexture->width, g_resources.dstTexture->height, 4, out, 0);
+    uint32_t *save = malloc(g_resources.dstTexture->width*g_resources.dstTexture->height*sizeof(uint32_t));
+    for (int i = 0; i<g_resources.dstTexture->width*g_resources.dstTexture->height/4; i++) {
+       uint16_t id = g_resources.dstTexture->pixels[i];
+       for (int j=0; j<4; j++) {
+         uint8_t pixel_id = (id >> (4*(3-j)))&0xF;
+         save[i*4+j] = pixel_id;
+         // rgb1555_t val = g_resources.srcTexture->palette.pixels[pixel_id];
+         // save[i*4+j] = ((((val>>10)&0x1F)<<3)<<16) | ((((val>>5)&0x1F)<<3)<<8) | (((val&0x1F)<<3)<<0) | 0xFF000000u;
+       }
+    }
+    sprintf(png_name, "index_%d.png", nbImage);
+    stbi_write_png(png_name, g_resources.dstTexture->width, g_resources.dstTexture->height, 4, save, 0);
+    for (int i = 0; i<g_resources.dstTexture->width*g_resources.dstTexture->height/4; i++) {
+       uint16_t id = g_resources.dstTexture->pixels[i];
+       for (int j=0; j<4; j++) {
+         uint8_t pixel_id = (id >> (4*(3-j)))&0xF;
+         rgb1555_t val = g_resources.srcTexture->palette.pixels[pixel_id];
+         save[i*4+j] = ((((val>>10)&0x1F)<<3)<<16) | ((((val>>5)&0x1F)<<3)<<8) | (((val&0x1F)<<3)<<0) | 0xFF000000u;
+       }
+    }
+    sprintf(png_name, "color_%d.png", nbImage);
+    stbi_write_png(png_name, g_resources.dstTexture->width, g_resources.dstTexture->height, 4, save, 0);
+    free(save);
 #endif
     free(out);
     g_resources.ready = 0;
@@ -356,13 +379,13 @@ void gl_generate_texture_from_tris(render_texture_t *out, tris_t *t, texture_t *
   printf("Got %dx%d => %d\n", width, height, width*height*2);
 
   g_vertex_buffer_data[0] = -1.0f;
-  g_vertex_buffer_data[1] = (float)height/120.0f - 1.0f;
+  g_vertex_buffer_data[1] = -1.0f;
   g_vertex_buffer_data[2] = (float)width/160.0f - 1.0f;
-  g_vertex_buffer_data[3] = (float)height/120.0f - 1.0f;
+  g_vertex_buffer_data[3] = -1.0f;
   g_vertex_buffer_data[4] = -1.0f;
-  g_vertex_buffer_data[5] = -1.0f;
+  g_vertex_buffer_data[5] = (float)height/120.0f - 1.0f;
   g_vertex_buffer_data[6] = (float)width/160.0f - 1.0f;
-  g_vertex_buffer_data[7] = -1.0f;
+  g_vertex_buffer_data[7] = (float)height/120.0f - 1.0f;
 
   out->width = width;
   out->height = height;
@@ -374,7 +397,7 @@ void gl_generate_texture_from_tris(render_texture_t *out, tris_t *t, texture_t *
   g_texcoord_buffer_data[4] = (float)t->vertices[2].uv.x / (float)texture->width;
   g_texcoord_buffer_data[5] = (float)t->vertices[2].uv.y / (float)texture->height;
   g_texcoord_buffer_data[6] = (float)t->vertices[1].uv.x / (float)texture->width;
-  g_texcoord_buffer_data[7] = (float)t->vertices[2].uv.y / (float)texture->height;
+  g_texcoord_buffer_data[7] = (float)t->vertices[1].uv.y / (float)texture->height;
 
 printf("UV %fx%f %fx%f %fx%f %fx%f\n",
 g_texcoord_buffer_data[0],
@@ -412,23 +435,23 @@ void gl_generate_texture_from_quad(render_texture_t *out, quads_t *t, texture_t 
     height = max(height, new_length);
   }
 
-
-    if (width*height > 256) {
-      double ratio = width/256.0;
+printf("Was %dx%d => %d\n", width, height, width*height);
+    if (width*height > 3048) {
+      double ratio = 3048.0/(width*height);
       width = ((int)(width * ratio)+0x7)& ~0x7;
       if (width == 0) width = 8;
-      height = 256/width;
+      height = 3048/width;
     }
-    printf("Got %dx%d => %d\n", width, height, width*height*2);
+    printf("Got %dx%d => %d\n", width, height, width*height);
 
-  g_vertex_buffer_data[0] = -1.0f;
-  g_vertex_buffer_data[1] = (float)height/120.0f - 1.0f;
-  g_vertex_buffer_data[2] = (float)width/160.0f - 1.0f;
-  g_vertex_buffer_data[3] = (float)height/120.0f - 1.0f;
   g_vertex_buffer_data[4] = -1.0f;
-  g_vertex_buffer_data[5] = -1.0f;
+  g_vertex_buffer_data[5] = (float)height/120.0f - 1.0f;
   g_vertex_buffer_data[6] = (float)width/160.0f - 1.0f;
-  g_vertex_buffer_data[7] = -1.0f;
+  g_vertex_buffer_data[7] = (float)height/120.0f - 1.0f;
+  g_vertex_buffer_data[0] = -1.0f;
+  g_vertex_buffer_data[1] = -1.0f;
+  g_vertex_buffer_data[2] = (float)width/160.0f - 1.0f;
+  g_vertex_buffer_data[3] = -1.0f;
 
   out->width = width;
   out->height = height;

@@ -156,6 +156,7 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t text
     palette_t *plt = object->pal[chrt->palette_id];
     uint16_t palette_texture = plt->texture;
     uint16_t *palette = getVdp1VramAddress_Saturn(palette_texture, id);
+    printf("Rendering character %d from @x%x (%s) using palette %d @ 0x%x\n", texture_index,character, object->info->name, chrt->palette_id, palette);
 
     vdp1_cmdt_color_bank_t color_bank; //not used yet
     switch(plt->format) {

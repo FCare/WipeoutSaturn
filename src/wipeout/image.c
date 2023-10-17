@@ -261,7 +261,7 @@ saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
 	uint16_t *buf = (uint16_t*)platform_load_saturn_asset(name, &texture);
 
 	saturn_image_ctrl_t *list = mem_bump(sizeof(saturn_image_ctrl_t));
-	int offset = 0;
+	uint32_t offset = 0;
 	list->nb_palettes = buf[offset++];
 	printf("Nb_palettes = %d\n", list->nb_palettes);
 	list->pal = mem_bump(sizeof(palette_t*)*list->nb_palettes);
@@ -269,10 +269,10 @@ saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
 		list->pal[i] = (palette_t *)&buf[offset];
 		printf("palette[%d] => size %dx1 0x%x\n",i, list->pal[i]->width, list->pal[i]);
 		offset += 3;
-		list->pal[i]->pixels = (rgb1555_t *)&buf[offset];
-		uint16_t delta = offset*sizeof(rgb1555_t);
-		printf("Create palette texture for 0x@%x\n", list->pal[i]->pixels);
+		uint32_t delta = offset*sizeof(rgb1555_t);
 		list->pal[i]->texture = create_sub_texture(delta , list->pal[i]->width, 1, texture);
+		// list->pal[i]->pixels = (rgb1555_t *)&buf[offset];
+		printf("Create palette[%d] texture from offset 0x%x to 0x@%x\n", i, delta, (rgb1555_t *)&buf[offset]);
 		printf("Pal texture[%d] = %d\n", i, list->pal[i]->texture);
 		switch(list->pal[i]->format) {
 			case COLOR_BANK_16_COL:
@@ -302,11 +302,11 @@ saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
 		printf("%d nb_characters = %d 0x%x\n", n, ch_list->nb_characters, offset);
 		ch_list->character = mem_bump(sizeof(character_t*)*ch_list->nb_characters);
 		for (int i =0; i<ch_list->nb_characters; i++) {
-			printf("Read character[%d] at offset @x%x\n", i, offset*2);
+			printf("Read character[%d] object[%d] t offset @x%x\n", i, n, offset*2);
 			ch_list->character[i] = (character_t *)&buf[offset];
 			offset += 5;
 			ch_list->character[i]->pixels = (rgb1555_t *)&buf[offset];
-			uint16_t delta = offset*sizeof(rgb1555_t);
+			uint32_t delta = offset*sizeof(rgb1555_t);
 			printf("Character %d is at 0x%x vs 0x%x => delta = 0x%x (Obj %d)\n", i, ch_list->character[i]->pixels, (uint16_t)buf, delta, n);
 			ch_list->character[i]->texture = create_sub_texture(delta , ch_list->character[i]->width, ch_list->character[i]->height, texture);
 			printf("%dx%d %d\n", ch_list->character[i]->width, ch_list->character[i]->height, ch_list->character[i]->length);

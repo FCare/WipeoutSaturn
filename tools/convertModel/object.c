@@ -879,7 +879,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 	write_16((uint16_t)textures->len, ftex);
 	printf("Output palette nb %d\n",textures->len);
 	for (int i = 0; i < textures->len; i++) {
-		printf("Palette[%d] @0x%x\n", ftell(ftex));
+		printf("Palette[%d] @0x%x\n", i, ftell(ftex));
 		texture_t *tex = textures->texture[i];
 		write_16((uint16_t)tex->format, ftex);
 		write_16((uint16_t)1, ftex);

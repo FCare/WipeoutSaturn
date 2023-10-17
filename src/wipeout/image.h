@@ -38,7 +38,7 @@ typedef struct {
 } saturn_font_t;
 
 typedef struct {
-	color_mode_t format;
+	uint16_t format;
 	uint16_t texture;
 	uint16_t width;
 	rgb1555_t *pixels;

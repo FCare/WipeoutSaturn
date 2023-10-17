@@ -48,6 +48,10 @@ texture_t *texture_create(uint32_t width, uint32_t height, rgba_t *pixels){
       nb_color++;
     }
   }
+  if (nb_color > 16) {
+    printf("Palette too big %d\n", nb_color);
+    exit(-1);
+  }
   texture_t *ret = allocate_tex(width, height, pixels);
   // if (nb_color > 256) {
   //   ret->format = COLOR_BANK_RGB;
