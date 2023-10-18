@@ -633,55 +633,6 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 
 	render_object_transform(vertex, object->vertices, object->info->vertices_len);
 
-	// TODO: check for PRM_SINGLE_SIDED
-
-	printf("Prim len = %d\n", primitives_len);
-
-	// //DEBUT DE TEST
-	//
-	// 	quads_saturn_t test = {
-	// 		.vertices = {
-	// 			{
-	// 				.pos = vec3(-40,0, -600),
-	// 				.color = (rgb1555_t){
-	// 					.r = 0x10,
-	// 					.g = 0x10,
-	// 					.b = 0x10
-	// 				}
-	// 			},
-	// 			{
-	// 				.pos = vec3(0 ,0, -600),
-	// 				.color = (rgb1555_t){
-	// 					.r = 0x10,
-	// 					.g = 0x10,
-	// 					.b = 0x10
-	// 				}
-	// 			},
-	// 			{
-	// 				.pos = vec3(-40,-40, -600),
-	// 				.color = (rgb1555_t){
-	// 					.r = 0x10,
-	// 					.g = 0x10,
-	// 					.b = 0x10
-	// 				}
-	// 			},
-	// 			{
-	// 				.pos = vec3(0,-40, -600),
-	// 				.color = (rgb1555_t){
-	// 					.r = 0x10,
-	// 					.g = 0x10,
-	// 					.b = 0x10
-	// 				}
-	// 			},
-	// 		}
-	// 	};
-	// 	render_push_stripe_saturn(&test, 1+(nb_texture++/60)%74, object);
-	//
-	// 		mem_temp_free(vertex);
-	//
-	// 		return;
-	// 		//FIN DE TEST
-
 	for (uint16_t i = 0; i < primitives_len; i++) {
 		int coord0;
 		int coord1;
@@ -724,16 +675,16 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 						.color = poly->gt4.color[0]
 					},
 					{
-						.pos = vertex[coord1],
-						.color = poly->gt4.color[1]
-					},
-					{
 						.pos = vertex[coord2],
 						.color = poly->gt4.color[2]
 					},
 					{
 						.pos = vertex[coord3],
 						.color = poly->gt4.color[3]
+					},
+					{
+						.pos = vertex[coord1],
+						.color = poly->gt4.color[1]
 					},
 				}
 			};
@@ -775,15 +726,15 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 						.color = poly->ft4.color
 					},
 					{
-						.pos = vertex[coord2],
-						.color = poly->ft4.color
-					},
-					{
 						.pos = vertex[coord1],
 						.color = poly->ft4.color
 					},
 					{
 						.pos = vertex[coord0],
+						.color = poly->ft4.color
+					},
+					{
+						.pos = vertex[coord2],
 						.color = poly->ft4.color
 					},
 				}
@@ -826,16 +777,16 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 						.color = poly->g4.color[3]
 					},
 					{
-						.pos = vertex[coord2],
-						.color = poly->g4.color[2]
-					},
-					{
 						.pos = vertex[coord1],
 						.color = poly->g4.color[1]
 					},
 					{
 						.pos = vertex[coord0],
 						.color = poly->g4.color[0]
+					},
+					{
+						.pos = vertex[coord2],
+						.color = poly->g4.color[2]
 					},
 				}
 			};
@@ -877,15 +828,15 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 						.color = poly->f4.color
 					},
 					{
-						.pos = vertex[coord2],
-						.color = poly->f4.color
-					},
-					{
 						.pos = vertex[coord1],
 						.color = poly->f4.color
 					},
 					{
 						.pos = vertex[coord0],
+						.color = poly->f4.color
+					},
+					{
+						.pos = vertex[coord2],
 						.color = poly->f4.color
 					},
 				}

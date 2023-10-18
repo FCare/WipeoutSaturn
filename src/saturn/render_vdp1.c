@@ -83,7 +83,7 @@ void vdp1_init(void)
   vdp1_sync_interval_set(0);
 }
 
-void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t texture_index, Object_Saturn *object){
+void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object_Saturn *object){
   uint16_t *character;
   vec2i_t size;
   LOGD(
@@ -195,16 +195,20 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, rgb1555_t color, uint16_t text
   cmd->cmd_link = (uint16_t)((uint32_t)&cmdts[nbCommand+1]-(uint32_t)&cmdt_list->cmdts[0])>>3;
   chain[nbCommand].id = nbCommand;
 
-  rgb1555_t gouraud = color;
-  if ((gouraud.r != 0x10) || (gouraud.g != 0x10) || (gouraud.b != 0x10)) {
+  uint8_t needGouraud = 0;
+  for (int i =0; i<4; i++) {
+    rgb1555_t gouraud = quad->vertices[i].color;
+    needGouraud |= ((gouraud.r != 0x10) || (gouraud.g != 0x10) || (gouraud.b != 0x10));
+  }
+  if (needGouraud != 0) {
     //apply gouraud
     //Shall not be shared between lists
     vdp1_gouraud_table_t *gouraud_base;
     gouraud_base = &_vdp1_vram_partitions.gouraud_base[gouraud_cmd];
-    gouraud_base->colors[0] = gouraud;
-    gouraud_base->colors[1] = gouraud;
-    gouraud_base->colors[2] = gouraud;
-    gouraud_base->colors[3] = gouraud;
+    gouraud_base->colors[0] = quad->vertices[0].color;
+    gouraud_base->colors[1] = quad->vertices[1].color;
+    gouraud_base->colors[2] = quad->vertices[2].color;
+    gouraud_base->colors[3] = quad->vertices[3].color;
     gouraud_cmd++;
     draw_mode.cc_mode = VDP1_CMDT_CC_GOURAUD;
 

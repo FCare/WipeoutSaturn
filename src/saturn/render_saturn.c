@@ -212,11 +212,6 @@ void render_push_quads(quads_t *quad, uint16_t texture_index) {
 void render_push_stripe_saturn(quads_saturn_t *quad, uint16_t texture_index, Object_Saturn *object) {
   LOGD("%s\n", __FUNCTION__);
 
-  vec3_t temp = quad->vertices[1].pos;
-  quad->vertices[1].pos = quad->vertices[2].pos;
-  quad->vertices[2].pos = quad->vertices[3].pos;
-  quad->vertices[3].pos = temp;
-
   nb_planes++;
   fix16_t minZ = FIX16_ZERO;
   for (int i = 0; i<4; i++) {
@@ -229,7 +224,7 @@ void render_push_stripe_saturn(quads_saturn_t *quad, uint16_t texture_index, Obj
   currentminZ = min(currentminZ, minZ);
 
   //Add a quad to the vdp1 list v0,v1,v2,v3
-  render_vdp1_add_saturn(quad, quad->vertices[0].color, texture_index, object);
+  render_vdp1_add_saturn(quad, texture_index, object);
 }
 
 
@@ -272,7 +267,7 @@ void render_push_tris_saturn(tris_saturn_t tris, uint16_t texture_index, Object_
     }
   };
   //Add a quad to the vdp1 list v0,v1,v2,v3
-  render_vdp1_add_saturn(&q,  q.vertices[0].color, texture_index, object);
+  render_vdp1_add_saturn(&q, texture_index, object);
 }
 
 void render_push_tris(tris_t tris, uint16_t texture_index){
