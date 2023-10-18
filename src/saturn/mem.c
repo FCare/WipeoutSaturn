@@ -32,7 +32,8 @@ void *mem_mark(void) {
 }
 
 void *mem_bump(uint32_t size) {
-	error_if(bump_len + size >= MEM_HUNK_BYTES, "Failed to allocate %d bytes (0x%x)", size, bump_len);
+	error_if(((bump_len+0x3)&~0x3) + size >= MEM_HUNK_BYTES, "Failed to allocate %d bytes (0x%x)", size, bump_len);
+	bump_len = (bump_len+0x3)&~0x3;
 	uint8_t *p = &hunk[bump_len];
 	bump_len += size;
 	LOGD("bump_len is 0x%x (0x%x)\n", bump_len, &bump_len);

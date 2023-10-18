@@ -56,11 +56,22 @@
 	LOGD("\n"); \
 	exit(1)
 
+#if DEBUG_PRINT
 #define error_if(TEST, ...) \
 	if (TEST) { \
 		die(__VA_ARGS__); \
 	}
+#else
+#define error_if
+#endif
 
+#define CHECK_ALIGN_4(A) \
+	error_if(((uint32_t)(A) & 0x3) != 0, "unaligned long access 0x%x %d", (uint32_t)(A), __LINE__)
+#define CHECK_ALIGN_2(A) \
+	error_if(((uint32_t)(A) & 0x1) != 0, "unaligned word access 0x%x %d", (uint32_t)(A), __LINE__)
+
+#define ALIGN_2(A) (A)=(((A)+0x1)&~0x1)
+#define ALIGN_4(A) (A)=(((A)+0x3)&~0x3)
 
 #define flags_add(FLAGS, F)  (FLAGS |= (F))
 #define flags_rm(FLAGS, F)   (FLAGS &= ~(F))

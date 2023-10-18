@@ -41,7 +41,7 @@ typedef struct {
 	uint16_t format;
 	uint16_t texture;
 	uint16_t width;
-	rgb1555_t *pixels;
+	rgb1555_t pixels[];
 } palette_t;
 
 typedef struct {
@@ -53,7 +53,7 @@ typedef struct {
 	uint16_t height;
 	uint16_t palette_id;
 	uint16_t length;
-	rgb1555_t *pixels;
+	rgb1555_t pixels[];
 } character_t;
 
 typedef struct {

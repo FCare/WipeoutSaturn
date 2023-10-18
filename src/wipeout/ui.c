@@ -6,6 +6,7 @@
 
 #include "ui.h"
 #include "image.h"
+#include "tex.h"
 
 int ui_scale = 2;
 

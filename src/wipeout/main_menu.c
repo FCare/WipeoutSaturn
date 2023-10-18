@@ -527,7 +527,7 @@ static void objects_unpack_imp(Object **dest_array, int len, Object *src) {
 		dest_array[i] = src;
 		src = src->next;
 	}
-	error_if(i != len, "expected %d models got %d", len, i)
+	error_if(i != len, "expected %d models got %d", len, i);
 }
 
 

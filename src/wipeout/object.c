@@ -503,28 +503,37 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 	LOGD("load: %s\n", name);
 	int texture;
 	uint16_t *bytes = (uint16_t*)platform_load_saturn_asset(name, &texture);
+	CHECK_ALIGN_4(bytes);
 	if (!bytes) {
 		die("Failed to load file %s\n", name);
 	}
 	uint32_t p = 0;
 	uint16_t length = get_i16(bytes, &p);
 	Object_Saturn_list *list = mem_bump(sizeof(Object_Saturn_list));
+	CHECK_ALIGN_4(list);
 	list->objects = mem_bump(sizeof(Object_Saturn*)*length);
+	CHECK_ALIGN_4(list->objects);
 	list->length = length;
 	LOGD("Input Nb Objects = %d\n", length);
 	for(int i = 0; i < length; i++) {
 		int nb_texture = 0;
 		Object_Saturn *object = mem_bump(sizeof(Object_Saturn));
+		CHECK_ALIGN_4(object);
 		object->info = (object_info *)&bytes[p/2];
 		list->objects[i] = object;
 		LOGD("Object[%d]@0x%x %s\n", i, p, list->objects[i]->info->name);
 		object->characters = &tl->characters[i];
 		object->pal = tl->pal;
+		CHECK_ALIGN_4(object->pal);
 		p+=sizeof(object_info);
 		object->primitives = mem_bump(sizeof(PRM_saturn*)*object->info->primitives_len);
+		CHECK_ALIGN_4(object->primitives);
 		LOGD("Input primitives %d @0x%x\n", object->info->primitives_len, p);
 		for (int j=0; j< object->info->primitives_len; j++) {
+			ALIGN_4(p);
+			LOGD("Input primitives[%d] @0x%x\n", j, p);
 			object->primitives[j] = (PRM_saturn*)&bytes[p/2];
+			CHECK_ALIGN_4(object->primitives[j]);
 			PRM_saturn *prm = object->primitives[j];
 			LOGD("Primitive type %d\n", prm->type);
 			switch (prm->type) {

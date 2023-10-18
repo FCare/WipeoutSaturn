@@ -190,7 +190,7 @@ static void page_race_stats_draw(menu_t *menu, int data) {
 menu_t *race_stats_menu_init(void) {
 	sfx_play(SFX_MENU_SELECT);
 	menu_reset(ingame_menu);
-	
+
 	char *title;
 	if (g.race_type == RACE_TYPE_TIME_TRIAL) {
 		title = "";
@@ -378,12 +378,12 @@ static void page_hall_of_fame_draw(menu_t *menu, int data) {
 	// complications
 
 	highscores_t *hs = &save.highscores[g.race_class][g.circut][g.highscore_tab];
-	
+
 	if (hs_entry_complete) {
 		sfx_play(SFX_MENU_SELECT);
 		strncpy(save.highscores_name, hs_new_entry.name, 4);
 		save.is_dirty = true;
-		
+
 		// Insert new highscore entry into the save struct
 		highscores_entry_t temp_entry = hs->entries[0];
 		for (int i = 0; i < NUM_HIGHSCORES; i++) {
@@ -467,7 +467,7 @@ static void text_scroll_menu_draw(menu_t *menu, int data) {
 			pos.y += 32 * scale;
 		}
 		else {
-			ui_draw_text_centered(line, pos, UI_SIZE_8, UI_COLOR_DEFAULT);	
+			ui_draw_text_centered(line, pos, UI_SIZE_8, UI_COLOR_DEFAULT);
 			pos.y += 12 * scale;
 		}
 	}

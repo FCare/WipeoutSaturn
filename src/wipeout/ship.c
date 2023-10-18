@@ -35,7 +35,6 @@ void ships_load(void) {
 		ship_init_exhaust_plume(&g.ships[ship_index]);
 	}
 
-
 /*
 	uint16_t shadow_textures_start = render_textures_len();
 	image_get_texture_semi_trans("wipeout/textures/shad1.tim");

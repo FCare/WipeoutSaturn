@@ -26,7 +26,7 @@ $(BUILD_DIR):
 
 $(BUILD_DIR)/%.o: %.c
 	mkdir -p $(dir $@)
-	gcc -c -o $@ $< -I$(GL_INCLUDE)
+	gcc -c -DLOGD=printf -o $@ $< -I$(GL_INCLUDE)
 
 .PHONY: clean
 clean:

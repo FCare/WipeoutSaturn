@@ -12,6 +12,12 @@
 
 #define fix16(X) ((uint32_t)(X)<<16)
 
+#define ALIGN_FILE_2(A) \
+	fseek((A), (ftell(A)+0x1)&~0x1, SEEK_SET)
+
+#define ALIGN_FILE_4(A) \
+	fseek((A), (ftell(A)+0x3)&~0x3, SEEK_SET)
+
 static texture_t * texture_from_list(texture_list_t *tl, uint16_t index) {
 	error_if(index >= tl->len, "Texture %d not in list of len %d", index, tl->len);
 	return tl->texture[index];
@@ -592,6 +598,8 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 		Prm poly = {.primitive = obj->primitives};
 		LOGD("Output primitives %d @0x%x\n",obj->primitives_len, ftell(fobj));
 		for (int i = 0; i < obj->primitives_len; i++) {
+			ALIGN_FILE_4(fobj);
+			LOGD("Output primitives [%d] @0x%x\n",i, ftell(fobj));
 			write_16((uint16_t)poly.primitive->type, fobj);
 			switch (poly.primitive->type) {
 				case PRM_TYPE_F3:
@@ -879,6 +887,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 	write_16((uint16_t)textures->len, ftex);
 	LOGD("Output palette nb %d\n",textures->len);
 	for (int i = 0; i < textures->len; i++) {
+		ALIGN_FILE_4(ftex);
 		LOGD("Palette[%d] @0x%x\n", i, ftell(ftex));
 		texture_t *tex = textures->texture[i];
 		write_16((uint16_t)tex->format, ftex);
@@ -918,6 +927,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 		uint32_t tmp32;
 		Object * obj = model[n];
 		int nb_texture = getNbCharacters(obj);
+		LOGD("Write nb texture[%d] @0x%x\n", n, ftell(ftex));
 		write_16((uint16_t)nb_texture, ftex);
 		nb_texture = 0;
 		Prm poly = {.primitive = obj->primitives};
@@ -932,6 +942,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				break;
 				case PRM_TYPE_FT3:
 					nb_texture++;
+					ALIGN_FILE_4(ftex);
 					write_16((uint16_t)poly.ft3->conv->id, ftex);
 					write_16((uint16_t)poly.ft3->conv->width, ftex);
 					LOGD("Size %dx%d\n", poly.ft3->conv->width,poly.ft3->conv->height);
@@ -946,6 +957,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				break;
 				case PRM_TYPE_FT4:
 					nb_texture++;
+					ALIGN_FILE_4(ftex);
 					write_16((uint16_t)poly.ft4->conv->id, ftex);
 					write_16((uint16_t)poly.ft4->conv->width, ftex);
 					write_16((uint16_t)poly.ft4->conv->height, ftex);
@@ -965,6 +977,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				break;
 				case PRM_TYPE_GT3:
 					nb_texture++;
+					ALIGN_FILE_4(ftex);
 					write_16((uint16_t)poly.gt3->conv->id, ftex);
 					write_16((uint16_t)poly.gt3->conv->width, ftex);
 					write_16((uint16_t)poly.gt3->conv->height, ftex);
@@ -978,6 +991,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				break;
 				case PRM_TYPE_GT4:
 					nb_texture++;
+					ALIGN_FILE_4(ftex);
 					write_16((uint16_t)poly.gt4->conv->id, ftex);
 					write_16((uint16_t)poly.gt4->conv->width, ftex);
 					write_16((uint16_t)poly.gt4->conv->height, ftex);
@@ -997,6 +1011,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				break;
 				case PRM_TYPE_LSFT3:
 					nb_texture++;
+					ALIGN_FILE_4(ftex);
 					write_16((uint16_t)poly.lsft3->conv->id, ftex);
 					write_16((uint16_t)poly.lsft3->conv->width, ftex);
 					write_16((uint16_t)poly.lsft3->conv->height, ftex);
@@ -1010,6 +1025,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				break;
 				case PRM_TYPE_LSFT4:
 					nb_texture++;
+					ALIGN_FILE_4(ftex);
 					write_16((uint16_t)poly.lsft4->conv->id, ftex);
 					write_16((uint16_t)poly.lsft4->conv->width, ftex);
 					write_16((uint16_t)poly.lsft4->conv->height, ftex);
@@ -1029,6 +1045,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				break;
 				case PRM_TYPE_LSGT3:
 					nb_texture++;
+					ALIGN_FILE_4(ftex);
 					write_16((uint16_t)poly.lsgt3->conv->id, ftex);
 					write_16((uint16_t)poly.lsgt3->conv->width, ftex);
 					write_16((uint16_t)poly.lsgt3->conv->height, ftex);
@@ -1042,6 +1059,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				break;
 				case PRM_TYPE_LSGT4:
 					nb_texture++;
+					ALIGN_FILE_4(ftex);
 					write_16((uint16_t)poly.lsgt4->conv->id, ftex);
 					write_16((uint16_t)poly.lsgt4->conv->width, ftex);
 					write_16((uint16_t)poly.lsgt4->conv->height, ftex);
@@ -1056,6 +1074,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				case PRM_TYPE_TSPR:
 				case PRM_TYPE_BSPR:
 					nb_texture++;
+					ALIGN_FILE_4(ftex);
 					write_16((uint16_t)poly.spr->conv->id, ftex);
 					write_16((uint16_t)poly.spr->conv->width, ftex);
 					write_16((uint16_t)poly.spr->conv->height, ftex);

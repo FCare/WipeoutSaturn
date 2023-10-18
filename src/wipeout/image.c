@@ -259,19 +259,23 @@ saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
 	LOGD("load: %s\n", name);
 	uint16_t texture;
 	uint16_t *buf = (uint16_t*)platform_load_saturn_asset(name, &texture);
-
+	CHECK_ALIGN_4(buf);
 	saturn_image_ctrl_t *list = mem_bump(sizeof(saturn_image_ctrl_t));
+	CHECK_ALIGN_4(list);
 	uint32_t offset = 0;
 	list->nb_palettes = buf[offset++];
 	LOGD("Nb_palettes = %d\n", list->nb_palettes);
 	list->pal = mem_bump(sizeof(palette_t*)*list->nb_palettes);
+	CHECK_ALIGN_4(list->pal);
 	for (int i =0; i<list->nb_palettes; i++) {
+		ALIGN_2(offset);
 		list->pal[i] = (palette_t *)&buf[offset];
+		CHECK_ALIGN_4(list->pal[i]);
+		CHECK_ALIGN_2(list->pal[i]->pixels);
 		LOGD("palette[%d] => size %dx1 0x%x\n",i, list->pal[i]->width, list->pal[i]);
 		offset += 3;
 		uint32_t delta = offset*sizeof(rgb1555_t);
 		list->pal[i]->texture = create_sub_texture(delta , list->pal[i]->width, 1, texture);
-		// list->pal[i]->pixels = (rgb1555_t *)&buf[offset];
 		LOGD("Create palette[%d] texture from offset 0x%x to 0x@%x\n", i, delta, (rgb1555_t *)&buf[offset]);
 		LOGD("Pal texture[%d] = %d\n", i, list->pal[i]->texture);
 		switch(list->pal[i]->format) {
@@ -296,14 +300,21 @@ saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
 	list->nb_objects = buf[offset++];
 	LOGD("nb obj = %d\n", list->nb_objects);
 	list->characters = mem_bump(sizeof(character_list_t)*list->nb_objects);
+	CHECK_ALIGN_4(list->characters);
 	for (int n =0; n<list->nb_objects; n++) {
 		character_list_t *ch_list = &list->characters[n];
-		ch_list->nb_characters = buf[offset++];
-		LOGD("%d nb_characters = %d 0x%x\n", n, ch_list->nb_characters, offset);
+		CHECK_ALIGN_4(ch_list);
+		ch_list->nb_characters = buf[offset];
+		LOGD("%d nb_characters = %d 0x%x\n", n, ch_list->nb_characters, offset*2);
+		offset++;
 		ch_list->character = mem_bump(sizeof(character_t*)*ch_list->nb_characters);
+		CHECK_ALIGN_4(ch_list->character);
 		for (int i =0; i<ch_list->nb_characters; i++) {
+			ALIGN_2(offset);
 			LOGD("Read character[%d] object[%d] t offset @x%x\n", i, n, offset*2);
 			ch_list->character[i] = (character_t *)&buf[offset];
+			CHECK_ALIGN_4(ch_list->character[i]);
+			CHECK_ALIGN_2(ch_list->character[i]->pixels);
 			offset += 5;
 			uint32_t delta = offset*sizeof(rgb1555_t);
 			LOGD("Character %d is at 0x%x vs 0x%x => delta = 0x%x (Obj %d)\n", i, ch_list->character[i]->pixels, (uint16_t)buf, delta, n);

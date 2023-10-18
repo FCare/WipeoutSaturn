@@ -11,7 +11,8 @@ static uint32_t tex_len = 0;
 static uint16_t textures_len = 0;
 
 static void *tex_bump(uint32_t size) {
-	error_if(tex_len + size >= MEM_HUNK_BYTES, "Failed to allocate %d bytes (%d)", size, tex_len);
+	error_if(((tex_len+0x3)&~0x3) + size >= MEM_HUNK_BYTES, "Failed to allocate %d bytes (%d)", size, tex_len);
+	tex_len = (tex_len+0x3)&~0x3;
 	uint8_t *p = &tex[tex_len];
 	tex_len += size;
 	return p;
