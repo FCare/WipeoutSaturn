@@ -305,7 +305,6 @@ saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
 			LOGD("Read character[%d] object[%d] t offset @x%x\n", i, n, offset*2);
 			ch_list->character[i] = (character_t *)&buf[offset];
 			offset += 5;
-			ch_list->character[i]->pixels = (rgb1555_t *)&buf[offset];
 			uint32_t delta = offset*sizeof(rgb1555_t);
 			LOGD("Character %d is at 0x%x vs 0x%x => delta = 0x%x (Obj %d)\n", i, ch_list->character[i]->pixels, (uint16_t)buf, delta, n);
 			ch_list->character[i]->texture = create_sub_texture(delta , ch_list->character[i]->width, ch_list->character[i]->height, texture);
