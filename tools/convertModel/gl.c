@@ -399,7 +399,6 @@ void gl_generate_texture_from_tris(render_texture_t *out, tris_t *t, texture_t *
   g_texcoord_buffer_data[6] = (float)t->vertices[2].uv.x / (float)texture->width;
   g_texcoord_buffer_data[7] = (float)t->vertices[2].uv.y / (float)texture->height;
 
-printf("UV %fx%f %fx%f %fx%f %fx%f\n",
 g_texcoord_buffer_data[0],
 g_texcoord_buffer_data[1],
 g_texcoord_buffer_data[2],

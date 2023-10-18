@@ -376,10 +376,10 @@ int main(int argc, char *argv[]) {
 	char *gcdb_path = strcat(strcpy(temp_path, path_assets), "gamecontrollerdb.txt");
 	int gcdb_res = SDL_GameControllerAddMappingsFromFile(gcdb_path);
 	if (gcdb_res < 0) {
-		printf("Failed to load gamecontrollerdb.txt\n");
+		LOGD("Failed to load gamecontrollerdb.txt\n");
 	}
 	else {
-		printf("load gamecontrollerdb.txt\n");
+		LOGD("load gamecontrollerdb.txt\n");
 	}
 
 

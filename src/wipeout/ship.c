@@ -18,7 +18,7 @@
 
 void ships_load(void) {
 	saturn_image_ctrl_t *ship_textures = image_get_saturn_textures("wipeout/common/allsh.stf");
-	printf("!!!!!!!!!!!!!!!!!!!!Load objects\n");
+	LOGD("!!!!!!!!!!!!!!!!!!!!Load objects\n");
 	Object_Saturn_list *ship_models = objects_saturn_load("wipeout/common/allsh.smf", ship_textures);
 	all_object_dump_saturn(ship_models);
 	saturn_image_ctrl_t *collision_textures = image_get_saturn_textures("wipeout/common/alcol.stf");
@@ -32,7 +32,6 @@ void ships_load(void) {
 		int ship_index = def.ship_model_to_pilot[object_index];
 		g.ships[ship_index].model = ship_models->objects[object_index];
 		g.ships[ship_index].collision_model = collision_models->objects[object_index];
-printf("Plume on object %d ship %d %s => %d\n", object_index, ship_index, g.ships[ship_index].model->info->name, g.ships[ship_index].model->info->vertices_len);
 		ship_init_exhaust_plume(&g.ships[ship_index]);
 	}
 

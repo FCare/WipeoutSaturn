@@ -107,7 +107,7 @@ static image_t *image_load_from_bytes(uint8_t *bytes, bool transparent) {
 }
 
 static cmp_t *image_load_compressed(char *name) {
-	printf("load cmp %s\n", name);
+	LOGD("load cmp %s\n", name);
 	uint32_t compressed_size;
 	uint8_t *compressed_bytes = file_load(name, &compressed_size);
 
@@ -146,7 +146,7 @@ texture_list_t image_get_compressed_textures(char *name) {
 	int nbPalette = 0;
 
   list.texture = malloc(cmp->len* sizeof(texture_t));
-	printf("Comp len = %d\n", cmp->len);
+	LOGD("Comp len = %d\n", cmp->len);
 	for (int i = 0; i < cmp->len; i++) {
 		int32_t width, height;
 		image_t *image = image_load_from_bytes(cmp->entries[i], false);
@@ -168,7 +168,7 @@ texture_list_t image_get_compressed_textures(char *name) {
 	stbi_write_png(png_name, image->width, image->height, 4, image->pixels, 0);
 #endif
 	}
-	printf("Found %d palettes\n", nbPalette);
+	LOGD("Found %d palettes\n", nbPalette);
 	free(cmp);
 	return list;
 }

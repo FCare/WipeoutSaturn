@@ -129,7 +129,6 @@ void menu_update(menu_t *menu) {
 	if (save.show_fps) {
 		ui_draw_text("FPS", ui_scaled(vec2i(16, 78)), UI_SIZE_8, UI_COLOR_ACCENT);
 		ui_draw_number(fix16_int32_to(g.frame_rate), ui_scaled(vec2i(16, 90)), UI_SIZE_8, UI_COLOR_DEFAULT);
-		printf("fps %d\n", fix16_int32_to(g.frame_rate));
 	}
 
 	// Draw Horizontal (confirm)

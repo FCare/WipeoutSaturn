@@ -64,8 +64,8 @@ static rgba_t rgba_from_u32(uint32_t v) {
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 #define die(...) \
-	printf("Abort at " TOSTRING(__FILE__) " line " TOSTRING(__LINE__) ": " __VA_ARGS__); \
-	printf("\n"); \
+	LOGD("Abort at " TOSTRING(__FILE__) " line " TOSTRING(__LINE__) ": " __VA_ARGS__); \
+	LOGD("\n"); \
 	exit(1)
 
 #define error_if(TEST, ...) \

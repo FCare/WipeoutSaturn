@@ -19,7 +19,7 @@ static texture_t * texture_from_list(texture_list_t *tl, uint16_t index) {
 
 Object *objects_load(char *name, texture_list_t *tl) {
 	uint32_t length = 0;
-	printf("load: %s\n", name);
+	LOGD("load: %s\n", name);
 	uint8_t *bytes = file_load(name, &length);
 	if (!bytes) {
 		die("Failed to load file %s\n", name);
@@ -575,7 +575,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 	FILE *ftex = fopen(texturePath, "wb+");
 	int nb_texture = 0;
 	write_16((uint16_t)nb_objects, fobj);
-	printf("Output Nb Objects = %d\n", nb_objects);
+	LOGD("Output Nb Objects = %d\n", nb_objects);
 	for (int n=0; n<nb_objects; n++) {
 		uint16_t tmp;
 		uint32_t tmp32;
@@ -590,7 +590,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 		write_fix((uint16_t)obj->origin.z, fobj);
 
 		Prm poly = {.primitive = obj->primitives};
-		printf("Output primitives %d @0x%x\n",obj->primitives_len, ftell(fobj));
+		LOGD("Output primitives %d @0x%x\n",obj->primitives_len, ftell(fobj));
 		for (int i = 0; i < obj->primitives_len; i++) {
 			write_16((uint16_t)poly.primitive->type, fobj);
 			switch (poly.primitive->type) {
@@ -615,7 +615,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				case PRM_TYPE_FT3:
 					write_16((uint16_t)poly.ft3->flag, fobj);
 					write_16((uint16_t)poly.ft3->conv->id, fobj);
-					printf("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
 					write_16((uint16_t)poly.ft3->conv->palette_id, fobj);
 					write_16((uint16_t)poly.ft3->coords[0], fobj);
 					write_16((uint16_t)poly.ft3->coords[1], fobj);
@@ -624,10 +624,10 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					poly.ft3 += 1;
 				break;
 				case PRM_TYPE_FT4:
-					printf("FT4 flasg is 0x%x\n",poly.ft4->flag);
+					LOGD("FT4 flasg is 0x%x\n",poly.ft4->flag);
 					write_16((uint16_t)poly.ft4->flag, fobj);
 					write_16((uint16_t)poly.ft4->conv->id, fobj);
-					printf("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
 					write_16((uint16_t)poly.ft4->conv->palette_id, fobj);
 					write_16((uint16_t)poly.ft4->coords[0], fobj);
 					write_16((uint16_t)poly.ft4->coords[1], fobj);
@@ -664,7 +664,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				case PRM_TYPE_GT3:
 					write_16((uint16_t)poly.gt3->flag, fobj);
 					write_16((uint16_t)poly.gt3->conv->id, fobj);
-					printf("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
 					write_16((uint16_t)poly.gt3->conv->palette_id, fobj);
 					write_16((uint16_t)poly.gt3->coords[0], fobj);
 					write_16((uint16_t)poly.gt3->coords[1], fobj);
@@ -677,7 +677,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				case PRM_TYPE_GT4:
 					write_16((uint16_t)poly.gt4->flag, fobj);
 					write_16((uint16_t)poly.gt4->conv->id, fobj);
-					printf("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
 					write_16((uint16_t)poly.gt4->conv->palette_id, fobj);
 					write_16((uint16_t)poly.gt4->coords[0], fobj);
 					write_16((uint16_t)poly.gt4->coords[1], fobj);
@@ -712,7 +712,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				case PRM_TYPE_LSFT3:
 					write_16((uint16_t)poly.lsft3->flag, fobj);
 					write_16((uint16_t)poly.lsft3->conv->id, fobj);
-					printf("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
 					write_16((uint16_t)poly.lsft3->conv->palette_id, fobj);
 					write_16((uint16_t)poly.lsft3->coords[0], fobj);
 					write_16((uint16_t)poly.lsft3->coords[1], fobj);
@@ -724,7 +724,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				case PRM_TYPE_LSFT4:
 					write_16((uint16_t)poly.lsft4->flag, fobj);
 					write_16((uint16_t)poly.lsft4->conv->id, fobj);
-					printf("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
 					write_16((uint16_t)poly.lsft4->conv->palette_id, fobj);
 					write_16((uint16_t)poly.lsft4->coords[0], fobj);
 					write_16((uint16_t)poly.lsft4->coords[1], fobj);
@@ -769,7 +769,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				case PRM_TYPE_LSGT3:
 					write_16((uint16_t)poly.lsgt3->flag, fobj);
 					write_16((uint16_t)poly.lsgt3->conv->id, fobj);
-					printf("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
 					write_16((uint16_t)poly.lsgt3->conv->palette_id, fobj);
 					write_16((uint16_t)poly.lsgt3->coords[0], fobj);
 					write_16((uint16_t)poly.lsgt3->coords[1], fobj);
@@ -793,7 +793,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_fix((uint16_t)poly.lsgt4->normals[2], fobj);
 					write_fix((uint16_t)poly.lsgt4->normals[3], fobj);
 					write_16((uint16_t)poly.lsgt4->conv->id, fobj);
-					printf("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
 					write_16((uint16_t)poly.lsgt4->conv->palette_id, fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsgt4->color[0]), fobj);
 					write_16((uint16_t)convert_to_rgb(poly.lsgt4->color[1]), fobj);
@@ -805,7 +805,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				case PRM_TYPE_BSPR:
 					write_16((uint16_t)poly.spr->flag, fobj);
 					write_16((uint16_t)poly.spr->conv->id, fobj);
-					printf("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
 					write_16((uint16_t)poly.spr->conv->palette_id, fobj);
 					write_16((uint16_t)poly.spr->coord, fobj);
 					write_16((uint16_t)poly.spr->width, fobj);
@@ -877,9 +877,9 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 	}
 
 	write_16((uint16_t)textures->len, ftex);
-	printf("Output palette nb %d\n",textures->len);
+	LOGD("Output palette nb %d\n",textures->len);
 	for (int i = 0; i < textures->len; i++) {
-		printf("Palette[%d] @0x%x\n", i, ftell(ftex));
+		LOGD("Palette[%d] @0x%x\n", i, ftell(ftex));
 		texture_t *tex = textures->texture[i];
 		write_16((uint16_t)tex->format, ftex);
 		write_16((uint16_t)1, ftex);
@@ -891,18 +891,18 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				break;
 			case COLOR_BANK_64_COL:
 				write_16((uint16_t)64, ftex);
-				printf("64 should never happen\n");
+				LOGD("64 should never happen\n");
 				exit(-1);
 				for (int j=0; j<64; j++) write_16((uint16_t)tex->palette.pixels[j], ftex);
 				break;
 			case COLOR_BANK_128_COL:
-			printf("128 should never happen\n");
+			LOGD("128 should never happen\n");
 			exit(-1);
 			write_16((uint16_t)128, ftex);
 				for (int j=0; j<128; j++) write_16((uint16_t)tex->palette.pixels[j], ftex);
 				break;
 			case COLOR_BANK_256_COL:
-			printf("256 should never happen\n");
+			LOGD("256 should never happen\n");
 			exit(-1);
 			write_16((uint16_t)256, ftex);
 				for (int j=0; j<256; j++) write_16((uint16_t)tex->palette.pixels[j], ftex);
@@ -911,7 +911,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 				break;
 		}
 	}
-	printf("Object %d is at 0x%x\n", nb_objects, ftell(ftex));
+	LOGD("Object %d is at 0x%x\n", nb_objects, ftell(ftex));
 	write_16((uint16_t)nb_objects, ftex);
 	for (int n=0; n<nb_objects; n++) {
 		uint16_t tmp;
@@ -922,7 +922,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 		nb_texture = 0;
 		Prm poly = {.primitive = obj->primitives};
 		for (int i = 0; i < obj->primitives_len; i++) {
-			printf("Write character[%d] @0x%x type %d\n", nb_texture, ftell(ftex), poly.primitive->type);
+			LOGD("Write character[%d] @0x%x type %d\n", nb_texture, ftell(ftex), poly.primitive->type);
 			switch (poly.primitive->type) {
 				case PRM_TYPE_F3:
 					poly.f3 += 1;
@@ -934,9 +934,9 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					nb_texture++;
 					write_16((uint16_t)poly.ft3->conv->id, ftex);
 					write_16((uint16_t)poly.ft3->conv->width, ftex);
-					printf("Size %dx%d\n", poly.ft3->conv->width,poly.ft3->conv->height);
+					LOGD("Size %dx%d\n", poly.ft3->conv->width,poly.ft3->conv->height);
 					write_16((uint16_t)poly.ft3->conv->height, ftex);
-					printf("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
 					write_16((uint16_t)poly.ft3->conv->palette_id, ftex);
 					write_16((uint16_t)poly.ft3->conv->length, ftex);
 					for (int i=0; i<poly.ft3->conv->length; i++) {
@@ -949,7 +949,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)poly.ft4->conv->id, ftex);
 					write_16((uint16_t)poly.ft4->conv->width, ftex);
 					write_16((uint16_t)poly.ft4->conv->height, ftex);
-					printf("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
 					write_16((uint16_t)poly.ft4->conv->palette_id, ftex);
 					write_16((uint16_t)poly.ft4->conv->length, ftex);
 					for (int i=0; i<poly.ft4->conv->length; i++) {
@@ -968,7 +968,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)poly.gt3->conv->id, ftex);
 					write_16((uint16_t)poly.gt3->conv->width, ftex);
 					write_16((uint16_t)poly.gt3->conv->height, ftex);
-					printf("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
 					write_16((uint16_t)poly.gt3->conv->palette_id, ftex);
 					write_16((uint16_t)poly.gt3->conv->length, ftex);
 					for (int i=0; i<poly.gt3->conv->length; i++) {
@@ -981,7 +981,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)poly.gt4->conv->id, ftex);
 					write_16((uint16_t)poly.gt4->conv->width, ftex);
 					write_16((uint16_t)poly.gt4->conv->height, ftex);
-					printf("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
 					write_16((uint16_t)poly.gt4->conv->palette_id, ftex);
 					write_16((uint16_t)poly.gt4->conv->length, ftex);
 					for (int i=0; i<poly.gt4->conv->length; i++) {
@@ -1000,7 +1000,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)poly.lsft3->conv->id, ftex);
 					write_16((uint16_t)poly.lsft3->conv->width, ftex);
 					write_16((uint16_t)poly.lsft3->conv->height, ftex);
-					printf("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
 					write_16((uint16_t)poly.lsft3->conv->palette_id, ftex);
 					write_16((uint16_t)poly.lsft3->conv->length, ftex);
 					for (int i=0; i<poly.lsft3->conv->length; i++) {
@@ -1013,7 +1013,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)poly.lsft4->conv->id, ftex);
 					write_16((uint16_t)poly.lsft4->conv->width, ftex);
 					write_16((uint16_t)poly.lsft4->conv->height, ftex);
-					printf("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
 					write_16((uint16_t)poly.lsft4->conv->palette_id, ftex);
 					write_16((uint16_t)poly.lsft4->conv->length, ftex);
 					for (int i=0; i<poly.lsft4->conv->length; i++) {
@@ -1032,7 +1032,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)poly.lsgt3->conv->id, ftex);
 					write_16((uint16_t)poly.lsgt3->conv->width, ftex);
 					write_16((uint16_t)poly.lsgt3->conv->height, ftex);
-					printf("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
 					write_16((uint16_t)poly.lsgt3->conv->palette_id, ftex);
 					write_16((uint16_t)poly.lsgt3->conv->length, ftex);
 					for (int i=0; i<poly.lsgt3->conv->length; i++) {
@@ -1045,7 +1045,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)poly.lsgt4->conv->id, ftex);
 					write_16((uint16_t)poly.lsgt4->conv->width, ftex);
 					write_16((uint16_t)poly.lsgt4->conv->height, ftex);
-					printf("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
 					write_16((uint16_t)poly.lsgt4->conv->palette_id, ftex);
 					write_16((uint16_t)poly.lsgt4->conv->length, ftex);
 					for (int i=0; i<poly.lsgt4->conv->length; i++) {
@@ -1059,7 +1059,7 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					write_16((uint16_t)poly.spr->conv->id, ftex);
 					write_16((uint16_t)poly.spr->conv->width, ftex);
 					write_16((uint16_t)poly.spr->conv->height, ftex);
-					printf("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
 					write_16((uint16_t)poly.spr->conv->palette_id, ftex);
 					write_16((uint16_t)poly.spr->conv->length, ftex);
 					for (int i=0; i<poly.spr->conv->length; i++) {
@@ -1133,7 +1133,7 @@ void object_draw(Object *object) {
 			break;
 
 		case PRM_TYPE_GT4:
-		printf("Gt4\n");
+		LOGD("Gt4\n");
 			coord0 = poly.gt4->coords[0];
 			coord1 = poly.gt4->coords[1];
 			coord2 = poly.gt4->coords[2];
@@ -1198,7 +1198,7 @@ void object_draw(Object *object) {
 			break;
 
 		case PRM_TYPE_FT4:
-		printf("FT4\n");
+		LOGD("FT4\n");
 			coord0 = poly.ft4->coords[0];
 			coord1 = poly.ft4->coords[1];
 			coord2 = poly.ft4->coords[2];

@@ -53,6 +53,6 @@ uint16_t create_sub_texture(uint32_t offset, uint32_t width, uint32_t height, ui
 }
 
 uint16_t tex_length(void) {
-	printf("return tex length %d\n", textures_len);
+	LOGD("return tex length %d\n", textures_len);
   return textures_len;
 }

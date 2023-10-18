@@ -43,8 +43,8 @@ static uint16_t palette_length;
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 #define die(...) \
-	printf("Abort at " TOSTRING(__FILE__) " line " TOSTRING(__LINE__) ": " __VA_ARGS__); \
-	printf("\n"); \
+	LOGD("Abort at " TOSTRING(__FILE__) " line " TOSTRING(__LINE__) ": " __VA_ARGS__); \
+	LOGD("\n"); \
 	exit(1)
 
 #define error_if(TEST, ...) \
@@ -333,7 +333,7 @@ static uint8_t *platform_load_asset(const char *name, uint32_t *bytes_read) {
 }
 
 static cmp_t *image_load_compressed(char *name) {
-	printf("load cmp %s\n", name);
+	LOGD("load cmp %s\n", name);
 	uint32_t compressed_size;
 	uint8_t *compressed_bytes = platform_load_asset(name, &compressed_size);
 
@@ -487,7 +487,7 @@ int main(int argc, char *argv[]) {
       }
 			char png_name[1024] = {0};
 			sprintf(png_name, "./fonts/fonts_%d.stf", char_set[i].height);
-			printf("extract %s\n", png_name);
+			LOGD("extract %s\n", png_name);
 			FILE *f = fopen(png_name, "w+");
 			uint16_t offset = (sizeof(texture_t) + 0x7)&~0x7; //offset address shall start on an aligned address to 0x8
 			uint16_t current = 0; //offset address shall start on an aligned address to 0x8
@@ -553,7 +553,7 @@ int main(int argc, char *argv[]) {
 #endif
 		free(image);
 	}
-	printf("Palette is %d\n", palette_length);
+	LOGD("Palette is %d\n", palette_length);
 
 	free(cmp);
   return 0;

@@ -508,15 +508,15 @@ void game_init(void) {
 	save_t *save_file = (save_t *)platform_load_userdata("save.dat", &size);
 	if (save_file) {
 		if (size == sizeof(save_t) && save_file->magic == SAVE_DATA_MAGIC) {
-			printf("load save data success\n");
+			LOGD("load save data success\n");
 			memcpy(&save, save_file, sizeof(save_t));
 		}
 		else {
-			printf("unexpected size/magic for save data");
+			LOGD("unexpected size/magic for save data");
 		}
 		mem_temp_free(save_file);
 	} else {
-			printf("No save data\n");
+			LOGD("No save data\n");
 	}
 
 	platform_set_fullscreen(save.fullscreen);
@@ -644,7 +644,7 @@ void game_update(void) {
 		// FIXME: this should probably run async somewhere
 		save.is_dirty = false;
 		platform_store_userdata("save.dat", &save, sizeof(save_t));
-		printf("wrote save.dat\n");
+		LOGD("wrote save.dat\n");
 	}
 
 	fix16_t now = platform_now();

@@ -59,7 +59,7 @@ char *replace_ext(const char *org, const char *new_ext)
 
 int main(int argc, char *argv[]) {
   if (argc != 3) {
-		printf("Usage: ./convertModel myfile.cmp myfile.prm\n");
+		LOGD("Usage: ./convertModel myfile.cmp myfile.prm\n");
 		return -1;
 	}
 
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
 		model[object_index] = models;
 		models = models->next;
 	}
-	printf("Found %d models\n", nb_objects);
+	LOGD("Found %d models\n", nb_objects);
 
 	if (gl_init(conversionStep, savingStep) != 0) {
     LOGD("Error\n");

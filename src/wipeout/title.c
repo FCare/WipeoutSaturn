@@ -21,10 +21,9 @@ void title_init(void) {
 }
 
 void title_update(void) {
-	printf("update\n");
+	LOGD("update\n");
 	render_set_view_2d();
 	render_push_2d(vec2i(0, 0), render_size(), rgba(128, 128, 128, 255), title_image);
-printf("push done\n");
 
 	rgba_t text_color = UI_COLOR_DEFAULT;
 

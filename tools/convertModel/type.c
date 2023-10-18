@@ -42,6 +42,6 @@ rgb1555_t rgb155_from_u32(uint32_t v) {
 	val.b = (v>>8) & 0xFF;
 	val.g = (v>>16) & 0xFF;
 	val.r = (v>24) & 0xFF;
-	printf("%x %x %x %x\n", val.a, val.b, val.g, val.r);
+	LOGD("%x %x %x %x\n", val.a, val.b, val.g, val.r);
   return convert_to_rgb(val);
 }
