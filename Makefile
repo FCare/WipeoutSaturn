@@ -59,15 +59,12 @@ PORT_MSG?=ON
 USER_CFLAGS += -DDEBUG_PRINT
 ifeq ($(PORT_MSG), ON)
 USER_CFLAGS += -DLOGD="printf"
-else
-USER_CFLAGS += -DLOGD=""
 endif
 else
 PORT_MSG?=OFF
 ifeq ($(PORT_MSG), ON)
 USER_CFLAGS += -DDEBUG_PRINT
 endif
-USER_CFLAGS += -DLOGD=""
 endif
 
 SH_LIBRARIES:=

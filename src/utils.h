@@ -52,17 +52,17 @@
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 #define die(...) \
-	LOGD("Abort at " TOSTRING(__FILE__) " line " TOSTRING(__LINE__) ": " __VA_ARGS__); \
-	LOGD("\n"); \
+	printf("Abort at " TOSTRING(__FILE__) " line " TOSTRING(__LINE__) ": " __VA_ARGS__); \
+	printf("\n"); \
 	exit(1)
 
-#if DEBUG_PRINT
 #define error_if(TEST, ...) \
 	if (TEST) { \
 		die(__VA_ARGS__); \
 	}
-#else
-#define error_if
+
+#ifndef LOGD
+#define LOGD
 #endif
 
 #define CHECK_ALIGN_4(A) \
