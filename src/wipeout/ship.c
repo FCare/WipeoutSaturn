@@ -20,7 +20,7 @@ void ships_load(void) {
 	saturn_image_ctrl_t *ship_textures = image_get_saturn_textures("wipeout/common/allsh.stf");
 	LOGD("!!!!!!!!!!!!!!!!!!!!Load objects\n");
 	Object_Saturn_list *ship_models = objects_saturn_load("wipeout/common/allsh.smf", ship_textures);
-	all_object_dump_saturn(ship_models);
+	// all_object_dump_saturn(ship_models);
 	saturn_image_ctrl_t *collision_textures = image_get_saturn_textures("wipeout/common/alcol.stf");
 	Object_Saturn_list *collision_models = objects_saturn_load("wipeout/common/alcol.smf", collision_textures);
 

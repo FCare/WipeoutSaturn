@@ -17,40 +17,40 @@
 
 
 void character_ctrl_dump(character_list_t * ch_list) {
-	printf("\t************** %d characters ***************\n", ch_list->nb_characters);
+	LOGD("\t************** %d characters ***************\n", ch_list->nb_characters);
 	for (int char_id = 0; char_id < ch_list->nb_characters; char_id++) {
 		character_t *character = ch_list->character[char_id];
-		printf("\t\character[%d] 0x%x: id %d, size %dx%d, length %d, texture %d\n", char_id, character, character->id, character->width, character->height, character->length, character->texture);
+		LOGD("\t\character[%d] 0x%x: id %d, size %dx%d, length %d, texture %d\n", char_id, character, character->id, character->width, character->height, character->length, character->texture);
 	}
 }
 
 void image_ctrl_dump(saturn_image_ctrl_t * img) {
-	printf("\t************** %d Palettes ***************\n", img->nb_palettes);
+	LOGD("\t************** %d Palettes ***************\n", img->nb_palettes);
 	for(int plt_id=0; plt_id < img->nb_palettes; plt_id++) {
 		palette_t *plt = img->pal[plt_id];
-		printf("\t\tpalette[%d] 0x%x: format %d, size %dx1, texture %d\n", plt_id, img->pal[plt_id], plt->format, plt->width, plt->texture);
-		printf("\t\t\t");
+		LOGD("\t\tpalette[%d] 0x%x: format %d, size %dx1, texture %d\n", plt_id, img->pal[plt_id], plt->format, plt->width, plt->texture);
+		LOGD("\t\t\t");
 		for (int w = 0; w < plt->width; w++) {
-			printf("0x%x ", plt->pixels[plt->width+w]);
+			LOGD("0x%x ", plt->pixels[plt->width+w]);
 		}
-		printf("\n");
+		LOGD("\n");
 	}
 	for (int obj_id = 0; obj_id < img->nb_objects; obj_id++){
-		printf("\t************** objects %d/%d***************\n", obj_id, img->nb_objects);
+		LOGD("\t************** objects %d/%d***************\n", obj_id, img->nb_objects);
 		character_list_t *ch_list = &img->characters[obj_id];
 		character_ctrl_dump(ch_list);
 	}
 }
 
 void object_dump_saturn(Object_Saturn *obj) {
-	printf("\t================ %s ===============\n", obj->info->name);
-	printf("\tsize: vertices:%d normals:%d primitives:%d\n", obj->info->vertices_len, obj->info->normals_len, obj->info->primitives_len);
-	printf("\tflags: 0x%x, origine %x %x %x\n", obj->info->flags, obj->info->origin.x, obj->info->origin.y, obj->info->origin.z);
+	LOGD("\t================ %s ===============\n", obj->info->name);
+	LOGD("\tsize: vertices:%d normals:%d primitives:%d\n", obj->info->vertices_len, obj->info->normals_len, obj->info->primitives_len);
+	LOGD("\tflags: 0x%x, origine %x %x %x\n", obj->info->flags, obj->info->origin.x, obj->info->origin.y, obj->info->origin.z);
 	character_ctrl_dump(obj->characters);
 }
 
 void all_object_dump_saturn(Object_Saturn_list* list) {
-	printf("============ %d objects ===============\n", list->length);
+	LOGD("============ %d objects ===============\n", list->length);
 
 	for (int obj_id = 0; obj_id<list->length; obj_id++) {
 		Object_Saturn *obj = list->objects[obj_id];
@@ -60,7 +60,7 @@ void all_object_dump_saturn(Object_Saturn_list* list) {
 
 Object *objects_load(char *name, texture_list_t tl) {
 	uint32_t length = 0;
-	printf("load: %s\n", name);
+	LOGD("load: %s\n", name);
 	uint8_t *bytes = platform_load_asset(name, &length);
 	if (!bytes) {
 		die("Failed to load file %s\n", name);
@@ -511,7 +511,7 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 	Object_Saturn_list *list = mem_bump(sizeof(Object_Saturn_list));
 	list->objects = mem_bump(sizeof(Object_Saturn*)*length);
 	list->length = length;
-	printf("Input Nb Objects = %d\n", length);
+	LOGD("Input Nb Objects = %d\n", length);
 	for(int i = 0; i < length; i++) {
 		int nb_texture = 0;
 		Object_Saturn *object = mem_bump(sizeof(Object_Saturn));
@@ -522,11 +522,11 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 		object->pal = tl->pal;
 		p+=sizeof(object_info);
 		object->primitives = mem_bump(sizeof(PRM_saturn*)*object->info->primitives_len);
-		printf("Input primitives %d @0x%x\n", object->info->primitives_len, p);
+		LOGD("Input primitives %d @0x%x\n", object->info->primitives_len, p);
 		for (int j=0; j< object->info->primitives_len; j++) {
 			object->primitives[j] = (PRM_saturn*)&bytes[p/2];
 			PRM_saturn *prm = object->primitives[j];
-			printf("Primitive type %d\n", prm->type);
+			LOGD("Primitive type %d\n", prm->type);
 			switch (prm->type) {
 			case PRM_TYPE_F3:
 				p += sizeof(F3_S);
@@ -535,12 +535,12 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 				p += sizeof(F4_S);
 				break;
 			case PRM_TYPE_FT3:
-			printf("palette prim[%d] = %d\n", j, prm->palette);
+			LOGD("palette prim[%d] = %d\n", j, prm->palette);
 				prm->texture = nb_texture++;
 				p += sizeof(FT3_S);
 				break;
 			case PRM_TYPE_FT4:
-			printf("palette prim[%d] = %d (0x%x 0x%x)\n", j, prm->palette, p, sizeof(FT4_S));
+			LOGD("palette prim[%d] = %d (0x%x 0x%x)\n", j, prm->palette, p, sizeof(FT4_S));
 				prm->texture = nb_texture++;
 				p += sizeof(FT4_S);
 				break;
@@ -551,12 +551,12 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 				p += sizeof(G4_S);
 				break;
 			case PRM_TYPE_GT3:
-			printf("palette prim[%d] = %d\n", j, prm->palette);
+			LOGD("palette prim[%d] = %d\n", j, prm->palette);
 				prm->texture = nb_texture++;
 				p += sizeof(GT3_S);
 				break;
 			case PRM_TYPE_GT4:
-			printf("palette prim[%d] = %d\n", j, prm->palette);
+			LOGD("palette prim[%d] = %d\n", j, prm->palette);
 				prm->texture = nb_texture++;
 				p += sizeof(GT4_S);
 				break;
@@ -567,12 +567,12 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 				p += sizeof(LSF4_S);
 				break;
 			case PRM_TYPE_LSFT3:
-			printf("palette prim[%d] = %d\n", j, prm->palette);
+			LOGD("palette prim[%d] = %d\n", j, prm->palette);
 				prm->texture = nb_texture++;
 				p += sizeof(LSFT3_S);
 				break;
 			case PRM_TYPE_LSFT4:
-			printf("palette prim[%d] = %d\n", j, prm->palette);
+			LOGD("palette prim[%d] = %d\n", j, prm->palette);
 				prm->texture = nb_texture++;
 				p += sizeof(LSFT4_S);
 				break;
@@ -583,12 +583,12 @@ Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl) {
 				p += sizeof(LSG4_S);
 				break;
 			case PRM_TYPE_LSGT3:
-			printf("palette prim[%d] = %d\n", j, prm->palette);
+			LOGD("palette prim[%d] = %d\n", j, prm->palette);
 				prm->texture = nb_texture++;
 				p += sizeof(LSGT3_S);
 				break;
 			case PRM_TYPE_LSGT4:
-			printf("palette prim[%d] = %d\n", j, prm->palette);
+			LOGD("palette prim[%d] = %d\n", j, prm->palette);
 				prm->texture = nb_texture++;
 				p += sizeof(LSGT4_S);
 				break;
