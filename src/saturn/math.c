@@ -19,15 +19,11 @@ fix16_t sin(fix16_t inAngle) {
 
 	fix16_t tempAngleSq = fix16_mul(tempAngle, tempAngle);
 
-printf("sin %d %d %d => ", inAngle, tempAngle, tempAngleSq);
-
   fix16_t tempOut;
 	tempOut = fix16_mul(-13, tempAngleSq) + 546;
 	tempOut = fix16_mul(tempOut, tempAngleSq) - 10923;
 	tempOut = fix16_mul(tempOut, tempAngleSq) + 65536;
 	tempOut = fix16_mul(tempOut, tempAngle);
-
-printf("%d\n", tempOut);
 
   return tempOut;
 }

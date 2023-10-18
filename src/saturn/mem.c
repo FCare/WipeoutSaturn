@@ -27,7 +27,7 @@ void mem_init(void) {
 }
 
 void *mem_mark(void) {
-	printf("Mem mark 0x%x\n", &hunk[bump_len]);
+	LOGD("Mem mark 0x%x\n", &hunk[bump_len]);
 	return &hunk[bump_len];
 }
 
@@ -35,7 +35,7 @@ void *mem_bump(uint32_t size) {
 	error_if(bump_len + size >= MEM_HUNK_BYTES, "Failed to allocate %d bytes (0x%x)", size, bump_len);
 	uint8_t *p = &hunk[bump_len];
 	bump_len += size;
-	printf("bump_len is 0x%x (0x%x)\n", bump_len, &bump_len);
+	LOGD("bump_len is 0x%x (0x%x)\n", bump_len, &bump_len);
 	memset(p, 0, size);
   if (max_mem < bump_len) {
     max_mem = bump_len;

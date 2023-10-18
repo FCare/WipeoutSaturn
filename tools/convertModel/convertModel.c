@@ -28,7 +28,7 @@ static int conversionStep(void) {
   uint16_t format = 0x1; //RGB/palette 16 bits
 
   if (currentModel < nb_objects) {
-    printf("Generating texture for model %s\n", model[currentModel]->name);
+    LOGD("Generating texture for model %s\n", model[currentModel]->name);
     object_draw(model[currentModel++]);
     return 1;
   }
@@ -36,9 +36,9 @@ static int conversionStep(void) {
 }
 
 static int savingStep(void) {
-  printf("We can save the model now\n");
-  printf("Saving converted models on %s\n", outputObject);
-  printf("Saving converted texture on %s\n", outputTexture);
+  LOGD("We can save the model now\n");
+  LOGD("Saving converted models on %s\n", outputObject);
+  LOGD("Saving converted texture on %s\n", outputTexture);
   objects_save(outputObject, outputTexture, model , nb_objects, &textures);
   return 0;
 }
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
 	printf("Found %d models\n", nb_objects);
 
 	if (gl_init(conversionStep, savingStep) != 0) {
-    printf("Error\n");
+    LOGD("Error\n");
     exit(-1);
   }
   //Never reached

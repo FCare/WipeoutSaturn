@@ -153,7 +153,7 @@ texture_list_t image_get_compressed_textures(char *name) {
 
 		// char png_name[1024] = {0};
 		// sprintf(png_name, "%s_%d.png", name, i);
-		// printf("save as %s\n", png_name);
+		// LOGD("save as %s\n", png_name);
 		// stbi_write_png(png_name, image->width, image->height, 4, image->pixels, 0);
 
 		list.texture[i] = texture_create(image->width, image->height, image->pixels);

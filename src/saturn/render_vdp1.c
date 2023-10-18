@@ -132,7 +132,7 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object
   };
 
   if (texture_index == RENDER_NO_TEXTURE) {
-    printf("No color\n");
+    LOGD("No color\n");
     draw_mode.color_mode = VDP1_CMDT_CM_RGB_32768;
     quads_t q;
     q.vertices[0].uv.x = 0;
@@ -148,7 +148,7 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object
     error_if(texture_index > object->characters->nb_characters, "texture index %d is out of bounds %d\n", texture_index, object->characters->nb_characters);
     character_t *chrt = object->characters->character[texture_index];
     uint16_t character_texture = chrt->texture;
-    printf("%d\n", __LINE__);
+    LOGD("%d\n", __LINE__);
     size = get_tex(character_texture)->size;
 
     // error_if((size.x*size.y > 256), "texture index %d (character texture %d) is too big %dx%d\n", texture_index, character_texture, size.x, size.y);
@@ -156,7 +156,7 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object
     palette_t *plt = object->pal[chrt->palette_id];
     uint16_t palette_texture = plt->texture;
     uint16_t *palette = getVdp1VramAddress_Saturn(palette_texture, id);
-    printf("Rendering character %d from @x%x (%s) using palette %d @ 0x%x\n", texture_index,character, object->info->name, chrt->palette_id, palette);
+    LOGD("Rendering character %d from @x%x (%s) using palette %d @ 0x%x\n", texture_index,character, object->info->name, chrt->palette_id, palette);
 
     vdp1_cmdt_color_bank_t color_bank; //not used yet
     switch(plt->format) {

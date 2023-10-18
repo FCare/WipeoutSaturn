@@ -458,7 +458,7 @@ Object *objects_load(char *name, texture_list_t *tl) {
 void write_16(uint16_t val, FILE *f) {
 	uint16_t tmp = SWAP(val);
 	// int pos = ftell(f);
-	// printf("a2 pos %x=>%x\n", pos, (pos+0x1)&~0x1);
+	// LOGD("a2 pos %x=>%x\n", pos, (pos+0x1)&~0x1);
 	// fseek(f, (pos+0x1)&~0x1, SEEK_SET); //Align on 16 bits
 	fwrite(&tmp, 2, sizeof(uint8_t), f);
 }
@@ -466,7 +466,7 @@ void write_16(uint16_t val, FILE *f) {
 void write_32(uint32_t val, FILE *f) {
 	uint32_t tmp = SWAP_32(val);
 	// int pos = ftell(f);
-	// printf("a4 pos %x=>%x\n", pos, (pos+0x3)&~0x3);
+	// LOGD("a4 pos %x=>%x\n", pos, (pos+0x3)&~0x3);
 	// fseek(f, (pos+0x3)&~0x3, SEEK_SET); //Align on 32 bits
 	fwrite(&tmp, 4, sizeof(uint8_t), f);
 }
@@ -474,7 +474,7 @@ void write_32(uint32_t val, FILE *f) {
 void write_fix(uint16_t val, FILE *f) {
 	uint32_t tmp = SWAP_32(fix16(val));
 	// int pos = ftell(f);
-	// printf("a4 pos %x=>%x\n", pos, (pos+0x3)&~0x3);
+	// LOGD("a4 pos %x=>%x\n", pos, (pos+0x3)&~0x3);
 	// fseek(f, (pos+0x3)&~0x3, SEEK_SET); //Align on 32 bits
 	fwrite(&tmp, 4, sizeof(uint8_t), f);
 }

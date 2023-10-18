@@ -230,10 +230,10 @@ uint8_t *platform_load_saturn_asset(const char *name, uint16_t *texture) {
   int ret __unused;
   cdfs_filelist_entry_t *file_entry = getEntry(name);
   error_if(file_entry==NULL, "File not found\n");
-  printf("File size = %d\n", file_entry->size);
+  LOGD("File size = %d\n", file_entry->size);
   *texture = allocate_tex(0, 0, file_entry->size);
   uint8_t *image = (uint8_t *)get_tex(*texture)->pixels;
-  printf("Image is 0x%x to 0x%x\n", image, &image[file_entry->size]);
+  LOGD("Image is 0x%x to 0x%x\n", image, &image[file_entry->size]);
   assert (image != NULL);
   ret = cd_block_sectors_read(file_entry->starting_fad, (void *)image, file_entry->size);
   assert(ret == 0);

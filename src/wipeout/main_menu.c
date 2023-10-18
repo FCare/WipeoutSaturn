@@ -258,7 +258,7 @@ static void page_options_controls_init(menu_t *menu) {
 	page->items_anchor = UI_POS_MIDDLE | UI_POS_CENTER;
 
 	// const char *thrust_name = button_name(A_THRUST);
-	// printf("thrust: %s\n", thrust_name);
+	// LOGD("thrust: %s\n", thrust_name);
 	menu_page_add_button(page, A_UP, "UP", page_options_controls_set_init);
 	menu_page_add_button(page, A_DOWN, "DOWN", page_options_controls_set_init);
 	menu_page_add_button(page, A_LEFT, "LEFT", page_options_controls_set_init);

@@ -237,16 +237,16 @@ static void render(void)
     uint32_t *out=malloc(sizeof(uint32_t)*g_resources.dstTexture->width*g_resources.dstTexture->height);
     glReadPixels(0,0, g_resources.dstTexture->width, g_resources.dstTexture->height, GL_RGBA, GL_UNSIGNED_BYTE, out);
     int paletteSize = 0;
-    printf("Write format = %d\n", g_resources.srcTexture->format);
+    LOGD("Write format = %d\n", g_resources.srcTexture->format);
     switch (g_resources.srcTexture->format) {
       case COLOR_BANK_16_COL:
       case LOOKUP_TABLE_16_COL:
       {
         g_resources.dstTexture->length = g_resources.dstTexture->width*g_resources.dstTexture->height/4;
         g_resources.dstTexture->pixels = malloc(g_resources.dstTexture->length*sizeof(rgb1555_t));
-        printf("Setup palette_id = %d %dx%d\n",g_resources.srcTexture->palette.index_in_file, g_resources.dstTexture->width, g_resources.dstTexture->height);
+        LOGD("Setup palette_id = %d %dx%d\n",g_resources.srcTexture->palette.index_in_file, g_resources.dstTexture->width, g_resources.dstTexture->height);
         g_resources.dstTexture->palette_id = g_resources.srcTexture->palette.index_in_file;
-        printf("Nb pix = %d format %d\n", g_resources.dstTexture->height*g_resources.dstTexture->width, g_resources.srcTexture->format);
+        LOGD("Nb pix = %d format %d\n", g_resources.dstTexture->height*g_resources.dstTexture->width, g_resources.srcTexture->format);
         for (int i=0; i<g_resources.dstTexture->height*g_resources.dstTexture->width; i+=4) {
           rgb1555_t a = out[i]&0xFFFF;
           rgb1555_t b = out[i+1]&0xFFFF;
@@ -264,11 +264,11 @@ static void render(void)
           }
           if ((outa == 0xFF)||(outb == 0xFF)||(outc == 0xFF)||(outd == 0xFF))
           {
-            printf("Error pixel not matched on palette - should not happen - texture %d loop %d\n", nbImage, i);
-            printf("Pix 0x%x 0x%x 0x%x 0x%x\n", a, b, c, d);
-            printf("Palette:\n");
+            LOGD("Error pixel not matched on palette - should not happen - texture %d loop %d\n", nbImage, i);
+            LOGD("Pix 0x%x 0x%x 0x%x 0x%x\n", a, b, c, d);
+            LOGD("Palette:\n");
             for (int j=0; j<16; j++) {
-              printf("\t 0x%x\n", g_resources.srcTexture->palette.pixels[j]);
+              LOGD("\t 0x%x\n", g_resources.srcTexture->palette.pixels[j]);
             }
             exit(-1);
           }
@@ -352,31 +352,31 @@ static void idle(void) {
 
 void gl_generate_texture_from_tris(render_texture_t *out, tris_t *t, texture_t *texture)
 {
-  int16_t width = 0;
-  int16_t delta_x = t->vertices[0].uv.x - t->vertices[2].uv.x;
-  int16_t delta_y = t->vertices[0].uv.y - t->vertices[2].uv.y;
+  int16_t length = 0;
+  int16_t delta_x = t->vertices[0].uv.x - t->vertices[1].uv.x;
+  int16_t delta_y = t->vertices[0].uv.y - t->vertices[1].uv.y;
   int16_t new_length = sqrt(delta_x*delta_x+delta_y*delta_y);
-  width = max(width, new_length);
+  length = max(length, new_length);
   delta_x = t->vertices[1].uv.x - t->vertices[2].uv.x;
   delta_y = t->vertices[1].uv.y - t->vertices[2].uv.y;
   new_length = sqrt(delta_x*delta_x+delta_y*delta_y);
-  width = max(width, new_length);
-  width = (width+0x7)&~0x7;
+  length = max(length, new_length);
+  delta_x = t->vertices[1].uv.x - t->vertices[2].uv.x;
+  delta_y = t->vertices[1].uv.y - t->vertices[2].uv.y;
+  length = max(length, new_length);
 
-  delta_x = t->vertices[0].uv.x - t->vertices[1].uv.x;
-  delta_y = t->vertices[0].uv.y - t->vertices[1].uv.y;
-  int16_t height = sqrt(delta_x*delta_x+delta_y*delta_y);
-
-  if (width*height > 1024) {
-    double ratio = 1024.0/(width*height);
-    width = ((int)(width * ratio)+0x7)& ~0x7;
-    if (width == 0) width = 8;
-    height = 1024/width;
-  }
+  int16_t height = length;
+  int16_t width = (length+0x7)&~0x7;
+  // if (width*height > 1024) {
+  //   double ratio = 1024.0/(width*height);
+  //   width = ((int)(width * ratio)+0x7)& ~0x7;
+  //   if (width == 0) width = 8;
+  //   height = 1024/width;
+  // }
   if (width == 0) width = 8;
   if (height == 0) height = 1;
 
-  printf("Got %dx%d => %d\n", width, height, width*height*2);
+  LOGD("Got %dx%d => %d\n", width, height, width*height*2);
 
   g_vertex_buffer_data[0] = -1.0f;
   g_vertex_buffer_data[1] = -1.0f;
@@ -396,8 +396,8 @@ void gl_generate_texture_from_tris(render_texture_t *out, tris_t *t, texture_t *
   g_texcoord_buffer_data[3] = (float)t->vertices[1].uv.y / (float)texture->height;
   g_texcoord_buffer_data[4] = (float)t->vertices[2].uv.x / (float)texture->width;
   g_texcoord_buffer_data[5] = (float)t->vertices[2].uv.y / (float)texture->height;
-  g_texcoord_buffer_data[6] = (float)t->vertices[1].uv.x / (float)texture->width;
-  g_texcoord_buffer_data[7] = (float)t->vertices[1].uv.y / (float)texture->height;
+  g_texcoord_buffer_data[6] = (float)t->vertices[2].uv.x / (float)texture->width;
+  g_texcoord_buffer_data[7] = (float)t->vertices[2].uv.y / (float)texture->height;
 
 printf("UV %fx%f %fx%f %fx%f %fx%f\n",
 g_texcoord_buffer_data[0],
@@ -425,7 +425,6 @@ void gl_generate_texture_from_quad(render_texture_t *out, quads_t *t, texture_t 
     int16_t new_length = sqrt(delta_x*delta_x+delta_y*delta_y);
     width = max(width, new_length);
   }
-  width = (width+0x7)&~0x7;
 
   int16_t height = 0;
   for (int i = 0; i<4; i+=2) {
@@ -434,24 +433,25 @@ void gl_generate_texture_from_quad(render_texture_t *out, quads_t *t, texture_t 
     int16_t new_length = sqrt(delta_x*delta_x+delta_y*delta_y);
     height = max(height, new_length);
   }
+  width = (width+0x7)&~0x7;
 
-printf("Was %dx%d => %d\n", width, height, width*height);
-    if (width*height > 3048) {
-      double ratio = 3048.0/(width*height);
-      width = ((int)(width * ratio)+0x7)& ~0x7;
-      if (width == 0) width = 8;
-      height = 3048/width;
-    }
-    printf("Got %dx%d => %d\n", width, height, width*height);
+// LOGD("Was %dx%d => %d\n", width, height, width*height);
+//     if (width*height > 4096) {
+//       double ratio = 4096.0/(width*height);
+//       width = ((int)(width * ratio)+0x7)& ~0x7;
+//       if (width == 0) width = 8;
+//       height = 4096/width;
+//     }
+//     LOGD("Got %dx%d => %d\n", width, height, width*height);
 
-  g_vertex_buffer_data[4] = -1.0f;
-  g_vertex_buffer_data[5] = (float)height/120.0f - 1.0f;
-  g_vertex_buffer_data[6] = (float)width/160.0f - 1.0f;
-  g_vertex_buffer_data[7] = (float)height/120.0f - 1.0f;
   g_vertex_buffer_data[0] = -1.0f;
   g_vertex_buffer_data[1] = -1.0f;
-  g_vertex_buffer_data[2] = (float)width/160.0f - 1.0f;
-  g_vertex_buffer_data[3] = -1.0f;
+  g_vertex_buffer_data[2] = -1.0f;
+  g_vertex_buffer_data[3] = (float)height/120.0f - 1.0f;
+  g_vertex_buffer_data[4] = (float)width/160.0f - 1.0f;
+  g_vertex_buffer_data[5] = -1.0f;
+  g_vertex_buffer_data[6] = (float)width/160.0f - 1.0f;
+  g_vertex_buffer_data[7] = (float)height/120.0f - 1.0f;
 
   out->width = width;
   out->height = height;
@@ -465,7 +465,7 @@ printf("Was %dx%d => %d\n", width, height, width*height);
   g_texcoord_buffer_data[6] = (float)t->vertices[3].uv.x / (float)texture->width;
   g_texcoord_buffer_data[7] = (float)t->vertices[3].uv.y / (float)texture->height;
 
-  printf("Origin UV %dx%d %dx%d %dx%d %dx%d\n",
+  LOGD("Origin UV %dx%d %dx%d %dx%d %dx%d\n",
     t->vertices[0].uv.x,
     t->vertices[0].uv.y,
     t->vertices[1].uv.x,
@@ -475,7 +475,7 @@ printf("Was %dx%d => %d\n", width, height, width*height);
     t->vertices[3].uv.x,
     t->vertices[3].uv.y
   );
-  printf("UV %fx%f %fx%f %fx%f %fx%f\n",
+  LOGD("UV %fx%f %fx%f %fx%f %fx%f\n",
   g_texcoord_buffer_data[0],
   g_texcoord_buffer_data[1],
   g_texcoord_buffer_data[2],

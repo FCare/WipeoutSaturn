@@ -548,7 +548,7 @@ int main(int argc, char *argv[]) {
 #ifdef SAVE_EXTRACT
 	char png_name[1024] = {0};
 	sprintf(png_name, "%s.%d.png", argv[1], i);
-  printf("extract %s\n", png_name);
+  LOGD("extract %s\n", png_name);
 	stbi_write_png(png_name, image->width, image->height, 4, image->pixels, 0);
 #endif
 		free(image);

@@ -263,7 +263,7 @@ void render_push_tris_saturn(tris_saturn_t tris, uint16_t texture_index, Object_
 
   quads_saturn_t q= (quads_saturn_t){
     .vertices = {
-      tris.vertices[0], tris.vertices[1], tris.vertices[1], tris.vertices[2]
+      tris.vertices[0], tris.vertices[1], tris.vertices[2], tris.vertices[2]
     }
   };
   //Add a quad to the vdp1 list v0,v1,v2,v3
@@ -415,7 +415,7 @@ uint16_t render_texture_create(uint32_t width, uint32_t height, rgba_t *pixels){
   LOGD("Create Texture(%dx%d)\n", width, height);
   uint16_t texture = allocate_tex(width, height, byte_size);
   rgb1555_t *buffer = get_tex(texture)->pixels;
-  printf("Buffer is 0x%x to 0x%x\n", buffer, &buffer[width*height]);
+  LOGD("Buffer is 0x%x to 0x%x\n", buffer, &buffer[width*height]);
 
   for (uint32_t i=0; i<width*height; i++) {
     buffer[i] = convert_to_rgb(pixels[i]);
@@ -436,7 +436,7 @@ void render_texture_replace_pixels(uint16_t texture_index, rgba_t *pixels){
   }
 }
 uint16_t render_textures_len(void){
-  printf("Return tex length 0x%x\n", tex_length());
+  LOGD("Return tex length 0x%x\n", tex_length());
   return tex_length();
 }
 void render_textures_reset(uint16_t len){
