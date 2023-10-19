@@ -86,8 +86,8 @@ static void button_quit(menu_t *menu, int data) {
 static void page_main_draw(menu_t *menu, int data) {
 	switch (data) {
 		case 0: draw_saturn_model(g.ships[0].model, vec2(0, -0.1), vec3(0, 0, -700), system_cycle_time()); break;
-		case 1: draw_model(models.misc.options, vec2(0, -0.2), vec3(0, 0, -700), system_cycle_time()); break;
-		case 2: draw_model(models.misc.msdos, vec2(0, -0.2), vec3(0, 0, -700), system_cycle_time()); break;
+		case 1: draw_saturn_model(models.misc.options, vec2(0, -0.2), vec3(0, 0, -700), system_cycle_time()); break;
+		case 2: draw_saturn_model(models.misc.msdos, vec2(0, -0.2), vec3(0, 0, -700), system_cycle_time()); break;
 	}
 }
 
@@ -126,9 +126,9 @@ static void button_audio(menu_t *menu, int data) {
 
 static void page_options_draw(menu_t *menu, int data) {
 	switch (data) {
-		case 0: draw_model(models.controller, vec2(0, -0.1), vec3(0, 0, -6000), system_cycle_time()); break;
-		case 1: draw_model(models.rescue, vec2(0, -0.2), vec3(0, 0, -700), system_cycle_time()); break; // TODO: needs better model
-		case 2: draw_model(models.options.headphones, vec2(0, -0.2), vec3(0, 0, -300), system_cycle_time()); break;
+		case 0: draw_saturn_model(models.controller, vec2(0, -0.1), vec3(0, 0, -6000), system_cycle_time()); break;
+		case 1: draw_saturn_model(models.rescue, vec2(0, -0.2), vec3(0, 0, -700), system_cycle_time()); break; // TODO: needs better model
+		case 2: draw_saturn_model(models.options.headphones, vec2(0, -0.2), vec3(0, 0, -300), system_cycle_time()); break;
 	}
 }
 
@@ -378,7 +378,7 @@ static void page_race_class_draw(menu_t *menu, int data) {
 	page->title_anchor = UI_POS_TOP | UI_POS_CENTER;
 	page->items_pos = vec2i(0, -110);
 	page->items_anchor = UI_POS_BOTTOM | UI_POS_CENTER;
-	draw_model(models.race_classes[data], vec2(0, -0.2), vec3(0, 0, -350), system_cycle_time());
+	draw_saturn_model(models.race_classes[data], vec2(0, -0.2), vec3(0, 0, -350), system_cycle_time());
 
 	if (!save.has_rapier_class && data == RACE_CLASS_RAPIER) {
 		render_set_view_2d();
@@ -407,9 +407,9 @@ static void button_race_type_select(menu_t *menu, int data) {
 
 static void page_race_type_draw(menu_t *menu, int data) {
 	switch (data) {
-		case 0: draw_model(models.misc.championship, vec2(0, -0.2), vec3(0, 0, -400), system_cycle_time()); break;
-		case 1: draw_model(models.misc.single_race, vec2(0, -0.2), vec3(0, 0, -400), system_cycle_time()); break;
-		case 2: draw_model(models.options.stopwatch, vec2(0, -0.2), vec3(0, 0, -400), system_cycle_time()); break;
+		case 0: draw_saturn_model(models.misc.championship, vec2(0, -0.2), vec3(0, 0, -400), system_cycle_time()); break;
+		case 1: draw_saturn_model(models.misc.single_race, vec2(0, -0.2), vec3(0, 0, -400), system_cycle_time()); break;
+		case 2: draw_saturn_model(models.options.stopwatch, vec2(0, -0.2), vec3(0, 0, -400), system_cycle_time()); break;
 	}
 }
 
@@ -437,9 +437,9 @@ static void button_team_select(menu_t *menu, int data) {
 
 static void page_team_draw(menu_t *menu, int data) {
 	int team_model_index = (data + 3) % 4; // models in the prm are shifted by -1
-	draw_model(models.teams[team_model_index], vec2(0, -0.2), vec3(0, 0, -10000), system_cycle_time());
-	draw_model(g.ships[def.teams[data].pilots[0]].model, vec2(0, -0.3), vec3(-700, -800, -1300), system_cycle_time()*1.1);
-	draw_model(g.ships[def.teams[data].pilots[1]].model, vec2(0, -0.3), vec3( 700, -800, -1300), system_cycle_time()*1.2);
+	draw_saturn_model(models.teams[team_model_index], vec2(0, -0.2), vec3(0, 0, -10000), system_cycle_time());
+	draw_saturn_model(g.ships[def.teams[data].pilots[0]].model, vec2(0, -0.3), vec3(-700, -800, -1300), system_cycle_time()*1.1);
+	draw_saturn_model(g.ships[def.teams[data].pilots[1]].model, vec2(0, -0.3), vec3( 700, -800, -1300), system_cycle_time()*1.2);
 }
 
 static void page_team_init(menu_t *menu) {
@@ -472,7 +472,7 @@ static void button_pilot_select(menu_t *menu, int data) {
 }
 
 static void page_pilot_draw(menu_t *menu, int data) {
-	draw_model(models.pilots[data], vec2(0, -0.2), vec3(0, 0, -10000), system_cycle_time());
+	draw_saturn_model(models.pilots[data], vec2(0, -0.2), vec3(0, 0, -10000), system_cycle_time());
 }
 
 static void page_pilot_init(menu_t *menu) {
@@ -531,6 +531,16 @@ static void objects_unpack_imp(Object **dest_array, int len, Object *src) {
 }
 
 
+#define objects_unpack_saturn(DEST, SRC) \
+	objects_unpack_saturn_imp((Object_Saturn **)&DEST,  SRC)
+
+static void objects_unpack_saturn_imp(Object_Saturn **dest_array, Object_Saturn_list *src) {
+	for (int i = 0; src && i < src->length; i++) {
+		dest_array[i] = src->objects[i];
+	}
+}
+
+
 void main_menu_init(void) {
 
 	// ships_load();
@@ -544,13 +554,13 @@ void main_menu_init(void) {
 	background = image_get_texture("wipeout/textures/wipeout1.tim");
 	track_images = image_get_compressed_textures("wipeout/textures/track.cmp");
 
-	objects_unpack(models.race_classes, objects_load("wipeout/common/leeg.prm", image_get_compressed_textures("wipeout/common/leeg.cmp")));
-	objects_unpack(models.teams, objects_load("wipeout/common/teams.prm", texture_list_empty()));
-	objects_unpack(models.pilots, objects_load("wipeout/common/pilot.prm", image_get_compressed_textures("wipeout/common/pilot.cmp")));
-	objects_unpack(models.options, objects_load("wipeout/common/alopt.prm", image_get_compressed_textures("wipeout/common/alopt.cmp")));
-	objects_unpack(models.rescue, objects_load("wipeout/common/rescu.prm", image_get_compressed_textures("wipeout/common/rescu.cmp")));
-	objects_unpack(models.controller, objects_load("wipeout/common/pad1.prm", image_get_compressed_textures("wipeout/common/pad1.cmp")));
-	objects_unpack(models.misc, objects_load("wipeout/common/msdos.prm", image_get_compressed_textures("wipeout/common/msdos.cmp")));
+	objects_unpack_saturn(models.misc, objects_saturn_load("wipeout/common/msdos.smf"));
+	objects_unpack_saturn(models.race_classes, objects_saturn_load("wipeout/common/leeg.smf"));
+	objects_unpack_saturn(models.teams, objects_saturn_load("wipeout/common/teams.smf"));
+	objects_unpack_saturn(models.pilots, objects_saturn_load("wipeout/common/pilot.smf"));
+	objects_unpack_saturn(models.options, objects_saturn_load("wipeout/common/alopt.smf"));
+	objects_unpack_saturn(models.rescue, objects_saturn_load("wipeout/common/rescu.smf"));
+	objects_unpack_saturn(models.controller, objects_saturn_load("wipeout/common/pad1.smf"));
 
 	menu_reset(main_menu);
 	page_main_init(main_menu);

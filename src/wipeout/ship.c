@@ -25,7 +25,6 @@ void ships_load(void) {
 	error_if(ship_models->length != NUM_PILOTS, "Expected %ld ship models, got %d", NUM_PILOTS, ship_models->length);
 	error_if(collision_models->length != NUM_PILOTS, "Expected %ld collison models, got %d", NUM_PILOTS, collision_models->length);
 
-
 	for (int object_index = 0; object_index < NUM_PILOTS; object_index++) {
 		int ship_index = def.ship_model_to_pilot[object_index];
 		g.ships[ship_index].model = ship_models->objects[object_index];
