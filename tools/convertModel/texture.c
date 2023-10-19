@@ -48,10 +48,10 @@ texture_t *texture_create(uint32_t width, uint32_t height, rgba_t *pixels){
       nb_color++;
     }
   }
-  if (nb_color > 16) {
-    LOGD("Palette too big %d\n", nb_color);
-    exit(-1);
-  }
+  // if (nb_color > 16) {
+  //   LOGD("Palette too big %d\n", nb_color);
+  //   exit(-1);
+  // }
   texture_t *ret = allocate_tex(width, height, pixels);
   // if (nb_color > 256) {
   //   ret->format = COLOR_BANK_RGB;
@@ -70,14 +70,14 @@ texture_t *texture_create(uint32_t width, uint32_t height, rgba_t *pixels){
   //   ret->format = COLOR_BANK_64_COL;
   //   ret->palette = malloc(64*sizeof(rgb1555_t));
   //   memcpy(ret->palette, &palette[0], 64*sizeof(rgb1555_t));
-  if (nb_color > 256) {
+  if (nb_color > 16) {
     ret->format = COLOR_BANK_RGB;
   } else {
     //Only 4bpp lut is supported yet
     ret->format = LOOKUP_TABLE_16_COL;
     ret->palette.pixels = malloc(16*sizeof(rgb1555_t));
     memcpy(ret->palette.pixels, &palette[0], 16*sizeof(rgb1555_t));
+    ret->palette.format = ret->format;
   }
-  ret->palette.format = ret->format;
 	return ret;
 }

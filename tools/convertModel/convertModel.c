@@ -58,36 +58,45 @@ char *replace_ext(const char *org, const char *new_ext)
 }
 
 int main(int argc, char *argv[]) {
-  if (argc != 3) {
+  int processObject = 0;
+  outputObject = NULL;
+  outputTexture = NULL;
+  if (argc < 2) {
 		LOGD("Usage: ./convertModel myfile.cmp myfile.prm\n");
+    LOGD("Usage: ./convertModel myfile.cmp\n");
 		return -1;
 	}
+  if (argc == 3) {
+    processObject = 1;
+  }
+
+  nb_objects = 0;
 
   outputTexture = replace_ext(argv[1], ".stf");
-  outputObject = replace_ext(argv[2], ".smf");
 
 	textures = image_get_compressed_textures(argv[1]);
 
-	Object *models = objects_load(argv[2], &textures);
+	if (processObject) {
+    outputObject = replace_ext(argv[2], ".smf");
+    Object *models = objects_load(argv[2], &textures);
 
-	int object_index;
+  	int object_index;
 
-	nb_objects = 0;
+  	Object *current = models;
 
-	Object *current = models;
+  	while(current != NULL) {
+  		nb_objects++;
+  		current = current->next;
+  	}
 
-	while(current != NULL) {
-		nb_objects++;
-		current = current->next;
-	}
+  	model = malloc(sizeof(Object*)*nb_objects);
 
-	model = malloc(sizeof(Object*)*nb_objects);
-
-	for (object_index = 0; object_index < nb_objects && models ; object_index++) {
-		model[object_index] = models;
-		models = models->next;
-	}
-	LOGD("Found %d models\n", nb_objects);
+  	for (object_index = 0; object_index < nb_objects && models ; object_index++) {
+  		model[object_index] = models;
+  		models = models->next;
+  	}
+  	LOGD("Found %d models\n", nb_objects);
+  }
 
 	if (gl_init(conversionStep, savingStep) != 0) {
     LOGD("Error\n");

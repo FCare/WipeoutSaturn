@@ -310,29 +310,31 @@ static void render(void)
     char png_name[1024] = {0};
 		sprintf(png_name, "char_%d.png", nbImage);
 		stbi_write_png(png_name, g_resources.dstTexture->width, g_resources.dstTexture->height, 4, out, 0);
-    uint32_t *save = malloc(g_resources.dstTexture->width*g_resources.dstTexture->height*sizeof(uint32_t));
-    for (int i = 0; i<g_resources.dstTexture->width*g_resources.dstTexture->height/4; i++) {
-       uint16_t id = g_resources.dstTexture->pixels[i];
-       for (int j=0; j<4; j++) {
-         uint8_t pixel_id = (id >> (4*(3-j)))&0xF;
-         save[i*4+j] = pixel_id;
-         // rgb1555_t val = g_resources.srcTexture->palette.pixels[pixel_id];
-         // save[i*4+j] = ((((val>>10)&0x1F)<<3)<<16) | ((((val>>5)&0x1F)<<3)<<8) | (((val&0x1F)<<3)<<0) | 0xFF000000u;
-       }
+    if (g_resources.srcTexture->format != COLOR_BANK_RGB) {
+      uint32_t *save = malloc(g_resources.dstTexture->width*g_resources.dstTexture->height*sizeof(uint32_t));
+      for (int i = 0; i<g_resources.dstTexture->width*g_resources.dstTexture->height/4; i++) {
+        uint16_t id = g_resources.dstTexture->pixels[i];
+        for (int j=0; j<4; j++) {
+          uint8_t pixel_id = (id >> (4*(3-j)))&0xF;
+          save[i*4+j] = pixel_id;
+          // rgb1555_t val = g_resources.srcTexture->palette.pixels[pixel_id];
+          // save[i*4+j] = ((((val>>10)&0x1F)<<3)<<16) | ((((val>>5)&0x1F)<<3)<<8) | (((val&0x1F)<<3)<<0) | 0xFF000000u;
+        }
+      }
+      sprintf(png_name, "index_%d.png", nbImage);
+      stbi_write_png(png_name, g_resources.dstTexture->width, g_resources.dstTexture->height, 4, save, 0);
+      for (int i = 0; i<g_resources.dstTexture->width*g_resources.dstTexture->height/4; i++) {
+        uint16_t id = g_resources.dstTexture->pixels[i];
+        for (int j=0; j<4; j++) {
+          uint8_t pixel_id = (id >> (4*(3-j)))&0xF;
+          rgb1555_t val = g_resources.srcTexture->palette.pixels[pixel_id];
+          save[i*4+j] = ((((val>>10)&0x1F)<<3)<<16) | ((((val>>5)&0x1F)<<3)<<8) | (((val&0x1F)<<3)<<0) | 0xFF000000u;
+        }
+      }
+      sprintf(png_name, "color_%d.png", nbImage);
+      stbi_write_png(png_name, g_resources.dstTexture->width, g_resources.dstTexture->height, 4, save, 0);
+      free(save);
     }
-    sprintf(png_name, "index_%d.png", nbImage);
-    stbi_write_png(png_name, g_resources.dstTexture->width, g_resources.dstTexture->height, 4, save, 0);
-    for (int i = 0; i<g_resources.dstTexture->width*g_resources.dstTexture->height/4; i++) {
-       uint16_t id = g_resources.dstTexture->pixels[i];
-       for (int j=0; j<4; j++) {
-         uint8_t pixel_id = (id >> (4*(3-j)))&0xF;
-         rgb1555_t val = g_resources.srcTexture->palette.pixels[pixel_id];
-         save[i*4+j] = ((((val>>10)&0x1F)<<3)<<16) | ((((val>>5)&0x1F)<<3)<<8) | (((val&0x1F)<<3)<<0) | 0xFF000000u;
-       }
-    }
-    sprintf(png_name, "color_%d.png", nbImage);
-    stbi_write_png(png_name, g_resources.dstTexture->width, g_resources.dstTexture->height, 4, save, 0);
-    free(save);
 #endif
     free(out);
     g_resources.ready = 0;
