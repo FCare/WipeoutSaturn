@@ -770,7 +770,7 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 						.color = poly->g3.color[0]
 					},
 				}
-			}, RENDER_NO_TEXTURE, object);
+			}, RENDER_NO_TEXTURE_SATURN, object);
 			break;
 
 		case PRM_TYPE_G4:
@@ -799,7 +799,7 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 					},
 				}
 			};
-			render_push_stripe_saturn( &q3, RENDER_NO_TEXTURE, object);
+			render_push_stripe_saturn( &q3, RENDER_NO_TEXTURE_SATURN, object);
 			break;
 
 		case PRM_TYPE_F3:
@@ -821,7 +821,7 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 						.color = poly->f3.color
 					},
 				}
-			}, RENDER_NO_TEXTURE, object);
+			}, RENDER_NO_TEXTURE_SATURN, object);
 			break;
 
 		case PRM_TYPE_F4:
@@ -850,7 +850,7 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 					},
 				}
 			};
-			render_push_stripe_saturn( &q4, RENDER_NO_TEXTURE, object);
+			render_push_stripe_saturn( &q4, RENDER_NO_TEXTURE_SATURN, object);
 			break;
 
 		case PRM_TYPE_TSPR:

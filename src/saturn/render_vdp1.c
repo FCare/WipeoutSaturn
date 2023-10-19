@@ -131,19 +131,16 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object
     .end_code_disable     = false,
   };
 
-  if (texture_index == RENDER_NO_TEXTURE) {
-    LOGD("No color\n");
-    draw_mode.color_mode = VDP1_CMDT_CM_RGB_32768;
-    quads_t q;
-    q.vertices[0].uv.x = 0;
-    q.vertices[0].uv.y = 0;
-    q.vertices[1].uv.x = 7;
-    q.vertices[1].uv.y = 0;
-    q.vertices[2].uv.x = 7;
-    q.vertices[2].uv.y = 1;
-    q.vertices[3].uv.x = 0;
-    q.vertices[3].uv.y = 1;
-    character = getVdp1VramAddress(texture_index, id, &q, &size);
+  if (texture_index == RENDER_NO_TEXTURE_SATURN) {
+    LOGD("No color, using a white polygon\n");
+    rgb1555_t white = (rgb1555_t){
+      .r = 0x10,
+      .g = 0x10,
+      .b = 0x10,
+      .msb = 1,
+    };
+    vdp1_cmdt_polygon_set(cmd);
+    vdp1_cmdt_color_set(cmd, white);
   } else {
     error_if(texture_index > object->characters->nb_characters, "texture index %d is out of bounds %d\n", texture_index, object->characters->nb_characters);
     character_t *chrt = object->characters->character[texture_index];
@@ -185,9 +182,9 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object
       break;
     }
     draw_mode.color_mode    = plt->format;
+    vdp1_cmdt_distorted_sprite_set(cmd); //Use distorted by default but it can be normal or scaled
   }
 
-  vdp1_cmdt_distorted_sprite_set(cmd); //Use distorted by default but it can be normal or scaled
   vdp1_cmdt_draw_mode_set(cmd, draw_mode);
   vdp1_cmdt_char_size_set(cmd, size.x, size.y);
   vdp1_cmdt_char_base_set(cmd, (vdp1_vram_t)character);

@@ -26,6 +26,7 @@ typedef enum {
 #define RENDER_FADEOUT_FAR 64000.0
 
 extern uint16_t RENDER_NO_TEXTURE;
+extern const uint16_t RENDER_NO_TEXTURE_SATURN;
 
 void render_init(vec2i_t screen_size);
 void render_cleanup(void);

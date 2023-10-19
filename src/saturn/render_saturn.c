@@ -14,6 +14,7 @@
 #define TEXTURES_MAX 1024
 
 uint16_t RENDER_NO_TEXTURE;
+const uint16_t RENDER_NO_TEXTURE_SATURN = 0xFFFF;
 
 static uint8_t nb_planes = 0;
 
