@@ -62,7 +62,8 @@
 	}
 
 #ifndef LOGD
-#define LOGD
+#define nop(...) {}
+#define LOGD(...) nop(__VA_ARGS__)
 #endif
 
 #define CHECK_ALIGN_4(A) \

@@ -28,7 +28,7 @@ static mat4_t projection_mat_3d = mat4_identity();
 static mat4_t screen_mat = mat4_identity();
 static mat4_t sprite_mat = mat4_identity();
 
-static void print_mat(mat4_t *m) {
+static void print_mat(mat4_t *m __unused) {
   LOGD("\t[%d %d %d %d]\n\t[%d %d %d %d]\n\t[%d %d %d %d]\n\t[%d %d %d %d]\n",
   (m->arr[0]),
   (m->arr[1]),
@@ -405,10 +405,11 @@ static inline rgb1555_t convert_to_rgb(rgba_t val) {
 
 uint16_t render_texture_create(uint32_t width, uint32_t height, rgba_t *pixels){
   uint32_t byte_size = width * height * sizeof(rgb1555_t);
-  if (byte_size < 4096)
+  if (byte_size < 4096){
     LOGD("Need %d B\n", byte_size);
-  else
+  }else{
     LOGD("Need %d kB\n", byte_size/1024);
+  }
   LOGD("Create Texture(%dx%d)\n", width, height);
   uint16_t texture = allocate_tex(width, height, byte_size);
   rgb1555_t *buffer = get_tex(texture)->pixels;

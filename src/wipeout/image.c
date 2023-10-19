@@ -18,7 +18,7 @@
 
 #define STBI_WRITE_NO_STDIO
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <stb_image_write.h>
+#include "../libs/stb_image_write.h"
 
 
 #define TIM_TYPE_PALETTED_4_BPP 0x08

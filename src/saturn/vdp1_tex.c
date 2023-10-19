@@ -144,14 +144,14 @@ uint16_t canAllocateVdp1(uint16_t texture_index, quads_t *quad) {
   return 2;
 }
 
-void reset_vdp1_pool(uint8_t id) {
+void reset_vdp1_pool() {
 	LOGD("%s\n", __FUNCTION__);
 	uint8_t id_reset = 0;
 	while((textures[id_reset].used == 1) && (id_reset < textures_len)) id_reset++;
 	for (int i = 0; i<textures_len; i++) {
 		textures[i].used = 0;
 	}
-	LOGD("reset[%d] to %d vs %d\n", id, id_reset, textures_len);
+	LOGD("reset to %d vs %d\n", id_reset, textures_len);
 	if (textures_len < id_reset){
 		textures_len = id_reset;
 		if (id_reset != 0) {

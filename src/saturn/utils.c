@@ -16,7 +16,7 @@ static size_t debug_write(FILE *f __attribute__((unused)), const unsigned char *
   return size;
 }
 #else
-static size_t debug_write(FILE *f, const unsigned char * buf, size_t size) {
+static size_t debug_write(FILE *f __unused, const unsigned char * buf __unused, size_t size) {
   return size;
 }
 #endif
