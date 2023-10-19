@@ -21,7 +21,10 @@ static void page_race_type_init(menu_t *menu);
 static void page_team_init(menu_t *menu);
 static void page_pilot_init(menu_t *menu);
 static void page_circut_init(menu_t *menu);
+
+#ifndef SATURN
 static void page_options_controls_init(menu_t *menu);
+#endif
 static void page_options_video_init(menu_t *menu);
 static void page_options_audio_init(menu_t *menu);
 
@@ -30,24 +33,14 @@ static texture_list_t track_images;
 static menu_t *main_menu;
 
 static struct {
-	Object *race_classes[2];
-	Object *teams[4];
-	Object *pilots[8];
-	struct { Object *stopwatch, *save, *load, *headphones, *cd; } options;
-	struct { Object *championship, *msdos, *single_race, *options; } misc;
-	Object *rescue;
-	Object *controller;
+	Object_Saturn *race_classes[2];
+	Object_Saturn *teams[4];
+	Object_Saturn *pilots[8];
+	struct { Object_Saturn *stopwatch, *save, *load, *headphones, *cd; } options;
+	struct { Object_Saturn *championship, *msdos, *single_race, *options; } misc;
+	Object_Saturn *rescue;
+	Object_Saturn *controller;
 } models;
-
-static void draw_model(Object *model, vec2_t offset, vec3_t pos, fix16_t rotation) {
-	render_set_view(vec3_fix16(FIX16_ZERO,FIX16_ZERO,FIX16_ZERO), vec3_fix16(FIX16_ZERO, -PLATFORM_PI, -PLATFORM_PI));
-	render_set_screen_position(offset);
-	mat4_t mat = mat4_identity();
-	mat4_set_translation(&mat, pos);
-	mat4_set_yaw_pitch_roll(&mat, vec3_fix16(FIX16_ZERO, rotation, PLATFORM_PI));
-	object_draw(model, &mat);
-	render_set_screen_position(vec2_fix16(FIX16_ZERO, FIX16_ZERO));
-}
 
 static void draw_saturn_model(Object_Saturn *model, vec2_t offset, vec3_t pos, fix16_t rotation) {
 	render_set_view(vec3_fix16(FIX16_ZERO,FIX16_ZERO,FIX16_ZERO), vec3_fix16(FIX16_ZERO, -PLATFORM_PI, -PLATFORM_PI));
@@ -62,14 +55,15 @@ static void draw_saturn_model(Object_Saturn *model, vec2_t offset, vec3_t pos, f
 // -----------------------------------------------------------------------------
 // Main Menu
 
-static void button_start_game(menu_t *menu, int data) {
+static void button_start_game(menu_t *menu, int data __unused) {
 	page_race_class_init(menu);
 }
 
-static void button_options(menu_t *menu, int data) {
+static void button_options(menu_t *menu, int data __unused) {
 	page_options_init(menu);
 }
 
+#ifndef NO_QUIT
 static void button_quit_confirm(menu_t *menu, int data) {
 	if (data) {
 		system_exit();
@@ -79,11 +73,12 @@ static void button_quit_confirm(menu_t *menu, int data) {
 	}
 }
 
-static void button_quit(menu_t *menu, int data) {
+static void button_quit(menu_t *menu, int data __unused) {
 	menu_confirm(menu, "ARE YOU SURE YOU", "WANT TO QUIT", "YES", "NO", button_quit_confirm);
 }
+#endif
 
-static void page_main_draw(menu_t *menu, int data) {
+static void page_main_draw(menu_t *menu __unused, int data) {
 	switch (data) {
 		case 0: draw_saturn_model(g.ships[0].model, vec2(0, -0.1), vec3(0, 0, -700), system_cycle_time()); break;
 		case 1: draw_saturn_model(models.misc.options, vec2(0, -0.2), vec3(0, 0, -700), system_cycle_time()); break;
@@ -112,19 +107,21 @@ static void page_main_init(menu_t *menu) {
 // -----------------------------------------------------------------------------
 // Options
 
-static void button_controls(menu_t *menu, int data) {
+#ifndef SATURN
+static void button_controls(menu_t *menu, int data __unused) {
 	page_options_controls_init(menu);
 }
+#endif
 
-static void button_video(menu_t *menu, int data) {
+static void button_video(menu_t *menu, int data __unused) {
 	page_options_video_init(menu);
 }
 
-static void button_audio(menu_t *menu, int data) {
+static void button_audio(menu_t *menu, int data __unused) {
 	page_options_audio_init(menu);
 }
 
-static void page_options_draw(menu_t *menu, int data) {
+static void page_options_draw(menu_t *menu __unused, int data) {
 	switch (data) {
 		case 0: draw_saturn_model(models.controller, vec2(0, -0.1), vec3(0, 0, -6000), system_cycle_time()); break;
 		case 1: draw_saturn_model(models.rescue, vec2(0, -0.2), vec3(0, 0, -700), system_cycle_time()); break; // TODO: needs better model
@@ -155,7 +152,7 @@ static const char *button_names[NUM_GAME_ACTIONS][2] = {};
 static int control_current_action;
 static fix16_t await_input_deadline;
 
-void button_capture(void *user, button_t button, int32_t ascii_char) {
+void button_capture(void *user, button_t button, int32_t ascii_char __unused) {
 	if (button == INPUT_INVALID) {
 		return;
 	}
@@ -170,7 +167,7 @@ void button_capture(void *user, button_t button, int32_t ascii_char) {
 	int index = button < INPUT_KEY_MAX ? 0 : 1; // joypad or keyboard
 
 	// unbind this button if it's bound anywhere
-	for (int i = 0; i < len(save.buttons); i++) {
+	for (uint32_t i = 0; i < len(save.buttons); i++) {
 		if (save.buttons[i][index] == button) {
 			save.buttons[i][index] = INPUT_INVALID;
 		}
@@ -182,7 +179,8 @@ void button_capture(void *user, button_t button, int32_t ascii_char) {
 	menu_pop(menu);
 }
 
-static void page_options_control_set_draw(menu_t *menu, int data) {
+#ifndef SATURN
+static void page_options_control_set_draw(menu_t *menu, int data __unused) {
 	fix16_t remaining = await_input_deadline - platform_now();
 
 	menu_page_t *page = &menu->pages[menu->index];
@@ -205,8 +203,7 @@ static void page_options_controls_set_init(menu_t *menu, int data) {
 	input_capture(button_capture, menu);
 }
 
-
-static void page_options_control_draw(menu_t *menu, int data) {
+static void page_options_control_draw(menu_t *menu, int data __unused) {
 	menu_page_t *page = &menu->pages[menu->index];
 
 	int left = page->items_pos.x + page->block_width - 100;
@@ -267,37 +264,39 @@ static void page_options_controls_init(menu_t *menu) {
 	menu_page_add_button(page, A_FIRE, "FIRE", page_options_controls_set_init);
 	menu_page_add_button(page, A_CHANGE_VIEW, "VIEW", page_options_controls_set_init);
 }
+#endif
 
 // -----------------------------------------------------------------------------
 // Options Video
 
-static void toggle_fullscreen(menu_t *menu, int data) {
+static void toggle_show_fps(menu_t *menu __unused, int data) {
+	save.show_fps = data;
+	save.is_dirty = true;
+}
+
+#ifndef SATURN
+static void toggle_fullscreen(menu_t *menu __unused, int data __unused) {
 	save.fullscreen = data;
 	save.is_dirty = true;
 	platform_set_fullscreen(save.fullscreen);
 }
 
-static void toggle_show_fps(menu_t *menu, int data) {
-	save.show_fps = data;
-	save.is_dirty = true;
-}
-
-static void toggle_ui_scale(menu_t *menu, int data) {
+static void toggle_ui_scale(menu_t *menu __unused, int data) {
 	save.ui_scale = data;
 	save.is_dirty = true;
 }
 
-static void toggle_res(menu_t *menu, int data) {
+static void toggle_res(menu_t *menu __unused, int data) {
 	render_set_resolution(data);
 	save.screen_res = data;
 	save.is_dirty = true;
 }
-
-static void toggle_post(menu_t *menu, int data) {
+static void toggle_post(menu_t *menu __unused, int data) {
 	render_set_post_effect(data);
 	save.post_effect = data;
 	save.is_dirty = true;
 }
+#endif
 
 static const char *opts_off_on[] = {"OFF", "ON"};
 static const char *opts_ui_sizes[] = {"AUTO", "1X", "2X", "3X", "4X"};
@@ -327,12 +326,12 @@ static void page_options_video_init(menu_t *menu) {
 // -----------------------------------------------------------------------------
 // Options Audio
 
-static void toggle_music_volume(menu_t *menu, int data) {
+static void toggle_music_volume(menu_t *menu __unused, int data) {
 	save.music_volume = (fix16_t)data * 0.1;
 	save.is_dirty = true;
 }
 
-static void toggle_sfx_volume(menu_t *menu, int data) {
+static void toggle_sfx_volume(menu_t *menu __unused, int data) {
 	save.sfx_volume = (fix16_t)data * 0.1;
 	save.is_dirty = true;
 }
@@ -389,7 +388,7 @@ static void page_race_class_draw(menu_t *menu, int data) {
 
 static void page_race_class_init(menu_t *menu) {
 	menu_page_t *page = menu_push(menu, "RACING CLASS", page_race_class_draw);
-	for (int i = 0; i < len(def.race_classes); i++) {
+	for (uint32_t i = 0; i < len(def.race_classes); i++) {
 		menu_page_add_button(page, i, def.race_classes[i].name, button_race_class_select);
 	}
 }
@@ -405,7 +404,7 @@ static void button_race_type_select(menu_t *menu, int data) {
 	page_team_init(menu);
 }
 
-static void page_race_type_draw(menu_t *menu, int data) {
+static void page_race_type_draw(menu_t *menu __unused, int data) {
 	switch (data) {
 		case 0: draw_saturn_model(models.misc.championship, vec2(0, -0.2), vec3(0, 0, -400), system_cycle_time()); break;
 		case 1: draw_saturn_model(models.misc.single_race, vec2(0, -0.2), vec3(0, 0, -400), system_cycle_time()); break;
@@ -420,7 +419,7 @@ static void page_race_type_init(menu_t *menu) {
 	page->title_anchor = UI_POS_TOP | UI_POS_CENTER;
 	page->items_pos = vec2i(0, -110);
 	page->items_anchor = UI_POS_BOTTOM | UI_POS_CENTER;
-	for (int i = 0; i < len(def.race_types); i++) {
+	for (uint32_t i = 0; i < len(def.race_types); i++) {
 		menu_page_add_button(page, i, def.race_types[i].name, button_race_type_select);
 	}
 }
@@ -435,7 +434,7 @@ static void button_team_select(menu_t *menu, int data) {
 	page_pilot_init(menu);
 }
 
-static void page_team_draw(menu_t *menu, int data) {
+static void page_team_draw(menu_t *menu __unused, int data) {
 	int team_model_index = (data + 3) % 4; // models in the prm are shifted by -1
 	draw_saturn_model(models.teams[team_model_index], vec2(0, -0.2), vec3(0, 0, -10000), system_cycle_time());
 	// draw_saturn_model(g.ships[def.teams[data].pilots[0]].model, vec2(0, -0.3), vec3(-700, -800, -1300), system_cycle_time()*1.1);
@@ -449,7 +448,7 @@ static void page_team_init(menu_t *menu) {
 	page->title_anchor = UI_POS_TOP | UI_POS_CENTER;
 	page->items_pos = vec2i(0, -110);
 	page->items_anchor = UI_POS_BOTTOM | UI_POS_CENTER;
-	for (int i = 0; i < len(def.teams); i++) {
+	for (uint32_t i = 0; i < len(def.teams); i++) {
 		menu_page_add_button(page, i, def.teams[i].name, button_team_select);
 	}
 }
@@ -471,7 +470,7 @@ static void button_pilot_select(menu_t *menu, int data) {
 	}
 }
 
-static void page_pilot_draw(menu_t *menu, int data) {
+static void page_pilot_draw(menu_t *menu __unused, int data) {
 	draw_saturn_model(models.pilots[data], vec2(0, -0.2), vec3(0, 0, -10000), system_cycle_time());
 }
 
@@ -482,7 +481,7 @@ static void page_pilot_init(menu_t *menu) {
 	page->title_anchor = UI_POS_TOP | UI_POS_CENTER;
 	page->items_pos = vec2i(0, -110);
 	page->items_anchor = UI_POS_BOTTOM | UI_POS_CENTER;
-	for (int i = 0; i < len(def.teams[g.team].pilots); i++) {
+	for (uint32_t i = 0; i < len(def.teams[g.team].pilots); i++) {
 		menu_page_add_button(page, def.teams[g.team].pilots[i], def.pilots[def.teams[g.team].pilots[i]].name, button_pilot_select);
 	}
 }
@@ -491,12 +490,12 @@ static void page_pilot_init(menu_t *menu) {
 // -----------------------------------------------------------------------------
 // Circut
 
-static void button_circut_select(menu_t *menu, int data) {
+static void button_circut_select(menu_t *menu __unused, int data) {
 	g.circut = data;
 	game_set_scene(GAME_SCENE_RACE);
 }
 
-static void page_circut_draw(menu_t *menu, int data) {
+static void page_circut_draw(menu_t *menu __unused, int data) {
 	vec2i_t pos = vec2i(0, -25);
 	vec2i_t size = vec2i(128, 74);
 	vec2i_t scaled_size = ui_scaled(size);
@@ -511,25 +510,12 @@ static void page_circut_init(menu_t *menu) {
 	page->title_anchor = UI_POS_TOP | UI_POS_CENTER;
 	page->items_pos = vec2i(0, -100);
 	page->items_anchor = UI_POS_BOTTOM | UI_POS_CENTER;
-	for (int i = 0; i < len(def.circuts); i++) {
+	for (uint32_t i = 0; i < len(def.circuts); i++) {
 		if (!def.circuts[i].is_bonus_circut || save.has_bonus_circuts) {
 			menu_page_add_button(page, i, def.circuts[i].name, button_circut_select);
 		}
 	}
 }
-
-#define objects_unpack(DEST, SRC) \
-	objects_unpack_imp((Object **)&DEST, sizeof(DEST)/sizeof(Object*), SRC)
-
-static void objects_unpack_imp(Object **dest_array, int len, Object *src) {
-	int i;
-	for (i = 0; src && i < len; i++) {
-		dest_array[i] = src;
-		src = src->next;
-	}
-	error_if(i != len, "expected %d models got %d", len, i);
-}
-
 
 #define objects_unpack_saturn(DEST, SRC) \
 	objects_unpack_saturn_imp((Object_Saturn **)&DEST,  SRC)

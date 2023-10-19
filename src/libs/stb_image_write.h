@@ -432,7 +432,7 @@ static void stbiw__write_pixel(stbi__write_context *s, int rgb_dir, int comp, in
             stbiw__write1(s, d[0]);  // monochrome TGA
          break;
       case 4:
-         if (!write_alpha) {
+         if (write_alpha == 0) {
             // composite against pink background
             for (k = 0; k < 3; ++k)
                px[k] = bg[k] + ((d[k] - bg[k]) * d[3]) / 255;

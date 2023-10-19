@@ -22,7 +22,7 @@ static uint16_t textures_len = 0;
 
 static uint32_t vdp1_size;
 
-static void *vdp1_tex_bump(uint32_t size, uint8_t id) {
+static void *vdp1_tex_bump(uint32_t size) {
 	size = (size+0x7)&~0x7; //align texture on 8bytes
 	error_if(tex_len + size >= vdp1_size, "Failed to allocate %d bytes on VDP1 RAM", size);
 	uint8_t *p = &tex[tex_len];
@@ -48,13 +48,13 @@ static uint8_t isSameUv(vec2_t *uv, quads_t *q) {
 	return 1;
 }
 
-uint16_t* getVdp1VramAddress_Saturn(uint16_t texture_index, uint8_t id){
+uint16_t* getVdp1VramAddress_Saturn(uint16_t texture_index){
 	render_texture_t* src = get_tex(texture_index);
 	for (uint16_t i=0; i<textures_len; i++) {
     if (textures[i].index == texture_index)
 		{
 			textures[i].used = 1;
-      return textures[i].pixels;
+      return (uint16_t*)textures[i].pixels;
     }
   }
 	error_if (textures_len == VDP1_TEXTURES_MAX, "Vdp1 has no more texture available\n");
@@ -62,18 +62,18 @@ uint16_t* getVdp1VramAddress_Saturn(uint16_t texture_index, uint8_t id){
 	uint16_t length = src->size.x*src->size.y*sizeof(rgb1555_t);
 	textures[textures_len].used = 1;
   textures[textures_len].index = texture_index;
-  textures[textures_len].pixels = vdp1_tex_bump(length, id);
+  textures[textures_len].pixels = vdp1_tex_bump(length);
 	LOGD("&&&&&&&&&&&&&&& Texture vdp1 from 0x%x to 0x%x  %dx%d!!!!!!!!!!!!!!!!ééééééééé\n", &src->pixels[0], &textures[textures_len].pixels[0], src->size.x, src->size.y);
 	scu_dma_transfer(0, (void *)&textures[textures_len].pixels[0], &src->pixels[0], length);
 	scu_dma_transfer_wait(0);
 
-	return textures[textures_len++].pixels;
+	return (uint16_t*)textures[textures_len++].pixels;
 }
 
-uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *quad, vec2i_t *size) {
+uint16_t* getVdp1VramAddress(uint16_t texture_index, quads_t *quad, vec2i_t *size) {
 	render_texture_t* src = get_tex(texture_index);
-	int orig_w = quad->vertices[1].uv.x - quad->vertices[0].uv.x + 1;
-	int h = quad->vertices[3].uv.y - quad->vertices[0].uv.y; //Here uv are simple uint32_t
+	uint32_t orig_w = quad->vertices[1].uv.x - quad->vertices[0].uv.x + 1;
+	uint32_t h = quad->vertices[3].uv.y - quad->vertices[0].uv.y; //Here uv are simple uint32_t
 
 	assert(orig_w >= 0);
 	assert(h >= 0);
@@ -97,7 +97,7 @@ uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *quad, 
 		{
 			textures[i].used = 1;
 				LOGD("&&&&&&&&&&&&&&& Texture vdp1 %d(0x%x) reused %dx%d => %dx%d:-) :-) :-)\n", i, textures[i].pixels, (int32_t)quad->vertices[0].uv.y, (int32_t)quad->vertices[0].uv.x, (int32_t)quad->vertices[2].uv.y, (int32_t)quad->vertices[2].uv.x);
-      return textures[i].pixels;
+      return (uint16_t*)textures[i].pixels;
     }
   }
 
@@ -109,18 +109,18 @@ uint16_t* getVdp1VramAddress(uint16_t texture_index, uint8_t id, quads_t *quad, 
 	}
   textures[textures_len].index = texture_index;
   textures[textures_len].size = *size;
-  textures[textures_len].pixels = vdp1_tex_bump(length, id);
+  textures[textures_len].pixels = vdp1_tex_bump(length);
 	rgb1555_t *src_buf = &src->pixels[(int32_t)quad->vertices[0].uv.y * src->size.x + (int32_t)quad->vertices[0].uv.x];
 	LOGD("&&&&&&&&&&&&&&& Texture vdp1 from %d(0x%x) at %dx%d=>%dx%d!!!!!!!!!!!!!!!!ééééééééé\n", textures_len, textures[textures_len].pixels, (int32_t)quad->vertices[0].uv.y, (int32_t)quad->vertices[0].uv.x, (int32_t)quad->vertices[3].uv.y, (int32_t)quad->vertices[3].uv.x);
-	for (int i = 0; i<h; i++) {
+	for (uint32_t i = 0; i<h; i++) {
 		scu_dma_transfer(0, (void *)&textures[textures_len].pixels[i*w], &src_buf[i*src->size.x], orig_w*sizeof(rgb1555_t));
 		// memset(&textures[textures_len].pixels[i*w+orig_w], 0, (w-orig_w)*sizeof(rgb1555_t));
 		scu_dma_transfer_wait(0);
 	}
-  return textures[textures_len++].pixels;
+  return (uint16_t*)textures[textures_len++].pixels;
 }
 
-uint16_t canAllocateVdp1(uint16_t texture_index, uint8_t id, quads_t *quad) {
+uint16_t canAllocateVdp1(uint16_t texture_index, quads_t *quad) {
 	render_texture_t* src = get_tex(texture_index);
   for (uint16_t i=0; i<textures_len; i++) {
     if ((textures[i].index == texture_index) && (isSameUv(textures[i].uv, quad)))

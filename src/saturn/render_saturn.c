@@ -67,7 +67,7 @@ void render_init(vec2i_t size) {
 }
 void render_cleanup(void){}
 
-void render_set_screen_size(vec2i_t size){
+void render_set_screen_size(vec2i_t size __unused){
   LOGD("%s\n", __FUNCTION__);
   LOGD("Screen %dx%d\n", screen_size.x, screen_size.y);
   fix16_t w2 = FIX16(screen_size.x>>1);
@@ -106,10 +106,10 @@ projection_mat_3d = mat4(
   LOGD("Proj 3D Mat= \n");
   print_mat(&projection_mat_3d);
 }
-void render_set_resolution(render_resolution_t res){
+void render_set_resolution(render_resolution_t res __unused){
   //Resolution is always same size on saturn port
 }
-void render_set_post_effect(render_post_effect_t post){}
+void render_set_post_effect(render_post_effect_t post __unused){}
 
 vec2i_t render_size(void){
   return screen_size;
@@ -169,19 +169,16 @@ void render_set_model_mat(mat4_t *m){
   mat4_mul(&mvp_mat, &vm_mat, &projection_mat_3d);
 }
 
-void render_set_depth_write(bool enabled){}
-void render_set_depth_test(bool enabled){}
-void render_set_depth_offset(fix16_t offset){}
-void render_set_screen_position(vec2_t pos){
-
-}
-void render_set_blend_mode(render_blend_mode_t mode){}
-void render_set_cull_backface(bool enabled){}
+void render_set_depth_write(bool enabled __unused){}
+void render_set_depth_test(bool enabled __unused){}
+void render_set_depth_offset(fix16_t offset __unused){}
+void render_set_screen_position(vec2_t pos __unused){}
+void render_set_blend_mode(render_blend_mode_t mode __unused){}
+void render_set_cull_backface(bool enabled __unused){}
 
 vec3_t render_transform(vec3_t pos){
   return vec3_transform(vec3_transform(pos, &view_mat), &projection_mat_3d);
 }
-
 
 void render_object_transform(vec3_t *out, vec3_t *in, int16_t size) {
   for (int i = 0; i<size; i++) {
@@ -228,7 +225,7 @@ void render_push_stripe_saturn(quads_saturn_t *quad, uint16_t texture_index, Obj
 }
 
 
-void render_push_stripe(quads_t *quad, uint16_t texture_index) {
+void render_push_stripe(quads_t *quad, uint16_t texture_index __unused) {
   LOGD("%s\n", __FUNCTION__);
 
   vec3_t temp = quad->vertices[1].pos;
@@ -270,7 +267,7 @@ void render_push_tris_saturn(tris_saturn_t tris, uint16_t texture_index, Object_
   render_vdp1_add_saturn(&q, texture_index, object);
 }
 
-void render_push_tris(tris_t tris, uint16_t texture_index){
+void render_push_tris(tris_t tris, uint16_t texture_index __unused){
   LOGD("%s\n", __FUNCTION__);
   fix16_t minZ = FIX16_ZERO;
   nb_planes++;
@@ -313,10 +310,10 @@ void render_push_sprite(vec3_t pos, vec2i_t size, rgba_t color, uint16_t texture
   render_texture_t *t = get_tex(texture_index);
   quads_t q = {
     .vertices = {
-      {.pos = p0, .uv = {0, 0}, .color = color},
-      {.pos = p1, .uv = {0 + t->size.x ,0}, .color = color},
-      {.pos = p2, .uv = {0, 0 + t->size.y}, .color = color},
-      {.pos = p3, .uv = {0 + t->size.x, 0 + t->size.y}, .color = color},
+      {.pos = p0, .uv = {.x=0, .y=0}, .color = color},
+      {.pos = p1, .uv = {.x=0 + t->size.x ,.y=0}, .color = color},
+      {.pos = p2, .uv = {.x=0, .y=0 + t->size.y}, .color = color},
+      {.pos = p3, .uv = {.x=0 + t->size.x, .y=0 + t->size.y}, .color = color},
     }
   };
   render_push_native_quads(&q, color, texture_index);
@@ -445,4 +442,4 @@ void render_textures_reset(uint16_t len){
   render_vdp1_clear();
   render_vdp2_clear();
 }
-void render_textures_dump(const char *path){LOGD("%s\n", __FUNCTION__); }
+void render_textures_dump(const char *path __unused){LOGD("%s\n", __FUNCTION__); }

@@ -38,7 +38,7 @@ void camera_update(camera_t *camera, ship_t *ship, droid_t *droid) {
 	camera->real_velocity = vec3_mulf(vec3_sub(camera->position, camera->last_position), 1.0/system_tick());
 }
 
-void camera_update_race_external(camera_t *camera, ship_t *ship, droid_t *droid) {
+void camera_update_race_external(camera_t *camera, ship_t *ship, droid_t *droid __unused) {
 	vec3_t pos = vec3_sub(ship->position, vec3_mulf(ship->dir_forward, 1024));
 	pos.y -= 200;
 	camera->section = track_nearest_section(pos, camera->section, NULL);
@@ -58,13 +58,13 @@ void camera_update_race_external(camera_t *camera, ship_t *ship, droid_t *droid)
 	camera->angle = vec3_fix16(ship->angle.x, ship->angle.y, 0);
 }
 
-void camera_update_race_internal(camera_t *camera, ship_t *ship, droid_t *droid) {
+void camera_update_race_internal(camera_t *camera, ship_t *ship, droid_t *droid __unused) {
 	camera->section = ship->section;
 	camera->position = ship_cockpit(ship);
 	camera->angle = vec3_fix16(ship->angle.x, ship->angle.y, ship->angle.z);
 }
 
-void camera_update_race_intro(camera_t *camera, ship_t *ship, droid_t *droid) {
+void camera_update_race_intro(camera_t *camera, ship_t *ship, droid_t *droid __unused) {
 	// Set to final position
 	vec3_t pos = vec3_sub(ship->position, vec3_mulf(ship->dir_forward, 0.25 * 4096));
 
@@ -93,7 +93,7 @@ void camera_update_race_intro(camera_t *camera, ship_t *ship, droid_t *droid) {
 	}
 }
 
-void camera_update_attract_circle(camera_t *camera, ship_t *ship, droid_t *droid) {
+void camera_update_attract_circle(camera_t *camera, ship_t *ship, droid_t *droid __unused) {
 	camera->update_timer -= system_tick();
 	if (camera->update_timer <= 0) {
 		camera->update_func = camera_update_attract_random;
@@ -117,7 +117,7 @@ void camera_update_attract_circle(camera_t *camera, ship_t *ship, droid_t *droid
 	camera->angle.y = -atan2(target.x, target.z);
 }
 
-void camera_update_rescue(camera_t *camera, ship_t *ship, droid_t *droid) {
+void camera_update_rescue(camera_t *camera, ship_t *ship __unused, droid_t *droid) {
 	camera->position = vec3_add(camera->section->center, vec3(300, -1500, 300));
 
 	vec3_t target = vec3_sub(droid->position, camera->position);
@@ -127,7 +127,7 @@ void camera_update_rescue(camera_t *camera, ship_t *ship, droid_t *droid) {
 }
 
 
-void camera_update_attract_internal(camera_t *camera, ship_t *ship, droid_t *droid) {
+void camera_update_attract_internal(camera_t *camera, ship_t *ship, droid_t *droid __unused) {
 	camera->update_timer -= system_tick();
 	if (camera->update_timer <= 0) {
 		camera->update_func = camera_update_attract_random;
@@ -138,7 +138,7 @@ void camera_update_attract_internal(camera_t *camera, ship_t *ship, droid_t *dro
 	camera->angle = vec3_fix16(ship->angle.x, ship->angle.y, 0); // No roll
 }
 
-void camera_update_static_follow(camera_t *camera, ship_t *ship, droid_t *droid) {
+void camera_update_static_follow(camera_t *camera, ship_t *ship, droid_t *droid __unused) {
 	camera->update_timer -= system_tick();
 	if (camera->update_timer <= 0) {
 		camera->update_func = camera_update_attract_random;

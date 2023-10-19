@@ -5,6 +5,26 @@
 
 static const fix16_t THREE_PI_DIV_4 = 0x00025B2F;       /*!< Fix16 value of 3PI/4 */
 
+static const fix16_t fix16_maximum  = 0x7FFFFFFF; /*!< the maximum value of fix16_t */
+static const fix16_t fix16_minimum  = 0x80000000; /*!< the minimum value of fix16_t */
+static const fix16_t fix16_overflow = 0x80000000; /*!< the value used to indicate overflows when FIXMATH_NO_OVERFLOW is not specified */
+
+/* Wrapper around fix16_div to add saturating arithmetic. */
+fix16_t fix16_sdiv(fix16_t inArg0, fix16_t inArg1)
+{
+	fix16_t result = fix16_div(inArg0, inArg1);
+
+	if (result == fix16_overflow)
+	{
+		if ((inArg0 >= 0) == (inArg1 >= 0))
+			return fix16_maximum;
+		else
+			return fix16_minimum;
+	}
+
+	return result;
+}
+
 fix16_t sqrt(fix16_t x) {
   return (fix16_t)fix16_sqrt((fix16_t)x);
 }

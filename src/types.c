@@ -23,11 +23,11 @@ fix16_t vec3_angle(vec3_t a, vec3_t b) {
 	return acos(clamp(cosine, -1, 1));
 }
 
-static vec4_t transpose(const fix16_vec4_t *vec) {
-	static fix16_vec4_t res;
-	mat44_row_transpose(&vec->comp[0], &res);
-	return vec4_fix16(res.x, res.y,res.z, res.w);
-}
+// static vec4_t transpose (const fix16_vec4_t *vec) {
+// 	static fix16_vec4_t res;
+// 	mat44_row_transpose(&vec->comp[0], &res);
+// 	return vec4_fix16(res.x, res.y,res.z, res.w);
+// }
 
 vec3_t vec3_transform(vec3_t a, mat4_t *mat) {
 	fix16_t w = fix16_mul(mat->arr[3], a.x) + fix16_mul(mat->arr[7], a.y) + fix16_mul(mat->arr[11], a.z) + mat->arr[15];

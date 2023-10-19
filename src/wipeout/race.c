@@ -37,16 +37,16 @@ void race_init(void) {
 	track_load(cs->path);
 	scene_load(cs->path, cs->sky_y_offset);
 
-	if (g.circut == CIRCUT_SILVERSTREAM && g.race_class == RACE_CLASS_RAPIER) {
-		scene_init_aurora_borealis();
-	}
+	// if (g.circut == CIRCUT_SILVERSTREAM && g.race_class == RACE_CLASS_RAPIER) {
+	// 	scene_init_aurora_borealis();
+	// }
 
 	race_start();
 	// render_textures_dump("texture_atlas.png");
 
 	if (g.is_attract_mode) {
 		attract_start_time = system_time();
-		for (int i = 0; i < len(g.ships); i++) {
+		for (uint32_t i = 0; i < len(g.ships); i++) {
 			// FIXME: this is needed to initializes the engine sound. Should
 			// maybe be done in a separate step?
 			ship_ai_update_intro(&g.ships[i]);
@@ -69,22 +69,36 @@ void race_init(void) {
 
 void race_update(void) {
 	if (is_paused) {
+		printf("%d\n", __LINE__);
 		if (!active_menu) {
+			printf("%d\n", __LINE__);
 			active_menu = pause_menu_init();
+			printf("%d\n", __LINE__);
 		}
 		if (input_pressed(A_MENU_QUIT)) {
+			printf("%d\n", __LINE__);
 			race_unpause();
+			printf("%d\n", __LINE__);
 		}
 	}
 	else {
+		printf("%d\n", __LINE__);
 		ships_update();
+		printf("%d\n", __LINE__);
 		droid_update(&g.droid, &g.ships[g.pilot]);
+		printf("%d\n", __LINE__);
 		camera_update(&g.camera, &g.ships[g.pilot], &g.droid);
+		printf("%d\n", __LINE__);
 		weapons_update();
+		printf("%d\n", __LINE__);
 		particles_update();
+		printf("%d\n", __LINE__);
 		scene_update();
+		printf("%d\n", __LINE__);
 		if (g.race_type != RACE_TYPE_TIME_TRIAL) {
+			printf("%d\n", __LINE__);
 			track_cycle_pickups();
+			printf("%d\n", __LINE__);
 		}
 
 		if (g.is_attract_mode) {
@@ -97,37 +111,53 @@ void race_update(void) {
 			}
 		}
 		else if (active_menu == NULL && (input_pressed(A_MENU_START) || input_pressed(A_MENU_QUIT))) {
+			printf("%d\n", __LINE__);
 			race_pause();
+			printf("%d\n", __LINE__);
 		}
 	}
 
 
 	// Draw 3D
+	printf("%d\n", __LINE__);
 	render_set_view(g.camera.position, g.camera.angle);
-
+printf("%d\n", __LINE__);
 	render_set_cull_backface(false);
+	printf("%d\n", __LINE__);
 	scene_draw(&g.camera);
+	printf("%d\n", __LINE__);
 	track_draw(&g.camera);
+	printf("%d\n", __LINE__);
 	render_set_cull_backface(true);
-
+printf("%d\n", __LINE__);
 	ships_draw();
+	printf("%d\n", __LINE__);
 	droid_draw(&g.droid);
+	printf("%d\n", __LINE__);
 	weapons_draw();
+	printf("%d\n", __LINE__);
 	particles_draw();
+	printf("%d\n", __LINE__);
 
 	// Draw 2d
 	render_set_view_2d();
 
 	if (flags_is(g.ships[g.pilot].flags, SHIP_RACING)) {
+		printf("%d\n", __LINE__);
 		hud_draw(&g.ships[g.pilot]);
+		printf("%d\n", __LINE__);
 	}
 
 	if (active_menu) {
 		if (!menu_is_scroll_text) {
+			printf("%d\n", __LINE__);
 			vec2i_t size = render_size();
 			render_push_2d(vec2i(0, 0), size, rgba(0, 0, 0, 128), RENDER_NO_TEXTURE);
+			printf("%d\n", __LINE__);
 		}
+		printf("%d\n", __LINE__);
 		menu_update(active_menu);
+		printf("%d\n", __LINE__);
 	}
 }
 
@@ -141,13 +171,12 @@ void race_start(void) {
 	droid_init(&g.droid, &g.ships[g.pilot]);
 	particles_init();
 	weapons_init();
-
-	for (int i = 0; i < len(g.race_ranks); i++) {
+	for (uint32_t i = 0; i < len(g.race_ranks); i++) {
 		g.race_ranks[i].points = 0;
 		g.race_ranks[i].pilot = i;
 	}
-	for (int i = 0; i < len(g.lap_times); i++) {
-		for (int j = 0; j < len(g.lap_times[i]); j++) {
+	for (uint32_t i = 0; i < len(g.lap_times); i++) {
+		for (uint32_t j = 0; j < len(g.lap_times[i]); j++) {
 			g.lap_times[i][j] = 0;
 		}
 	}
@@ -205,11 +234,11 @@ void race_end(void) {
 	}
 
 	if (g.race_type == RACE_TYPE_CHAMPIONSHIP) {
-		for (int i = 0; i < len(def.race_points_for_rank); i++) {
+		for (uint32_t i = 0; i < len(def.race_points_for_rank); i++) {
 			g.race_ranks[i].points = def.race_points_for_rank[i];
 
 			// Find the pilot for this race rank in the championship table
-			for (int j = 0; j < len(g.championship_ranks); j++) {
+			for (uint32_t j = 0; j < len(g.championship_ranks); j++) {
 				if (g.race_ranks[i].pilot == g.championship_ranks[j].pilot) {
 					g.championship_ranks[j].points += def.race_points_for_rank[i];
 					break;

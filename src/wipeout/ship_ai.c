@@ -22,6 +22,7 @@ vec3_t ship_ai_strat_avoid_other(ship_t *self, track_face_t *face);
 vec3_t ship_ai_strat_zig_zag(ship_t *self, track_face_t *face);
 
 void ship_ai_update_intro(ship_t *self) {
+	printf("%d\n", __LINE__);
 	self->temp_target = self->position;
 	self->update_func = ship_ai_update_intro_await_go;
 
@@ -38,14 +39,14 @@ void ship_ai_update_intro_await_go(ship_t *self) {
 	}
 }
 
-vec3_t ship_ai_strat_hold_left(ship_t *self, track_face_t *face) {
+vec3_t ship_ai_strat_hold_left(ship_t *self __unused, track_face_t *face) {
 	vec3_t fv1 = face->quad.vertices[1].pos;
 	vec3_t fv2 = face->quad.vertices[0].pos;
 
 	return vec3_mulf(vec3_sub(fv1, fv2), 0.5);
 }
 
-vec3_t ship_ai_strat_hold_right(ship_t *self, track_face_t *face) {
+vec3_t ship_ai_strat_hold_right(ship_t *self __unused, track_face_t *face) {
 	vec3_t fv1 = face->quad.vertices[0].pos;
 	vec3_t fv2 = face->quad.vertices[1].pos;
 
@@ -53,7 +54,7 @@ vec3_t ship_ai_strat_hold_right(ship_t *self, track_face_t *face) {
 }
 
 
-vec3_t ship_ai_strat_hold_center(ship_t *self, track_face_t *face) {
+vec3_t ship_ai_strat_hold_center(ship_t *self __unused, track_face_t *face __unused) {
 	return vec3_fix16(0, 0, 0);
 }
 

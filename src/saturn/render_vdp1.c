@@ -83,9 +83,9 @@ void vdp1_init(void)
   vdp1_sync_interval_set(0);
 }
 
-void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object_Saturn *object){
-  uint16_t *character;
-  vec2i_t size;
+void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object_Saturn *object __unused){
+  uint16_t *character = NULL;
+  vec2i_t size = vec2i(0,0);
   LOGD(
     "vdp1 add saturn %dx%d %dx%d %dx%d %dx%d\n",
     fix16_int32_to(quad->vertices[0].pos.x),
@@ -241,7 +241,7 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
   );
 
   assert (nbCommand < cmdt_max-2);
-  assert(canAllocateVdp1(texture_index, id, quad) != 0);
+  assert(canAllocateVdp1(texture_index, quad) != 0);
 
   const vdp1_cmdt_draw_mode_t draw_mode = {
           .color_mode           = VDP1_CMDT_CM_RGB_32768,
@@ -267,8 +267,8 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
   }
   chain[nbCommand].z >>= 2;
 
-  vec2i_t size;
-  uint16_t*character = getVdp1VramAddress(texture_index, id, quad, &size); //a revoir parce qu'il ne faut copier suivant le UV
+  vec2i_t size = vec2i(0,0);
+  uint16_t*character = getVdp1VramAddress(texture_index, quad, &size); //a revoir parce qu'il ne faut copier suivant le UV
   LOGD(
     "after %dx%d %dx%d %dx%d %dx%d\n",
     fix16_int32_to(quad->vertices[0].pos.x),

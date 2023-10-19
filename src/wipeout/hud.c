@@ -86,67 +86,28 @@ static void hud_draw_speedo_bar(vec2i_t *pos, const speedo_bar_t *a, const speed
 	quads_t q = {
 		.vertices = {
 			{
-				.pos = {pos->x + bottom_left.x, pos->y + bottom_left.y, 0},
-				.uv = {0, 0},
+				.pos = {.x=pos->x + bottom_left.x, .y=pos->y + bottom_left.y, .z=0},
+				.uv = {.x=0, .y=0},
 				.color = left_color
 			},
 			{
-				.pos = {pos->x + bottom_right.x, pos->y + bottom_right.y, 0},
-				.uv = {0, 0},
+				.pos = {.x=pos->x + bottom_right.x, .y=pos->y + bottom_right.y, .z=0},
+				.uv = {.x=0, 0},
 				.color = right_color
 			},
 			{
-				.pos = {pos->x + top_right.x, pos->y + top_right.y, 0},
-				.uv = {0, 0},
+				.pos = {.x=pos->x + top_right.x, .y=pos->y + top_right.y, .z=0},
+				.uv = {.x=0, 0},
 				.color = right_color
 			},
 			{
-				.pos = {pos->x + top_left.x, pos->y + top_left.y, 0},
-				.uv = {0, 0},
+				.pos = {.x=pos->x + top_left.x, .y=pos->y + top_left.y, .z=0},
+				.uv = {.x=0, .y=0},
 				.color = left_color
 			},
 		}
 	};
 	render_push_quads( &q, RENDER_NO_TEXTURE);
-	// render_push_tris((tris_t) {
-	// 	.vertices = {
-	// 		{
-	// 			.pos = {pos->x + bottom_left.x, pos->y + bottom_left.y, 0},
-	// 			.uv = {0, 0},
-	// 			.color = left_color
-	// 		},
-	// 		{
-	// 			.pos = {pos->x + top_right.x, pos->y + top_right.y, 0},
-	// 			.uv = {0, 0},
-	// 			.color = right_color
-	// 		},
-	// 		{
-	// 			.pos = {pos->x + top_left.x, pos->y + top_left.y, 0},
-	// 			.uv = {0, 0},
-	// 			.color = left_color
-	// 		},
-	// 	}
-	// }, RENDER_NO_TEXTURE);
-	//
-	// render_push_tris((tris_t) {
-	// 	.vertices = {
-	// 		{
-	// 			.pos = {pos->x + bottom_right.x, pos->y + bottom_right.y, 0},
-	// 			.uv = {0, 0},
-	// 			.color = right_color
-	// 		},
-	// 		{
-	// 			.pos = {pos->x + top_right.x, pos->y + top_right.y, 0},
-	// 			.uv = {0, 0},
-	// 			.color = right_color
-	// 		},
-	// 		{
-	// 			.pos = {pos->x + bottom_left.x, pos->y + bottom_left.y, 0},
-	// 			.uv = {0, 0},
-	// 			.color = left_color
-	// 		},
-	// 	}
-	// }, RENDER_NO_TEXTURE);
 }
 
 static void hud_draw_speedo_bars(vec2i_t *pos, fix16_t f, rgba_t color_override) {

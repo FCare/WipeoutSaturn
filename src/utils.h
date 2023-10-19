@@ -115,18 +115,18 @@ extern void quickSort_Z(chain_t *array, uint16_t low, uint16_t high);
 		swap((LIST)[i], (LIST)[j]); \
 	}
 
-static inline uint8_t get_u8(uint8_t *bytes, uint32_t *p) {
+static inline uint8_t get_u8_f(uint8_t *bytes, uint32_t *p) {
 	return bytes[(*p)++];
 }
 
-static inline uint16_t get_u16(uint8_t *bytes, uint32_t *p) {
+static inline uint16_t get_u16_f(uint8_t *bytes, uint32_t *p) {
 	uint16_t v = 0;
 	v |= bytes[(*p)++] << 8;
 	v |= bytes[(*p)++] << 0;
 	return v;
 }
 
-static inline uint32_t get_u32(uint8_t *bytes, uint32_t *p) {
+static inline uint32_t get_u32_f(uint8_t *bytes, uint32_t *p) {
 	uint32_t v = 0;
 	v |= bytes[(*p)++] << 24;
 	v |= bytes[(*p)++] << 16;
@@ -135,14 +135,14 @@ static inline uint32_t get_u32(uint8_t *bytes, uint32_t *p) {
 	return v;
 }
 
-static inline uint16_t get_u16_le(uint8_t *bytes, uint32_t *p) {
+static inline uint16_t get_u16_le_f(uint8_t *bytes, uint32_t *p) {
 	uint16_t v = 0;
 	v |= bytes[(*p)++] << 0;
 	v |= bytes[(*p)++] << 8;
 	return v;
 }
 
-static inline uint32_t get_u32_le(uint8_t *bytes, uint32_t *p) {
+static inline uint32_t get_u32_le_f(uint8_t *bytes, uint32_t *p) {
 	uint32_t v = 0;
 	v |= bytes[(*p)++] <<  0;
 	v |= bytes[(*p)++] <<  8;
@@ -151,10 +151,18 @@ static inline uint32_t get_u32_le(uint8_t *bytes, uint32_t *p) {
 	return v;
 }
 
-#define get_i8(BYTES, P) ((int8_t)get_u8(BYTES, P))
-#define get_i16(BYTES, P) ((int16_t)get_u16(BYTES, P))
-#define get_i16_le(BYTES, P) ((int16_t)get_u16_le(BYTES, P))
-#define get_i32(BYTES, P) ((int32_t)get_u32(BYTES, P))
-#define get_i32_le(BYTES, P) ((int32_t)get_u32_le(BYTES, P))
+#define get_i8(BYTES, P) ((int8_t)get_u8_f((uint8_t*)BYTES, P))
+#define get_i16(BYTES, P) ((int16_t)get_u16_f((uint8_t*)BYTES, P))
+#define get_i16_le(BYTES, P) ((int16_t)get_u16_le_f((uint8_t*)BYTES, P))
+#define get_i32(BYTES, P) ((int32_t)get_u32_f((uint8_t*)BYTES, P))
+#define get_i32_le(BYTES, P) ((int32_t)get_u32_le_f((uint8_t*)BYTES, P))
+
+#define get_u8(BYTES, P) ((uint8_t)get_u8_f((uint8_t*)BYTES, P))
+#define get_u16(BYTES, P) ((uint16_t)get_u16_f((uint8_t*)BYTES, P))
+#define get_u16_le(BYTES, P) ((uint16_t)get_u16_le_f((uint8_t*)BYTES, P))
+#define get_u32(BYTES, P) ((uint32_t)get_u32_f((uint8_t*)BYTES, P))
+#define get_u32_le(BYTES, P) ((uint32_t)get_u32_le_f((uint8_t*)BYTES, P))
+
+
 
 #endif

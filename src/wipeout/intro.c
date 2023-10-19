@@ -81,7 +81,7 @@ void intro_update(void) {
 
 static void audio_cb(plm_t *plm, plm_samples_t *samples, void *user) {
 	int len = samples->count * 2;
-	for (int i = 0; i < len; i++) {
+	for (uint32_t i = 0; i < len; i++) {
 		audio_buffer[audio_buffer_write_pos % INTRO_AUDIO_BUFFER_LEN] = samples->interleaved[i];
 		audio_buffer_write_pos++;
 	}

@@ -43,6 +43,7 @@ void ship_player_update_sfx(ship_t *self) {
 }
 
 void ship_player_update_intro(ship_t *self) {
+	printf("%d\n", __LINE__);
 	self->temp_target = self->position;
 
 	self->sfx_engine_thrust = sfx_reserve_loop(SFX_ENGINE_THRUST);
@@ -508,7 +509,7 @@ ship_t *ship_player_find_target(ship_t *self) {
 	int shortest_distance = 256;
 	ship_t *nearest_ship = NULL;
 
-	for (int i = 0; i < len(g.ships); i++) {
+	for (uint32_t i = 0; i < len(g.ships); i++) {
 		ship_t *other = &g.ships[i];
 		if (self == other) {
 			continue;

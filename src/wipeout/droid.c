@@ -24,11 +24,9 @@ void droid_load(void) {
 
 void droid_init(droid_t *droid, ship_t *ship) {
 	droid->section = g.track.sections;
-
 	while (flags_not(droid->section->flags, SECTION_JUMP)) {
 		droid->section = droid->section->next;
 	}
-
 	droid->position = vec3_add(ship->position, vec3_fix16(FIX16_ZERO, FIX16(-200), FIX16_ZERO));
 	droid->velocity = vec3_fix16(FIX16_ZERO, FIX16_ZERO, FIX16_ZERO);
 	droid->acceleration = vec3_fix16(FIX16_ZERO, FIX16_ZERO, FIX16_ZERO);
@@ -36,10 +34,8 @@ void droid_init(droid_t *droid, ship_t *ship) {
 	droid->angular_velocity = vec3_fix16(FIX16_ZERO, FIX16_ZERO, FIX16_ZERO);
 	droid->update_timer = DROID_UPDATE_TIME_INITIAL;
 	droid->mat = mat4_identity();
-
 	droid->cycle_timer = 0;
 	droid->update_func = droid_update_intro;
-
 	droid->sfx_tractor = sfx_reserve_loop(SFX_TRACTOR);
 	flags_rm(droid->sfx_tractor->flags, SFX_PLAY);
 }
@@ -127,7 +123,7 @@ void droid_update(droid_t *droid, ship_t *ship) {
 	}
 }
 
-void droid_update_intro(droid_t *droid, ship_t *ship) {
+void droid_update_intro(droid_t *droid, ship_t *ship __unused) {
 	droid->update_timer -= system_tick();
 
 	if (droid->update_timer < DROID_UPDATE_TIME_INTRO_3) {

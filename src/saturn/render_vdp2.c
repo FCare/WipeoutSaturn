@@ -102,10 +102,10 @@ void render_vdp2_clear(void) {
 
 static void updateLayerImage(uint16_t texture, vdp2_layer_t layer) {
   render_texture_t* src = get_tex(texture);
-  rgb1555_t *dst = layer_ctrl[layer].format.bitmap_base;
+  rgb1555_t *dst = (rgb1555_t *)layer_ctrl[layer].format.bitmap_base;
   uint32_t y = src->size.y;
   uint32_t x = src->size.x;
-  for (int32_t i = 0; i< y; i++) {
+  for (uint32_t i = 0; i< y; i++) {
     scu_dma_transfer(0, (void *)&(dst[512*i]), &src->pixels[i*x], x*sizeof(rgb1555_t));
     scu_dma_transfer_wait(0);
   }

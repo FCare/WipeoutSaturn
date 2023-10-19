@@ -527,11 +527,11 @@ void game_init(void) {
 
 	ui_load(); //used everywhere. Better to get them in persistent memory
 	sfx_load();
-	// hud_load();
+	hud_load();
 	ships_load();
-	// droid_load();
-	// particles_load();
-	// weapons_load();
+	droid_load();
+	particles_load();
+	weapons_load();
 
 	global_textures_len = render_textures_len();
 	global_mem_mark = mem_mark();
@@ -574,7 +574,7 @@ void game_init(void) {
 
 
 	// User defined, loaded from the save struct
-	for (int action = 0; action < len(save.buttons); action++) {
+	for (uint32_t action = 0; action < len(save.buttons); action++) {
 		if (save.buttons[action][0] != INPUT_INVALID) {
 			input_bind(INPUT_LAYER_USER, save.buttons[action][0], action);
 		}
@@ -592,7 +592,7 @@ void game_set_scene(game_scene_t scene) {
 }
 
 void game_reset_championship(void) {
-	for (int i = 0; i < len(g.championship_ranks); i++) {
+	for (uint32_t i = 0; i < len(g.championship_ranks); i++) {
 		g.championship_ranks[i].points = 0;
 		g.championship_ranks[i].pilot = i;
 	}

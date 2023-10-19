@@ -20,7 +20,7 @@ void track_load(const char *base_path) {
 	cmp_t *cmp = image_load_compressed(get_path(base_path, "library.cmp"));
 
 	image_t *temp_tile = image_alloc(128, 128);
-	for (int i = 0; i < ttf->len; i++) {
+	for (uint32_t i = 0; i < ttf->len; i++) {
 		for (int tx = 0; tx < 4; tx++) {
 			for (int ty = 0; ty < 4; ty++) {
 				uint32_t sub_tile_index = ttf->tiles[i].near[ty * 4 + tx];
@@ -94,7 +94,7 @@ ttf_t *track_load_tile_format(char *ttf_name) {
 	ttf_t *ttf = mem_temp_alloc(sizeof(ttf_t) + sizeof(ttf_tile_t) * num_tiles);
 	ttf->len = num_tiles;
 
-	for (int t = 0; t < num_tiles; t++) {
+	for (uint32_t t = 0; t < num_tiles; t++) {
 		for (int i = 0; i < 16; i++) {
 			ttf->tiles[t].near[i] = get_i16(ttf_bytes, &p);
 		}
@@ -110,13 +110,18 @@ ttf_t *track_load_tile_format(char *ttf_name) {
 
 bool track_collect_pickups(track_face_t *face) {
 	if (flags_is(face->flags, FACE_PICKUP_ACTIVE)) {
+		printf("%d\n", __LINE__);
 		flags_rm(face->flags, FACE_PICKUP_ACTIVE);
 		flags_add(face->flags, FACE_PICKUP_COLLECTED);
+		printf("%d\n", __LINE__);
 		track_face_set_color(face, rgba(255, 255, 255, 255));
+		printf("%d\n", __LINE__);
 		return true;
 	}
 	else {
+		printf("%d\n", __LINE__);
 		return false;
+		printf("%d\n", __LINE__);
 	}
 }
 
@@ -140,8 +145,8 @@ vec3_t *track_load_vertices(char *file_name) {
 }
 
 static const vec2_t track_uv[2][4] = {
-	{{128, 0}, {  0, 0}, {  0, 128}, {128, 128}},
-	{{  0, 0}, {128, 0}, {128, 128}, {  0, 128}}
+	{{.x=128, .y=0}, {.x=0, .y=0}, {.x=0, .y=128}, {.x=128, .y=128}},
+	{{.x=0, .y=0}, {.x=128, .y=0}, {.x=128, .y=128}, {.x=0, .y=128}}
 };
 
 void track_load_faces(char *file_name, vec3_t *vertices) {
@@ -244,7 +249,7 @@ void track_draw_section(section_t *section) {
 	track_face_t *face = g.track.faces + section->face_start;
 	int16_t face_count = section->face_count;
 
-	for (uint32_t j = 0; j < face_count; j++) {
+	for (int16_t j = 0; j < face_count; j++) {
 		uint16_t tex_index = texture_from_list(g.track.textures, face->texture);
 		render_push_quads(&(face->quad), tex_index);
 		face++;

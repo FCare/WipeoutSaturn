@@ -15,7 +15,7 @@
 #include "hud.h"
 #include "object.h"
 
-
+#ifdef DUMP
 void character_ctrl_dump(character_list_t * ch_list) {
 	LOGD("\t************** %d characters ***************\n", ch_list->nb_characters);
 	for (int char_id = 0; char_id < ch_list->nb_characters; char_id++) {
@@ -57,6 +57,7 @@ void all_object_dump_saturn(Object_Saturn_list* list) {
 		object_dump_saturn(obj);
 	}
 }
+#endif
 
 Object *objects_load(char *name, texture_list_t tl) {
 	uint32_t length = 0;
@@ -501,14 +502,14 @@ Object *objects_load(char *name, texture_list_t tl) {
 
 Object_Saturn_list* objects_saturn_load(char *name) {
 	LOGD("load: %s\n", name);
-	int texture;
+	uint16_t texture;
 	uint16_t *bytes = (uint16_t*)platform_load_saturn_asset(name, &texture);
 	CHECK_ALIGN_4(bytes);
 	if (!bytes) {
 		die("Failed to load file %s\n", name);
 	}
 	uint32_t p = 0;
-	uint16_t length = get_i16(bytes, &p);
+	uint16_t length = get_u16(bytes, &p);
 	Object_Saturn_list *list = mem_bump(sizeof(Object_Saturn_list));
 	CHECK_ALIGN_4(list);
 	list->objects = mem_bump(sizeof(Object_Saturn*)*length);
@@ -904,17 +905,17 @@ void object_draw(Object *object, mat4_t *mat) {
 				.vertices = {
 					{
 						.pos = vertex[coord2],
-						.uv = {poly.gt3->u2, poly.gt3->v2},
+						.uv = {.x=poly.gt3->u2, .y=poly.gt3->v2},
 						.color = poly.gt3->color[2]
 					},
 					{
 						.pos = vertex[coord1],
-						.uv = {poly.gt3->u1, poly.gt3->v1},
+						.uv = {.x=poly.gt3->u1, .y=poly.gt3->v1},
 						.color = poly.gt3->color[1]
 					},
 					{
 						.pos = vertex[coord0],
-						.uv = {poly.gt3->u0, poly.gt3->v0},
+						.uv = {.x=poly.gt3->u0, .y=poly.gt3->v0},
 						.color = poly.gt3->color[0]
 					},
 				}
@@ -933,67 +934,27 @@ void object_draw(Object *object, mat4_t *mat) {
 				.vertices = {
 					{
 						.pos = vertex[coord0],
-						.uv = {poly.gt4->u0, poly.gt4->v0},
+						.uv = {.x=poly.gt4->u0, .y=poly.gt4->v0},
 						.color = poly.gt4->color[0]
 					},
 					{
 						.pos = vertex[coord1],
-						.uv = {poly.gt4->u1, poly.gt4->v1},
+						.uv = {.x=poly.gt4->u1, .y=poly.gt4->v1},
 						.color = poly.gt4->color[1]
 					},
 					{
 						.pos = vertex[coord2],
-						.uv = {poly.gt4->u2, poly.gt4->v2},
+						.uv = {.x=poly.gt4->u2, .y=poly.gt4->v2},
 						.color = poly.gt4->color[2]
 					},
 					{
 						.pos = vertex[coord3],
-						.uv = {poly.gt4->u3, poly.gt4->v3},
+						.uv = {.x=poly.gt4->u3, .y=poly.gt4->v3},
 						.color = poly.gt4->color[3]
 					},
 				}
 			};
 			render_push_stripe( &q1, poly.gt4->texture);
-
-			// render_push_tris((tris_t) {
-			// 	.vertices = {
-			// 		{
-			// 			.pos = vertex[coord2],
-			// 			.uv = {poly.gt4->u2, poly.gt4->v2},
-			// 			.color = poly.gt4->color[2]
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord1],
-			// 			.uv = {poly.gt4->u1, poly.gt4->v1},
-			// 			.color = poly.gt4->color[1]
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord0],
-			// 			.uv = {poly.gt4->u0, poly.gt4->v0},
-			// 			.color = poly.gt4->color[0]
-			// 		},
-			// 	}
-			// }, poly.gt4->texture);
-			// render_push_tris((tris_t) {
-			// 	.vertices = {
-			// 		{
-			// 			.pos = vertex[coord2],
-			// 			.uv = {poly.gt4->u2, poly.gt4->v2},
-			// 			.color = poly.gt4->color[2]
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord3],
-			// 			.uv = {poly.gt4->u3, poly.gt4->v3},
-			// 			.color = poly.gt4->color[3]
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord1],
-			// 			.uv = {poly.gt4->u1, poly.gt4->v1},
-			// 			.color = poly.gt4->color[1]
-			// 		},
-			// 	}
-			// }, poly.gt4->texture);
-
 			poly.gt4 += 1;
 			break;
 
@@ -1006,17 +967,17 @@ void object_draw(Object *object, mat4_t *mat) {
 				.vertices = {
 					{
 						.pos = vertex[coord2],
-						.uv = {poly.ft3->u2, poly.ft3->v2},
+						.uv = {.x=poly.ft3->u2, .y=poly.ft3->v2},
 						.color = poly.ft3->color
 					},
 					{
 						.pos = vertex[coord1],
-						.uv = {poly.ft3->u1, poly.ft3->v1},
+						.uv = {.x=poly.ft3->u1, .y=poly.ft3->v1},
 						.color = poly.ft3->color
 					},
 					{
 						.pos = vertex[coord0],
-						.uv = {poly.ft3->u0, poly.ft3->v0},
+						.uv = {.x=poly.ft3->u0, .y=poly.ft3->v0},
 						.color = poly.ft3->color
 					},
 				}
@@ -1035,67 +996,27 @@ void object_draw(Object *object, mat4_t *mat) {
 				.vertices = {
 					{
 						.pos = vertex[coord3],
-						.uv = {poly.ft4->u3, poly.ft4->v3},
+						.uv = {.x=poly.ft4->u3, .y=poly.ft4->v3},
 						.color = poly.ft4->color
 					},
 					{
 						.pos = vertex[coord2],
-						.uv = {poly.ft4->u2, poly.ft4->v2},
+						.uv = {.x=poly.ft4->u2, .y=poly.ft4->v2},
 						.color = poly.ft4->color
 					},
 					{
 						.pos = vertex[coord1],
-						.uv = {poly.ft4->u1, poly.ft4->v1},
+						.uv = {.x=poly.ft4->u1, .y=poly.ft4->v1},
 						.color = poly.ft4->color
 					},
 					{
 						.pos = vertex[coord0],
-						.uv = {poly.ft4->u0, poly.ft4->v0},
+						.uv = {.x=poly.ft4->u0, .y=poly.ft4->v0},
 						.color = poly.ft4->color
 					},
 				}
 			};
 			render_push_stripe( &q2, poly.ft4->texture);
-
-			// render_push_tris((tris_t) {
-			// 	.vertices = {
-			// 		{
-			// 			.pos = vertex[coord2],
-			// 			.uv = {poly.ft4->u2, poly.ft4->v2},
-			// 			.color = poly.ft4->color
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord1],
-			// 			.uv = {poly.ft4->u1, poly.ft4->v1},
-			// 			.color = poly.ft4->color
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord0],
-			// 			.uv = {poly.ft4->u0, poly.ft4->v0},
-			// 			.color = poly.ft4->color
-			// 		},
-			// 	}
-			// }, poly.ft4->texture);
-			// render_push_tris((tris_t) {
-			// 	.vertices = {
-			// 		{
-			// 			.pos = vertex[coord2],
-			// 			.uv = {poly.ft4->u2, poly.ft4->v2},
-			// 			.color = poly.ft4->color
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord3],
-			// 			.uv = {poly.ft4->u3, poly.ft4->v3},
-			// 			.color = poly.ft4->color
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord1],
-			// 			.uv = {poly.ft4->u1, poly.ft4->v1},
-			// 			.color = poly.ft4->color
-			// 		},
-			// 	}
-			// }, poly.ft4->texture);
-
 			poly.ft4 += 1;
 			break;
 
@@ -1151,40 +1072,6 @@ void object_draw(Object *object, mat4_t *mat) {
 				}
 			};
 			render_push_stripe( &q3, RENDER_NO_TEXTURE);
-			//
-			// render_push_tris((tris_t) {
-			// 	.vertices = {
-			// 		{
-			// 			.pos = vertex[coord2],
-			// 			.color = poly.g4->color[2]
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord1],
-			// 			.color = poly.g4->color[1]
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord0],
-			// 			.color = poly.g4->color[0]
-			// 		},
-			// 	}
-			// }, RENDER_NO_TEXTURE);
-			// render_push_tris((tris_t) {
-			// 	.vertices = {
-			// 		{
-			// 			.pos = vertex[coord2],
-			// 			.color = poly.g4->color[2]
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord3],
-			// 			.color = poly.g4->color[3]
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord1],
-			// 			.color = poly.g4->color[1]
-			// 		},
-			// 	}
-			// }, RENDER_NO_TEXTURE);
-
 			poly.g4 += 1;
 			break;
 
@@ -1240,40 +1127,6 @@ void object_draw(Object *object, mat4_t *mat) {
 				}
 			};
 			render_push_stripe( &q4, RENDER_NO_TEXTURE);
-
-			// render_push_tris((tris_t) {
-			// 	.vertices = {
-			// 		{
-			// 			.pos = vertex[coord2],
-			// 			.color = poly.f4->color
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord1],
-			// 			.color = poly.f4->color
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord0],
-			// 			.color = poly.f4->color
-			// 		},
-			// 	}
-			// }, RENDER_NO_TEXTURE);
-			// render_push_tris((tris_t) {
-			// 	.vertices = {
-			// 		{
-			// 			.pos = vertex[coord2],
-			// 			.color = poly.f4->color
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord3],
-			// 			.color = poly.f4->color
-			// 		},
-			// 		{
-			// 			.pos = vertex[coord1],
-			// 			.color = poly.f4->color
-			// 		},
-			// 	}
-			// }, RENDER_NO_TEXTURE);
-
 			poly.f4 += 1;
 			break;
 

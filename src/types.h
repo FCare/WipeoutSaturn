@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include "platform_math.h"
 
+#define UNUSED(x) (void)(x)
+
 typedef struct {
 	int32_t x, y;
 } vec2i_t;

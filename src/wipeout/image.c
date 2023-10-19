@@ -16,7 +16,7 @@
 #include "image.h"
 #include "tex.h"
 
-
+#define STBI_WRITE_NO_STDIO
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
@@ -303,7 +303,7 @@ saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
 			CHECK_ALIGN_2(ch_list->character[i]->pixels);
 			offset += 5;
 			uint32_t delta = offset*sizeof(rgb1555_t);
-			LOGD("Character %d is at 0x%x vs 0x%x => delta = 0x%x (Obj %d)\n", i, ch_list->character[i]->pixels, (uint16_t)buf, delta, n);
+			LOGD("Character %d is at 0x%x vs 0x%x => delta = 0x%x (Obj %d)\n", i, ch_list->character[i]->pixels, (uint32_t)buf, delta, n);
 			ch_list->character[i]->texture = create_sub_texture(delta , ch_list->character[i]->width, ch_list->character[i]->height, texture);
 			LOGD("%dx%d %d\n", ch_list->character[i]->width, ch_list->character[i]->height, ch_list->character[i]->length);
 			offset += ch_list->character[i]->length;
@@ -343,7 +343,7 @@ texture_list_t image_get_compressed_textures(char *name) {
 	cmp_t *cmp = image_load_compressed(name);
 	texture_list_t list = {.start = render_textures_len(), .len = cmp->len};
 
-	for (int i = 0; i < cmp->len; i++) {
+	for (uint32_t i = 0; i < cmp->len; i++) {
 		int32_t width, height;
 		image_t *image = image_load_from_bytes(cmp->entries[i], false);
 

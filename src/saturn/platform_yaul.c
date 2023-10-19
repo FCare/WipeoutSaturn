@@ -19,7 +19,7 @@ static cdfs_filelist_t _filelist;
 static int16_t nb_ovf = 0;
 static fix16_t ovf_time_step;
 
-static update_loop = 0;
+static uint8_t update_loop = 0;
 
 static void
 _frt_compare_output_handler(void)
@@ -173,7 +173,7 @@ void platform_set_fullscreen(bool fullscreen __attribute__((unused))) {
   LOGD("Set fullscreen\n");
 };
 
-void platform_set_audio_mix_cb(void (*cb)(fix16_t *buffer, uint32_t len)) {
+void platform_set_audio_mix_cb(void (*cb)(fix16_t *buffer, uint32_t len) __unused) {
 //TODO
 }
 
@@ -253,12 +253,12 @@ uint8_t *platform_load_asset(const char *name, uint32_t *bytes_read) {
   return bytes;
 }
 
-uint8_t *platform_load_userdata(const char *name, uint32_t *bytes_read) {
+uint8_t *platform_load_userdata(const char *name __unused, uint32_t *bytes_read __unused) {
   //load to backup
   return NULL;
 }
 
-uint32_t platform_store_userdata(const char *name, void *bytes, int32_t len) {
+uint32_t platform_store_userdata(const char *name __unused, void *bytes __unused, int32_t len __unused) {
   //save to backup
   return 0;
 }
