@@ -1,7 +1,7 @@
 #include "tex.h"
 #include "map.h"
 
-#define TEXTURES_MAX 1024
+#define TEXTURES_MAX 2048
 
 static render_texture_t textures[TEXTURES_MAX];
 

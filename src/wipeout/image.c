@@ -272,29 +272,15 @@ saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
 		list->pal[i] = (palette_t *)&buf[offset];
 		CHECK_ALIGN_4(list->pal[i]);
 		CHECK_ALIGN_2(list->pal[i]->pixels);
-		LOGD("palette[%d] => size %dx1 0x%x\n",i, list->pal[i]->width, list->pal[i]);
+		LOGD("palette[%d] => size %dx%d 0x%x\n",i, list->pal[i]->texture, list->pal[i]->length, list->pal[i]);
 		offset += 3;
 		uint32_t delta = offset*sizeof(rgb1555_t);
-		list->pal[i]->texture = create_sub_texture(delta , list->pal[i]->width, 1, texture);
+		uint16_t width = list->pal[i]->texture;
+		list->pal[i]->texture = create_sub_texture(delta , list->pal[i]->length, width, texture);
+		list->pal[i]->length = list->pal[i]->length*width;
 		LOGD("Create palette[%d] texture from offset 0x%x to 0x@%x\n", i, delta, (rgb1555_t *)&buf[offset]);
 		LOGD("Pal texture[%d] = %d\n", i, list->pal[i]->texture);
-		switch(list->pal[i]->format) {
-			case COLOR_BANK_16_COL:
-			case LOOKUP_TABLE_16_COL:
-				offset += 16;
-				break;
-			case COLOR_BANK_64_COL:
-				offset += 64;
-				break;
-			case COLOR_BANK_128_COL:
-				offset += 128;
-				break;
-			case COLOR_BANK_256_COL:
-				offset += 256;
-				break;
-			default:
-				break;
-			}
+		offset += list->pal[i]->length;
 	}
 	LOGD("offset = 0x%x\n", offset);
 	list->nb_objects = buf[offset++];

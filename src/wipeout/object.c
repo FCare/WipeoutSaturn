@@ -28,10 +28,10 @@ void image_ctrl_dump(saturn_image_ctrl_t * img) {
 	LOGD("\t************** %d Palettes ***************\n", img->nb_palettes);
 	for(int plt_id=0; plt_id < img->nb_palettes; plt_id++) {
 		palette_t *plt = img->pal[plt_id];
-		LOGD("\t\tpalette[%d] 0x%x: format %d, size %dx1, texture %d\n", plt_id, img->pal[plt_id], plt->format, plt->width, plt->texture);
+		LOGD("\t\tpalette[%d] 0x%x: format %d, lenght %d, texture %d\n", plt_id, img->pal[plt_id], plt->format, plt->length, plt->texture);
 		LOGD("\t\t\t");
-		for (int w = 0; w < plt->width; w++) {
-			LOGD("0x%x ", plt->pixels[plt->width+w]);
+		for (int w = 0; w < plt->length; w++) {
+			LOGD("0x%x ", plt->pixels[plt->length+w]);
 		}
 		LOGD("\n");
 	}

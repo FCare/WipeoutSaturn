@@ -40,7 +40,7 @@ typedef struct {
 typedef struct {
 	uint16_t format;
 	uint16_t texture;
-	uint16_t width;
+	uint16_t length;
 	rgb1555_t pixels[];
 } palette_t;
 
