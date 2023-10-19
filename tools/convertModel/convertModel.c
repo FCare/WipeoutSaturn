@@ -25,13 +25,13 @@ static char *outputObject;
 static char *outputTexture;
 
 static int conversionStep(void) {
-  uint16_t format = 0x1; //RGB/palette 16 bits
-
-  if (currentModel < nb_objects) {
-    LOGD("Generating texture for model %s\n", model[currentModel]->name);
-    object_draw(model[currentModel++]);
-    return 1;
-  }
+  // uint16_t format = 0x1; //RGB/palette 16 bits
+  //
+  // if (currentModel < nb_objects) {
+  //   LOGD("Generating texture for model %s\n", model[currentModel]->name);
+  //   object_draw(model[currentModel++]);
+  //   return 1;
+  // }
   return 0;
 }
 
@@ -62,23 +62,23 @@ int main(int argc, char *argv[]) {
   outputObject = NULL;
   outputTexture = NULL;
   if (argc < 2) {
-		LOGD("Usage: ./convertModel myfile.cmp myfile.prm\n");
-    LOGD("Usage: ./convertModel myfile.cmp\n");
+		// LOGD("Usage: ./convertModel myfile.prm myfile.cmp\n");
+    LOGD("Usage: ./convertModel myfile.prm\n");
 		return -1;
 	}
-  if (argc == 3) {
+  // if (argc == 3) {
     processObject = 1;
-  }
+  // }
 
   nb_objects = 0;
-
-  outputTexture = replace_ext(argv[1], ".stf");
-
+#if 0
+  outputTexture = replace_ext(argv[2], ".stf");
 	textures = image_get_compressed_textures(argv[1]);
+#endif
 
 	if (processObject) {
-    outputObject = replace_ext(argv[2], ".smf");
-    Object *models = objects_load(argv[2], &textures);
+    outputObject = replace_ext(argv[1], ".smf");
+    Object *models = objects_load(argv[1], &textures);
 
   	int object_index;
 

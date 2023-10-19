@@ -19,8 +19,11 @@
 	fseek((A), (ftell(A)+0x3)&~0x3, SEEK_SET)
 
 static texture_t * texture_from_list(texture_list_t *tl, uint16_t index) {
-	error_if(index >= tl->len, "Texture %d not in list of len %d", index, tl->len);
-	return tl->texture[index];
+	if ((tl != NULL)&&(tl->len > 0)) {
+		error_if(index >= tl->len, "Texture %d not in list of len %d", index, tl->len);
+		return tl->texture[index];
+	}
+	return NULL;
 }
 
 Object *objects_load(char *name, texture_list_t *tl) {
@@ -487,7 +490,7 @@ void write_fix(uint16_t val, FILE *f) {
 
 void pad(FILE *f) {
 	uint16_t z = 0;
-	// fwrite(<&z, 2, sizeof(uint8_t), f);
+	fwrite(&z, 2, sizeof(uint8_t), f);
 }
 
 uint16_t getNbCharacters(Object *obj) {
@@ -577,7 +580,7 @@ uint16_t getNbCharacters(Object *obj) {
 
 void objects_save(const char *objectPath, const char *texturePath, Object** model, int nb_objects, texture_list_t *textures)
 {
-	FILE *ftex = fopen(texturePath, "wb+");
+	FILE *ftex = NULL;
 	FILE *fobj = NULL;
 	if (nb_objects != 0)
 	{
@@ -611,7 +614,6 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 						write_16((uint16_t)poly.f3->coords[1], fobj);
 						write_16((uint16_t)poly.f3->coords[2], fobj);
 						write_16(convert_to_rgb(poly.f3->color), fobj);
-						pad(fobj);
 						poly.f3 += 1;
 					break;
 					case PRM_TYPE_F4:
@@ -625,9 +627,14 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					break;
 					case PRM_TYPE_FT3:
 						write_16((uint16_t)poly.ft3->flag, fobj);
-						write_16((uint16_t)poly.ft3->conv->id, fobj);
-						LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
-						write_16((uint16_t)poly.ft3->conv->palette_id, fobj);
+						if (poly.ft3->conv != NULL) {
+							write_16((uint16_t)poly.ft3->conv->id, fobj);
+							LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+							write_16((uint16_t)poly.ft3->conv->palette_id, fobj);
+						} else {
+							pad(fobj);
+							pad(fobj);
+						}
 						write_16((uint16_t)poly.ft3->coords[0], fobj);
 						write_16((uint16_t)poly.ft3->coords[1], fobj);
 						write_16((uint16_t)poly.ft3->coords[2], fobj);
@@ -637,15 +644,19 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					case PRM_TYPE_FT4:
 						LOGD("FT4 flasg is 0x%x\n",poly.ft4->flag);
 						write_16((uint16_t)poly.ft4->flag, fobj);
-						write_16((uint16_t)poly.ft4->conv->id, fobj);
-						LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
-						write_16((uint16_t)poly.ft4->conv->palette_id, fobj);
+						if (poly.ft4->conv != NULL) {
+							write_16((uint16_t)poly.ft4->conv->id, fobj);
+							LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+							write_16((uint16_t)poly.ft4->conv->palette_id, fobj);
+						} else {
+							pad(fobj);
+							pad(fobj);
+						}
 						write_16((uint16_t)poly.ft4->coords[0], fobj);
 						write_16((uint16_t)poly.ft4->coords[1], fobj);
 						write_16((uint16_t)poly.ft4->coords[2], fobj);
 						write_16((uint16_t)poly.ft4->coords[3], fobj);
 						write_16((uint16_t)convert_to_rgb(poly.ft4->color), fobj);
-						pad(fobj);
 						poly.ft4 += 1;
 					break;
 					case PRM_TYPE_G3:
@@ -656,7 +667,6 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 						write_16((uint16_t)convert_to_rgb(poly.g3->color[0]), fobj);
 						write_16((uint16_t)convert_to_rgb(poly.g3->color[1]), fobj);
 						write_16((uint16_t)convert_to_rgb(poly.g3->color[2]), fobj);
-						pad(fobj);
 						poly.g3 += 1;
 					break;
 					case PRM_TYPE_G4:
@@ -669,14 +679,18 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 						write_16((uint16_t)convert_to_rgb(poly.g4->color[1]), fobj);
 						write_16((uint16_t)convert_to_rgb(poly.g4->color[2]), fobj);
 						write_16((uint16_t)convert_to_rgb(poly.g4->color[3]), fobj);
-						pad(fobj);
 						poly.g4 += 1;
 					break;
 					case PRM_TYPE_GT3:
 						write_16((uint16_t)poly.gt3->flag, fobj);
-						write_16((uint16_t)poly.gt3->conv->id, fobj);
-						LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
-						write_16((uint16_t)poly.gt3->conv->palette_id, fobj);
+						if (poly.gt3->conv != NULL) {
+							write_16((uint16_t)poly.gt3->conv->id, fobj);
+							LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+							write_16((uint16_t)poly.gt3->conv->palette_id, fobj);
+						} else {
+							pad(fobj);
+							pad(fobj);
+						}
 						write_16((uint16_t)poly.gt3->coords[0], fobj);
 						write_16((uint16_t)poly.gt3->coords[1], fobj);
 						write_16((uint16_t)poly.gt3->coords[2], fobj);
@@ -687,9 +701,14 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					break;
 					case PRM_TYPE_GT4:
 						write_16((uint16_t)poly.gt4->flag, fobj);
-						write_16((uint16_t)poly.gt4->conv->id, fobj);
-						LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
-						write_16((uint16_t)poly.gt4->conv->palette_id, fobj);
+						if (poly.gt4->conv != NULL) {
+							write_16((uint16_t)poly.gt4->conv->id, fobj);
+							LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+							write_16((uint16_t)poly.gt4->conv->palette_id, fobj);
+						} else {
+							pad(fobj);
+							pad(fobj);
+						}
 						write_16((uint16_t)poly.gt4->coords[0], fobj);
 						write_16((uint16_t)poly.gt4->coords[1], fobj);
 						write_16((uint16_t)poly.gt4->coords[2], fobj);
@@ -707,7 +726,6 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 						write_16((uint16_t)poly.lsf3->coords[2], fobj);
 						write_fix((uint16_t)poly.lsf3->normal, fobj);
 						write_16((uint16_t)convert_to_rgb(poly.lsf3->color), fobj);
-						pad(fobj);
 						poly.lsf3 += 1;
 					break;
 					case PRM_TYPE_LSF4:
@@ -722,9 +740,14 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					break;
 					case PRM_TYPE_LSFT3:
 						write_16((uint16_t)poly.lsft3->flag, fobj);
-						write_16((uint16_t)poly.lsft3->conv->id, fobj);
-						LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
-						write_16((uint16_t)poly.lsft3->conv->palette_id, fobj);
+						if (poly.lsft3->conv != NULL) {
+							write_16((uint16_t)poly.lsft3->conv->id, fobj);
+							LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+							write_16((uint16_t)poly.lsft3->conv->palette_id, fobj);
+						} else {
+							pad(fobj);
+							pad(fobj);
+						}
 						write_16((uint16_t)poly.lsft3->coords[0], fobj);
 						write_16((uint16_t)poly.lsft3->coords[1], fobj);
 						write_16((uint16_t)poly.lsft3->coords[2], fobj);
@@ -734,16 +757,20 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					break;
 					case PRM_TYPE_LSFT4:
 						write_16((uint16_t)poly.lsft4->flag, fobj);
-						write_16((uint16_t)poly.lsft4->conv->id, fobj);
-						LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
-						write_16((uint16_t)poly.lsft4->conv->palette_id, fobj);
+						if (poly.lsft4->conv != NULL) {
+							write_16((uint16_t)poly.lsft4->conv->id, fobj);
+							LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+							write_16((uint16_t)poly.lsft4->conv->palette_id, fobj);
+						} else {
+							pad(fobj);
+							pad(fobj);
+						}
 						write_16((uint16_t)poly.lsft4->coords[0], fobj);
 						write_16((uint16_t)poly.lsft4->coords[1], fobj);
 						write_16((uint16_t)poly.lsft4->coords[2], fobj);
 						write_16((uint16_t)poly.lsft4->coords[3], fobj);
 						write_fix((uint16_t)poly.lsft4->normal, fobj);
 						write_16((uint16_t)convert_to_rgb(poly.lsft4->color), fobj);
-						pad(fobj);
 						poly.lsft4 += 1;
 					break;
 					case PRM_TYPE_LSG3:
@@ -757,7 +784,6 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 						write_16((uint16_t)convert_to_rgb(poly.lsg3->color[0]), fobj);
 						write_16((uint16_t)convert_to_rgb(poly.lsg3->color[1]), fobj);
 						write_16((uint16_t)convert_to_rgb(poly.lsg3->color[2]), fobj);
-						pad(fobj);
 						poly.lsg3 += 1;
 					break;
 					case PRM_TYPE_LSG4:
@@ -774,14 +800,18 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 						write_16((uint16_t)convert_to_rgb(poly.lsg4->color[1]), fobj);
 						write_16((uint16_t)convert_to_rgb(poly.lsg4->color[2]), fobj);
 						write_16((uint16_t)convert_to_rgb(poly.lsg4->color[3]), fobj);
-						pad(fobj);
 						poly.lsg4 += 1;
 					break;
 					case PRM_TYPE_LSGT3:
 						write_16((uint16_t)poly.lsgt3->flag, fobj);
-						write_16((uint16_t)poly.lsgt3->conv->id, fobj);
-						LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
-						write_16((uint16_t)poly.lsgt3->conv->palette_id, fobj);
+						if (poly.lsgt3->conv != NULL) {
+							write_16((uint16_t)poly.lsgt3->conv->id, fobj);
+							LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+							write_16((uint16_t)poly.lsgt3->conv->palette_id, fobj);
+						} else {
+							pad(fobj);
+							pad(fobj);
+						}
 						write_16((uint16_t)poly.lsgt3->coords[0], fobj);
 						write_16((uint16_t)poly.lsgt3->coords[1], fobj);
 						write_16((uint16_t)poly.lsgt3->coords[2], fobj);
@@ -803,9 +833,14 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 						write_fix((uint16_t)poly.lsgt4->normals[1], fobj);
 						write_fix((uint16_t)poly.lsgt4->normals[2], fobj);
 						write_fix((uint16_t)poly.lsgt4->normals[3], fobj);
-						write_16((uint16_t)poly.lsgt4->conv->id, fobj);
-						LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
-						write_16((uint16_t)poly.lsgt4->conv->palette_id, fobj);
+						if (poly.lsgt4->conv != NULL) {
+							write_16((uint16_t)poly.lsgt4->conv->id, fobj);
+							LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+							write_16((uint16_t)poly.lsgt4->conv->palette_id, fobj);
+						} else {
+							pad(fobj);
+							pad(fobj);
+						}
 						write_16((uint16_t)convert_to_rgb(poly.lsgt4->color[0]), fobj);
 						write_16((uint16_t)convert_to_rgb(poly.lsgt4->color[1]), fobj);
 						write_16((uint16_t)convert_to_rgb(poly.lsgt4->color[2]), fobj);
@@ -815,9 +850,14 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 					case PRM_TYPE_TSPR:
 					case PRM_TYPE_BSPR:
 						write_16((uint16_t)poly.spr->flag, fobj);
-						write_16((uint16_t)poly.spr->conv->id, fobj);
-						LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
-						write_16((uint16_t)poly.spr->conv->palette_id, fobj);
+						if (poly.spr->conv != NULL) {
+							write_16((uint16_t)poly.spr->conv->id, fobj);
+							LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+							write_16((uint16_t)poly.spr->conv->palette_id, fobj);
+						} else {
+							pad(fobj);
+							pad(fobj);
+						}
 						write_16((uint16_t)poly.spr->coord, fobj);
 						write_16((uint16_t)poly.spr->width, fobj);
 						write_16((uint16_t)poly.spr->height, fobj);
@@ -889,236 +929,239 @@ void objects_save(const char *objectPath, const char *texturePath, Object** mode
 		fclose(fobj);
 	}
 
-	write_16((uint16_t)textures->len, ftex);
-	LOGD("Output palette nb %d\n",textures->len);
-	for (int i = 0; i < textures->len; i++) {
-		ALIGN_FILE_4(ftex);
-		LOGD("Palette[%d] @0x%x\n", i, ftell(ftex));
-		texture_t *tex = textures->texture[i];
-		write_16((uint16_t)tex->format, ftex);
-		switch(tex->format) {
-			case COLOR_BANK_16_COL:
-			case LOOKUP_TABLE_16_COL:
-				write_16((uint16_t)1, ftex);
-				write_16((uint16_t)16, ftex);
-				for (int j=0; j<16; j++) write_16((uint16_t)tex->palette.pixels[j], ftex);
-				break;
-			case COLOR_BANK_64_COL:
-				write_16((uint16_t)1, ftex);
-				write_16((uint16_t)64, ftex);
-				LOGD("64 should never happen\n");
+	if ((textures != NULL) && (textures->len > 0)) {
+		ftex = fopen(texturePath, "wb+");
+		write_16((uint16_t)textures->len, ftex);
+		LOGD("Output palette nb %d\n",textures->len);
+		for (int i = 0; i < textures->len; i++) {
+			ALIGN_FILE_4(ftex);
+			LOGD("Palette[%d] @0x%x\n", i, ftell(ftex));
+			texture_t *tex = textures->texture[i];
+			write_16((uint16_t)tex->format, ftex);
+			switch(tex->format) {
+				case COLOR_BANK_16_COL:
+				case LOOKUP_TABLE_16_COL:
+					write_16((uint16_t)1, ftex);
+					write_16((uint16_t)16, ftex);
+					for (int j=0; j<16; j++) write_16((uint16_t)tex->palette.pixels[j], ftex);
+					break;
+				case COLOR_BANK_64_COL:
+					write_16((uint16_t)1, ftex);
+					write_16((uint16_t)64, ftex);
+					LOGD("64 should never happen\n");
+					exit(-1);
+					for (int j=0; j<64; j++) write_16((uint16_t)tex->palette.pixels[j], ftex);
+					break;
+				case COLOR_BANK_128_COL:
+				LOGD("128 should never happen\n");
 				exit(-1);
-				for (int j=0; j<64; j++) write_16((uint16_t)tex->palette.pixels[j], ftex);
-				break;
-			case COLOR_BANK_128_COL:
-			LOGD("128 should never happen\n");
-			exit(-1);
-			write_16((uint16_t)1, ftex);
-			write_16((uint16_t)128, ftex);
-				for (int j=0; j<128; j++) write_16((uint16_t)tex->palette.pixels[j], ftex);
-				break;
-			case COLOR_BANK_256_COL:
-			LOGD("256 should never happen\n");
-			exit(-1);
-			write_16((uint16_t)1, ftex);
-			write_16((uint16_t)256, ftex);
-				for (int j=0; j<256; j++) write_16((uint16_t)tex->palette.pixels[j], ftex);
-				break;
-			case COLOR_BANK_RGB:
-			default:
-				LOGD("Format is %d %dx%d\n", tex->format, tex->width, tex->height);
-				write_16((uint16_t)tex->height, ftex);
-				write_16((uint16_t)tex->width, ftex);
-				for (int j=0; j<tex->height*tex->width; j++)
-					write_16(convert_to_rgb(tex->pixels[j]), ftex);
-				break;
-		}
-	}
-	LOGD("Object %d is at 0x%x\n", nb_objects, ftell(ftex));
-	write_16((uint16_t)nb_objects, ftex);
-	for (int n=0; n<nb_objects; n++) {
-		uint16_t tmp;
-		uint32_t tmp32;
-		Object * obj = model[n];
-		int nb_texture = getNbCharacters(obj);
-		LOGD("Write nb texture[%d] @0x%x\n", n, ftell(ftex));
-		write_16((uint16_t)nb_texture, ftex);
-		nb_texture = 0;
-		Prm poly = {.primitive = obj->primitives};
-		for (int i = 0; i < obj->primitives_len; i++) {
-			LOGD("Write character[%d] @0x%x type %d\n", nb_texture, ftell(ftex), poly.primitive->type);
-			switch (poly.primitive->type) {
-				case PRM_TYPE_F3:
-					poly.f3 += 1;
-				break;
-				case PRM_TYPE_F4:
-					poly.f4 += 1;
-				break;
-				case PRM_TYPE_FT3:
-					nb_texture++;
-					ALIGN_FILE_4(ftex);
-					write_16((uint16_t)poly.ft3->conv->id, ftex);
-					write_16((uint16_t)poly.ft3->conv->width, ftex);
-					LOGD("Size %dx%d\n", poly.ft3->conv->width,poly.ft3->conv->height);
-					write_16((uint16_t)poly.ft3->conv->height, ftex);
-					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
-					write_16((uint16_t)poly.ft3->conv->palette_id, ftex);
-					write_16((uint16_t)poly.ft3->conv->length, ftex);
-					for (int i=0; i<poly.ft3->conv->length; i++) {
-						write_16((uint16_t)poly.ft3->conv->pixels[i], ftex);
-					}
-					poly.ft3 += 1;
-				break;
-				case PRM_TYPE_FT4:
-					nb_texture++;
-					ALIGN_FILE_4(ftex);
-					write_16((uint16_t)poly.ft4->conv->id, ftex);
-					write_16((uint16_t)poly.ft4->conv->width, ftex);
-					write_16((uint16_t)poly.ft4->conv->height, ftex);
-					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
-					write_16((uint16_t)poly.ft4->conv->palette_id, ftex);
-					write_16((uint16_t)poly.ft4->conv->length, ftex);
-					for (int i=0; i<poly.ft4->conv->length; i++) {
-						write_16((uint16_t)poly.ft4->conv->pixels[i], ftex);
-					}
-					poly.ft4 += 1;
-				break;
-				case PRM_TYPE_G3:
-					poly.g3 += 1;
-				break;
-				case PRM_TYPE_G4:
-					poly.g4 += 1;
-				break;
-				case PRM_TYPE_GT3:
-					nb_texture++;
-					ALIGN_FILE_4(ftex);
-					write_16((uint16_t)poly.gt3->conv->id, ftex);
-					write_16((uint16_t)poly.gt3->conv->width, ftex);
-					write_16((uint16_t)poly.gt3->conv->height, ftex);
-					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
-					write_16((uint16_t)poly.gt3->conv->palette_id, ftex);
-					write_16((uint16_t)poly.gt3->conv->length, ftex);
-					for (int i=0; i<poly.gt3->conv->length; i++) {
-						write_16((uint16_t)poly.gt3->conv->pixels[i], ftex);
-					}
-					poly.gt3 += 1;
-				break;
-				case PRM_TYPE_GT4:
-					nb_texture++;
-					ALIGN_FILE_4(ftex);
-					write_16((uint16_t)poly.gt4->conv->id, ftex);
-					write_16((uint16_t)poly.gt4->conv->width, ftex);
-					write_16((uint16_t)poly.gt4->conv->height, ftex);
-					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
-					write_16((uint16_t)poly.gt4->conv->palette_id, ftex);
-					write_16((uint16_t)poly.gt4->conv->length, ftex);
-					for (int i=0; i<poly.gt4->conv->length; i++) {
-						write_16((uint16_t)poly.gt4->conv->pixels[i], ftex);
-					}
-					poly.gt4 += 1;
-				break;
-				case PRM_TYPE_LSF3:
-					poly.lsf3 += 1;
-				break;
-				case PRM_TYPE_LSF4:
-					poly.lsf4 += 1;
-				break;
-				case PRM_TYPE_LSFT3:
-					nb_texture++;
-					ALIGN_FILE_4(ftex);
-					write_16((uint16_t)poly.lsft3->conv->id, ftex);
-					write_16((uint16_t)poly.lsft3->conv->width, ftex);
-					write_16((uint16_t)poly.lsft3->conv->height, ftex);
-					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
-					write_16((uint16_t)poly.lsft3->conv->palette_id, ftex);
-					write_16((uint16_t)poly.lsft3->conv->length, ftex);
-					for (int i=0; i<poly.lsft3->conv->length; i++) {
-						write_16((uint16_t)poly.lsft3->conv->pixels[i], ftex);
-					}
-					poly.lsft3 += 1;
-				break;
-				case PRM_TYPE_LSFT4:
-					nb_texture++;
-					ALIGN_FILE_4(ftex);
-					write_16((uint16_t)poly.lsft4->conv->id, ftex);
-					write_16((uint16_t)poly.lsft4->conv->width, ftex);
-					write_16((uint16_t)poly.lsft4->conv->height, ftex);
-					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
-					write_16((uint16_t)poly.lsft4->conv->palette_id, ftex);
-					write_16((uint16_t)poly.lsft4->conv->length, ftex);
-					for (int i=0; i<poly.lsft4->conv->length; i++) {
-						write_16((uint16_t)poly.lsft4->conv->pixels[i], ftex);
-					}
-					poly.lsft4 += 1;
-				break;
-				case PRM_TYPE_LSG3:
-					poly.lsg3 += 1;
-				break;
-				case PRM_TYPE_LSG4:
-					poly.lsg4 += 1;
-				break;
-				case PRM_TYPE_LSGT3:
-					nb_texture++;
-					ALIGN_FILE_4(ftex);
-					write_16((uint16_t)poly.lsgt3->conv->id, ftex);
-					write_16((uint16_t)poly.lsgt3->conv->width, ftex);
-					write_16((uint16_t)poly.lsgt3->conv->height, ftex);
-					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
-					write_16((uint16_t)poly.lsgt3->conv->palette_id, ftex);
-					write_16((uint16_t)poly.lsgt3->conv->length, ftex);
-					for (int i=0; i<poly.lsgt3->conv->length; i++) {
-						write_16((uint16_t)poly.lsgt3->conv->pixels[i], ftex);
-					}
-					poly.lsgt3 += 1;
-				break;
-				case PRM_TYPE_LSGT4:
-					nb_texture++;
-					ALIGN_FILE_4(ftex);
-					write_16((uint16_t)poly.lsgt4->conv->id, ftex);
-					write_16((uint16_t)poly.lsgt4->conv->width, ftex);
-					write_16((uint16_t)poly.lsgt4->conv->height, ftex);
-					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
-					write_16((uint16_t)poly.lsgt4->conv->palette_id, ftex);
-					write_16((uint16_t)poly.lsgt4->conv->length, ftex);
-					for (int i=0; i<poly.lsgt4->conv->length; i++) {
-						write_16((uint16_t)poly.lsgt4->conv->pixels[i], ftex);
-					}
-					poly.lsgt4 += 1;
-				break;
-				case PRM_TYPE_TSPR:
-				case PRM_TYPE_BSPR:
-					nb_texture++;
-					ALIGN_FILE_4(ftex);
-					write_16((uint16_t)poly.spr->conv->id, ftex);
-					write_16((uint16_t)poly.spr->conv->width, ftex);
-					write_16((uint16_t)poly.spr->conv->height, ftex);
-					LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
-					write_16((uint16_t)poly.spr->conv->palette_id, ftex);
-					write_16((uint16_t)poly.spr->conv->length, ftex);
-					for (int i=0; i<poly.spr->conv->length; i++) {
-						write_16((uint16_t)poly.spr->conv->pixels[i], ftex);
-					}
-					poly.spr += 1;
-				break;
-				case PRM_TYPE_SPLINE:
-					poly.spline += 1;
-				break;
-				case PRM_TYPE_POINT_LIGHT:
-					poly.pointLight += 1;
-				break;
-				case PRM_TYPE_SPOT_LIGHT:
-					poly.spotLight += 1;
-				break;
-				case PRM_TYPE_INFINITE_LIGHT:
-					poly.infiniteLight += 1;
-				break;
+				write_16((uint16_t)1, ftex);
+				write_16((uint16_t)128, ftex);
+					for (int j=0; j<128; j++) write_16((uint16_t)tex->palette.pixels[j], ftex);
+					break;
+				case COLOR_BANK_256_COL:
+				LOGD("256 should never happen\n");
+				exit(-1);
+				write_16((uint16_t)1, ftex);
+				write_16((uint16_t)256, ftex);
+					for (int j=0; j<256; j++) write_16((uint16_t)tex->palette.pixels[j], ftex);
+					break;
+				case COLOR_BANK_RGB:
 				default:
-					die("bad primitive type\n");
+					LOGD("Format is %d %dx%d\n", tex->format, tex->width, tex->height);
+					write_16((uint16_t)tex->height, ftex);
+					write_16((uint16_t)tex->width, ftex);
+					for (int j=0; j<tex->height*tex->width; j++)
+						write_16(convert_to_rgb(tex->pixels[j]), ftex);
+					break;
 			}
 		}
+		LOGD("Object %d is at 0x%x\n", nb_objects, ftell(ftex));
+		write_16((uint16_t)nb_objects, ftex);
+		for (int n=0; n<nb_objects; n++) {
+			uint16_t tmp;
+			uint32_t tmp32;
+			Object * obj = model[n];
+			int nb_texture = getNbCharacters(obj);
+			LOGD("Write nb texture[%d] @0x%x\n", n, ftell(ftex));
+			write_16((uint16_t)nb_texture, ftex);
+			nb_texture = 0;
+			Prm poly = {.primitive = obj->primitives};
+			for (int i = 0; i < obj->primitives_len; i++) {
+				LOGD("Write character[%d] @0x%x type %d\n", nb_texture, ftell(ftex), poly.primitive->type);
+				switch (poly.primitive->type) {
+					case PRM_TYPE_F3:
+						poly.f3 += 1;
+					break;
+					case PRM_TYPE_F4:
+						poly.f4 += 1;
+					break;
+					case PRM_TYPE_FT3:
+						nb_texture++;
+						ALIGN_FILE_4(ftex);
+						write_16((uint16_t)poly.ft3->conv->id, ftex);
+						write_16((uint16_t)poly.ft3->conv->width, ftex);
+						LOGD("Size %dx%d\n", poly.ft3->conv->width,poly.ft3->conv->height);
+						write_16((uint16_t)poly.ft3->conv->height, ftex);
+						LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+						write_16((uint16_t)poly.ft3->conv->palette_id, ftex);
+						write_16((uint16_t)poly.ft3->conv->length, ftex);
+						for (int i=0; i<poly.ft3->conv->length; i++) {
+							write_16((uint16_t)poly.ft3->conv->pixels[i], ftex);
+						}
+						poly.ft3 += 1;
+					break;
+					case PRM_TYPE_FT4:
+						nb_texture++;
+						ALIGN_FILE_4(ftex);
+						write_16((uint16_t)poly.ft4->conv->id, ftex);
+						write_16((uint16_t)poly.ft4->conv->width, ftex);
+						write_16((uint16_t)poly.ft4->conv->height, ftex);
+						LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+						write_16((uint16_t)poly.ft4->conv->palette_id, ftex);
+						write_16((uint16_t)poly.ft4->conv->length, ftex);
+						for (int i=0; i<poly.ft4->conv->length; i++) {
+							write_16((uint16_t)poly.ft4->conv->pixels[i], ftex);
+						}
+						poly.ft4 += 1;
+					break;
+					case PRM_TYPE_G3:
+						poly.g3 += 1;
+					break;
+					case PRM_TYPE_G4:
+						poly.g4 += 1;
+					break;
+					case PRM_TYPE_GT3:
+						nb_texture++;
+						ALIGN_FILE_4(ftex);
+						write_16((uint16_t)poly.gt3->conv->id, ftex);
+						write_16((uint16_t)poly.gt3->conv->width, ftex);
+						write_16((uint16_t)poly.gt3->conv->height, ftex);
+						LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+						write_16((uint16_t)poly.gt3->conv->palette_id, ftex);
+						write_16((uint16_t)poly.gt3->conv->length, ftex);
+						for (int i=0; i<poly.gt3->conv->length; i++) {
+							write_16((uint16_t)poly.gt3->conv->pixels[i], ftex);
+						}
+						poly.gt3 += 1;
+					break;
+					case PRM_TYPE_GT4:
+						nb_texture++;
+						ALIGN_FILE_4(ftex);
+						write_16((uint16_t)poly.gt4->conv->id, ftex);
+						write_16((uint16_t)poly.gt4->conv->width, ftex);
+						write_16((uint16_t)poly.gt4->conv->height, ftex);
+						LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+						write_16((uint16_t)poly.gt4->conv->palette_id, ftex);
+						write_16((uint16_t)poly.gt4->conv->length, ftex);
+						for (int i=0; i<poly.gt4->conv->length; i++) {
+							write_16((uint16_t)poly.gt4->conv->pixels[i], ftex);
+						}
+						poly.gt4 += 1;
+					break;
+					case PRM_TYPE_LSF3:
+						poly.lsf3 += 1;
+					break;
+					case PRM_TYPE_LSF4:
+						poly.lsf4 += 1;
+					break;
+					case PRM_TYPE_LSFT3:
+						nb_texture++;
+						ALIGN_FILE_4(ftex);
+						write_16((uint16_t)poly.lsft3->conv->id, ftex);
+						write_16((uint16_t)poly.lsft3->conv->width, ftex);
+						write_16((uint16_t)poly.lsft3->conv->height, ftex);
+						LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+						write_16((uint16_t)poly.lsft3->conv->palette_id, ftex);
+						write_16((uint16_t)poly.lsft3->conv->length, ftex);
+						for (int i=0; i<poly.lsft3->conv->length; i++) {
+							write_16((uint16_t)poly.lsft3->conv->pixels[i], ftex);
+						}
+						poly.lsft3 += 1;
+					break;
+					case PRM_TYPE_LSFT4:
+						nb_texture++;
+						ALIGN_FILE_4(ftex);
+						write_16((uint16_t)poly.lsft4->conv->id, ftex);
+						write_16((uint16_t)poly.lsft4->conv->width, ftex);
+						write_16((uint16_t)poly.lsft4->conv->height, ftex);
+						LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+						write_16((uint16_t)poly.lsft4->conv->palette_id, ftex);
+						write_16((uint16_t)poly.lsft4->conv->length, ftex);
+						for (int i=0; i<poly.lsft4->conv->length; i++) {
+							write_16((uint16_t)poly.lsft4->conv->pixels[i], ftex);
+						}
+						poly.lsft4 += 1;
+					break;
+					case PRM_TYPE_LSG3:
+						poly.lsg3 += 1;
+					break;
+					case PRM_TYPE_LSG4:
+						poly.lsg4 += 1;
+					break;
+					case PRM_TYPE_LSGT3:
+						nb_texture++;
+						ALIGN_FILE_4(ftex);
+						write_16((uint16_t)poly.lsgt3->conv->id, ftex);
+						write_16((uint16_t)poly.lsgt3->conv->width, ftex);
+						write_16((uint16_t)poly.lsgt3->conv->height, ftex);
+						LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+						write_16((uint16_t)poly.lsgt3->conv->palette_id, ftex);
+						write_16((uint16_t)poly.lsgt3->conv->length, ftex);
+						for (int i=0; i<poly.lsgt3->conv->length; i++) {
+							write_16((uint16_t)poly.lsgt3->conv->pixels[i], ftex);
+						}
+						poly.lsgt3 += 1;
+					break;
+					case PRM_TYPE_LSGT4:
+						nb_texture++;
+						ALIGN_FILE_4(ftex);
+						write_16((uint16_t)poly.lsgt4->conv->id, ftex);
+						write_16((uint16_t)poly.lsgt4->conv->width, ftex);
+						write_16((uint16_t)poly.lsgt4->conv->height, ftex);
+						LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+						write_16((uint16_t)poly.lsgt4->conv->palette_id, ftex);
+						write_16((uint16_t)poly.lsgt4->conv->length, ftex);
+						for (int i=0; i<poly.lsgt4->conv->length; i++) {
+							write_16((uint16_t)poly.lsgt4->conv->pixels[i], ftex);
+						}
+						poly.lsgt4 += 1;
+					break;
+					case PRM_TYPE_TSPR:
+					case PRM_TYPE_BSPR:
+						nb_texture++;
+						ALIGN_FILE_4(ftex);
+						write_16((uint16_t)poly.spr->conv->id, ftex);
+						write_16((uint16_t)poly.spr->conv->width, ftex);
+						write_16((uint16_t)poly.spr->conv->height, ftex);
+						LOGD("palette prim[%d] = %d\n", i, (uint16_t)poly.ft3->conv->palette_id);
+						write_16((uint16_t)poly.spr->conv->palette_id, ftex);
+						write_16((uint16_t)poly.spr->conv->length, ftex);
+						for (int i=0; i<poly.spr->conv->length; i++) {
+							write_16((uint16_t)poly.spr->conv->pixels[i], ftex);
+						}
+						poly.spr += 1;
+					break;
+					case PRM_TYPE_SPLINE:
+						poly.spline += 1;
+					break;
+					case PRM_TYPE_POINT_LIGHT:
+						poly.pointLight += 1;
+					break;
+					case PRM_TYPE_SPOT_LIGHT:
+						poly.spotLight += 1;
+					break;
+					case PRM_TYPE_INFINITE_LIGHT:
+						poly.infiniteLight += 1;
+					break;
+					default:
+						die("bad primitive type\n");
+				}
+			}
+		}
+		fclose(ftex);
 	}
 
-	fclose(ftex);
 }
 
 
