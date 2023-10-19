@@ -489,7 +489,7 @@ void write_fix(uint16_t val, FILE *f) {
 }
 
 void pad(FILE *f) {
-	uint16_t z = 0;
+	uint16_t z = 0xFFFF;
 	fwrite(&z, 2, sizeof(uint8_t), f);
 }
 

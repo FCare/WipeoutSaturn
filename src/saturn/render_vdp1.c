@@ -141,48 +141,48 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object
     };
     vdp1_cmdt_polygon_set(cmd);
     vdp1_cmdt_color_set(cmd, white);
-  } else {
-    error_if(texture_index > object->characters->nb_characters, "texture index %d is out of bounds %d\n", texture_index, object->characters->nb_characters);
-    character_t *chrt = object->characters->character[texture_index];
-    uint16_t character_texture = chrt->texture;
-    LOGD("%d\n", __LINE__);
-    size = get_tex(character_texture)->size;
-
-    // error_if((size.x*size.y > 256), "texture index %d (character texture %d) is too big %dx%d\n", texture_index, character_texture, size.x, size.y);
-    character = getVdp1VramAddress_Saturn(character_texture, id);
-    palette_t *plt = object->pal[chrt->palette_id];
-    uint16_t palette_texture = plt->texture;
-    uint16_t *palette = getVdp1VramAddress_Saturn(palette_texture, id);
-    LOGD("Rendering character %d from @x%x (%s) using palette %d @ 0x%x\n", texture_index,character, object->info->name, chrt->palette_id, palette);
-
-    vdp1_cmdt_color_bank_t color_bank; //not used yet
-    switch(plt->format) {
-      case COLOR_BANK_16_COL 	:
-      die("Not supported\n");
-      // vdp1_cmdt_color_mode0_set(&draw_mode, palette);
-      break;
-      case LOOKUP_TABLE_16_COL:
-      vdp1_cmdt_color_mode1_set(cmd, (uint32_t)palette);
-      break;
-      case COLOR_BANK_64_COL 	:
-      die("Not supported\n");
-      // vdp1_cmdt_color_mode2_set(&draw_mode, palette);
-      break;
-      case COLOR_BANK_128_COL :
-      die("Not supported\n");
-      // vdp1_cmdt_color_mode3_set(&draw_mode, palette);
-      break;
-      case COLOR_BANK_256_COL :
-      die("Not supported\n");
-      // vdp1_cmdt_color_mode4_set(&draw_mode, palette);
-      break;
-      case COLOR_BANK_RGB 		:
-      default:
-      // vdp1_cmdt_color_mode5_set(&draw_mode, palette);
-      break;
-    }
-    draw_mode.color_mode    = plt->format;
-    vdp1_cmdt_distorted_sprite_set(cmd); //Use distorted by default but it can be normal or scaled
+  // } else {
+  //   error_if(texture_index > object->characters->nb_characters, "texture index %d is out of bounds %d\n", texture_index, object->characters->nb_characters);
+  //   character_t *chrt = object->characters->character[texture_index];
+  //   uint16_t character_texture = chrt->texture;
+  //   LOGD("%d\n", __LINE__);
+  //   size = get_tex(character_texture)->size;
+  //
+  //   // error_if((size.x*size.y > 256), "texture index %d (character texture %d) is too big %dx%d\n", texture_index, character_texture, size.x, size.y);
+  //   character = getVdp1VramAddress_Saturn(character_texture, id);
+  //   palette_t *plt = object->pal[chrt->palette_id];
+  //   uint16_t palette_texture = plt->texture;
+  //   uint16_t *palette = getVdp1VramAddress_Saturn(palette_texture, id);
+  //   LOGD("Rendering character %d from @x%x (%s) using palette %d @ 0x%x\n", texture_index,character, object->info->name, chrt->palette_id, palette);
+  //
+  //   vdp1_cmdt_color_bank_t color_bank; //not used yet
+  //   switch(plt->format) {
+  //     case COLOR_BANK_16_COL 	:
+  //     die("Not supported\n");
+  //     // vdp1_cmdt_color_mode0_set(&draw_mode, palette);
+  //     break;
+  //     case LOOKUP_TABLE_16_COL:
+  //     vdp1_cmdt_color_mode1_set(cmd, (uint32_t)palette);
+  //     break;
+  //     case COLOR_BANK_64_COL 	:
+  //     die("Not supported\n");
+  //     // vdp1_cmdt_color_mode2_set(&draw_mode, palette);
+  //     break;
+  //     case COLOR_BANK_128_COL :
+  //     die("Not supported\n");
+  //     // vdp1_cmdt_color_mode3_set(&draw_mode, palette);
+  //     break;
+  //     case COLOR_BANK_256_COL :
+  //     die("Not supported\n");
+  //     // vdp1_cmdt_color_mode4_set(&draw_mode, palette);
+  //     break;
+  //     case COLOR_BANK_RGB 		:
+  //     default:
+  //     // vdp1_cmdt_color_mode5_set(&draw_mode, palette);
+  //     break;
+  //   }
+  //   draw_mode.color_mode    = plt->format;
+  //   vdp1_cmdt_distorted_sprite_set(cmd); //Use distorted by default but it can be normal or scaled
   }
 
   vdp1_cmdt_draw_mode_set(cmd, draw_mode);

@@ -281,8 +281,8 @@ typedef struct {
 
 typedef struct {
 	object_info *info;
-	character_list_t *characters;
-	palette_t **pal;
+	// character_list_t *characters;
+	// palette_t **pal;
 	PRM_saturn **primitives;
 	fix16_vec3_t *vertices;
 	fix16_vec3_t *normals;
@@ -293,6 +293,6 @@ typedef struct{
 	Object_Saturn **objects;
 } Object_Saturn_list;
 
-extern Object_Saturn_list* objects_saturn_load(char *name, saturn_image_ctrl_t *tl);
+extern Object_Saturn_list* objects_saturn_load(char *name);
 extern void object_saturn_draw(Object_Saturn *object, mat4_t *mat);
 #endif
