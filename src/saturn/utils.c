@@ -33,11 +33,11 @@ FILE __stderr_FILE = {
 };
 
 fix16_t rand_fix16_t(fix16_t min, fix16_t max) {
-	return min + ((fix16_t)rand() * (max - min))/ (fix16_t)RAND_MAX;
+	return min + ((fix16_t)((uint32_t)rand()) * (max - min))/ (fix16_t)RAND_MAX;
 }
 
 int32_t rand_int(int32_t min, int32_t max) {
-	return min + rand() % (max - min);
+  return min + ((uint32_t)rand()) % (max - min);
 }
 
 char temp_path[64];

@@ -153,7 +153,7 @@ void camera_update_static_follow(camera_t *camera, ship_t *ship, droid_t *droid 
 void camera_update_attract_random(camera_t *camera, ship_t *ship, droid_t *droid) {
 	flags_rm(ship->flags, SHIP_VIEW_INTERNAL);
 
-	if (rand() % 2) {
+	if (((uint32_t)rand()) % 2) {
 		camera->update_func = camera_update_attract_circle;
 		camera->update_timer = 5;
 	}
