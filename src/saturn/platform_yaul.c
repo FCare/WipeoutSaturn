@@ -100,18 +100,21 @@ void main(void) {
 
   while (true) {
     //Update controller
+    printf("%d\n", __LINE__);
     controller_update();
+    printf("%d\n", __LINE__);
 
     if (update_loop == 0) {
       LOGD("Update Game\n");
       vdp2_video_sync();
-
+printf("%d\n", __LINE__);
       system_update();
-
+printf("%d\n", __LINE__);
       vdp2_sync();
       vdp1_sync();
       vdp2_sync_wait();
       vdp1_sync_wait();
+printf("%d\n", __LINE__);
     }
   }
 

@@ -72,8 +72,8 @@ uint16_t* getVdp1VramAddress_Saturn(uint16_t texture_index){
 
 uint16_t* getVdp1VramAddress(uint16_t texture_index, quads_t *quad, vec2i_t *size) {
 	render_texture_t* src = get_tex(texture_index);
-	uint32_t orig_w = quad->vertices[1].uv.x - quad->vertices[0].uv.x + 1;
-	uint32_t h = quad->vertices[3].uv.y - quad->vertices[0].uv.y; //Here uv are simple uint32_t
+	uint32_t orig_w = abs(quad->vertices[1].uv.x - quad->vertices[0].uv.x) + 1;
+	uint32_t h = abs(quad->vertices[3].uv.y - quad->vertices[0].uv.y); //Here uv are simple uint32_t
 
 	assert(orig_w >= 0);
 	assert(h >= 0);
@@ -85,7 +85,7 @@ uint16_t* getVdp1VramAddress(uint16_t texture_index, quads_t *quad, vec2i_t *siz
 	*size = vec2i(w,h);
 
 	if (w != orig_w) {
-		LOGD("Need extend for %d to %d\n", orig_w, w);
+		LOGD("Need extend for %u to %u\n", orig_w, w);
 		fix16_t ratioX = fix16_div(FIX16(w - orig_w),FIX16(orig_w));
 		//extend the quad to fit the uv
 		quad->vertices[1].pos.x += fix16_mul((quad->vertices[1].pos.x - quad->vertices[0].pos.x),ratioX);

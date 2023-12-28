@@ -133,11 +133,24 @@ vec3_t *track_load_vertices(char *file_name) {
 	vec3_t *vertices = mem_temp_alloc(sizeof(vec3_t) * g.track.vertex_count);
 
 	uint32_t p = 0;
+	int div = 0;
 	for (int i = 0; i < g.track.vertex_count; i++) {
-		vertices[i].x = get_i32(bytes, &p);
-		vertices[i].y = get_i32(bytes, &p);
-		vertices[i].z = get_i32(bytes, &p);
+		int val[3] = {get_i32(bytes, &p),get_i32(bytes, &p),get_i32(bytes, &p)};
+		// printf("Vertices[%d]= {%d,%d,%d}\n", i, val[0], val[1], val[2]);
+		for (int k=0; k<3; k++) {
+			if ((val[k]>>div) > 32768) div++;
+			if ((val[k]>>div) < -32768) div++;
+		}
+		vertices[i].x = val[0];
+		vertices[i].y = val[1];
+		vertices[i].z = val[2];
 		p += 4; // padding
+	}
+	printf("Finally div is %d\n", div);
+	for (int i = 0; i < g.track.vertex_count; i++) {
+		vertices[i].x = FIX16(vertices[i].x>>div);
+		vertices[i].y = FIX16(vertices[i].y>>div);
+		vertices[i].z = FIX16(vertices[i].z>>div);
 	}
 
 	mem_temp_free(bytes);
@@ -166,9 +179,12 @@ void track_load_faces(char *file_name, vec3_t *vertices) {
 		vec3_t v1 = vertices[get_i16(bytes, &p)];
 		vec3_t v2 = vertices[get_i16(bytes, &p)];
 		vec3_t v3 = vertices[get_i16(bytes, &p)];
-		tf->normal.x = (fix16_t)get_i16(bytes, &p) / 4096.0;
-		tf->normal.y = (fix16_t)get_i16(bytes, &p) / 4096.0;
-		tf->normal.z = (fix16_t)get_i16(bytes, &p) / 4096.0;
+		uint16_t val = get_i16(bytes, &p);
+		tf->normal.x = FIX16(val) >> 12; // val / 4096.0
+		val = get_i16(bytes, &p);
+		tf->normal.y = FIX16(val) >> 12; // val / 4096.0
+		val = get_i16(bytes, &p);
+		tf->normal.z = FIX16(val) >> 12; // val / 4096.0
 
 		tf->texture = get_i8(bytes, &p);
 		tf->flags = get_i8(bytes, &p);
@@ -272,8 +288,8 @@ void track_draw(camera_t *camera) {
 		fix16_t cam_dot = vec3_dot(diff, cam_dir);
 		fix16_t dist_sq = vec3_dot(diff, diff);
 		if (
-			cam_dot < 2048 && // FIXME: should use the bounding radius of the section
-			dist_sq < (RENDER_FADEOUT_FAR * RENDER_FADEOUT_FAR)
+			(cam_dot < FIX16(2048)) && // FIXME: should use the bounding radius of the section
+			(dist_sq < (RENDER_FADEOUT_FAR * RENDER_FADEOUT_FAR))
 		) {
 			track_draw_section(s);
 		}

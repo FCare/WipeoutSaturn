@@ -203,7 +203,8 @@ static void render_push_native_quads(quads_t *quad, rgba_t color, uint16_t textu
 
 void render_push_quads(quads_t *quad, uint16_t texture_index) {
   LOGD("%s\n", __FUNCTION__);
-  render_push_native_quads(quad, rgba(128,128,128,255), texture_index);
+  // render_push_native_quads(quad, rgba(128,128,128,255), texture_index);
+  render_push_native_quads(quad, rgba(128,128,128,255), RENDER_NO_TEXTURE);
 }
 
 void render_push_stripe_saturn(quads_saturn_t *quad, uint16_t texture_index, Object_Saturn *object) {

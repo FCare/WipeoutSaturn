@@ -27,6 +27,9 @@ static void cmdt_list_init(void)
 
   cmdt_max = _vdp1_vram_partitions.cmdt_size/sizeof(vdp1_cmdt_t);
   cmdt_list = vdp1_cmdt_list_alloc(cmdt_max);
+
+printf("Can get %d CMDS\n", cmdt_max);
+
   assert(cmdt_list != NULL);
 
   (void)memset(&(cmdt_list->cmdts[0]), 0x00, sizeof(vdp1_cmdt_t) * (cmdt_max));
@@ -321,19 +324,27 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
 }
 
 void render_vdp1_flush(void) {
+  printf("%s %d\n", __FUNCTION__, nbCommand);
   //Flush shall not force the sync of the screen
   if (nbCommand > 0) {
     //sort all the quads
     //Set the last command as end
+    printf("%d\n", __LINE__);
     quickSort_Z(&chain[0], 0, nbCommand-1);
+    printf("%d\n", __LINE__);
     //Reordering jmp adress based on order
     cmdt_list->cmdts[1].cmd_link = (chain[0].id+2)<<2;
+    printf("%d\n", __LINE__);
     for (int i = 0; i< nbCommand-1; i++) {
       cmdts[chain[i].id].cmd_link = (chain[i+1].id+2)<<2;
     }
+    printf("%d\n", __LINE__);
     cmdts[chain[nbCommand-1].id].cmd_link = (nbCommand+2)<<2;
+    printf("%d\n", __LINE__);
     vdp1_cmdt_end_set(&cmdts[nbCommand]);
+    printf("%d\n", __LINE__);
   }
+  printf("%d\n", __LINE__);
   cmdt_list->count = nbCommand+3;
 
   LOGD("List count = %d\n", cmdt_list->count);

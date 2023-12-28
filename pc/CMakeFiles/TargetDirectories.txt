@@ -1,0 +1,7 @@
+/home/francois/workspace/WipeoutSaturn/pc/CMakeFiles/wipeout-game.dir
+/home/francois/workspace/WipeoutSaturn/pc/CMakeFiles/edit_cache.dir
+/home/francois/workspace/WipeoutSaturn/pc/CMakeFiles/rebuild_cache.dir
+/home/francois/workspace/WipeoutSaturn/pc/CMakeFiles/list_install_components.dir
+/home/francois/workspace/WipeoutSaturn/pc/CMakeFiles/install.dir
+/home/francois/workspace/WipeoutSaturn/pc/CMakeFiles/install/local.dir
+/home/francois/workspace/WipeoutSaturn/pc/CMakeFiles/install/strip.dir

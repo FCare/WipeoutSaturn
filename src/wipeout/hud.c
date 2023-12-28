@@ -51,6 +51,8 @@ const struct {
 static uint16_t speedo_facia_texture;
 
 void hud_load(void) {
+	//not yet supported
+	return;
 	speedo_facia_texture = image_get_texture("wipeout/textures/speedo.tim");
 	target_reticle = image_get_texture_semi_trans("wipeout/textures/target2.tim");
 	weapon_icon_textures = image_get_compressed_textures("wipeout/common/wicons.cmp");
@@ -173,6 +175,8 @@ static void hud_draw_target_icon(vec3_t position) {
 }
 
 void hud_draw(ship_t *ship) {
+	//Not yet supported
+	return;
 	// Current lap time
 	if (ship->lap >= 0) {
 		ui_draw_time(ship->lap_time, ui_scaled_pos(UI_POS_BOTTOM | UI_POS_LEFT, vec2i(16, -30)), UI_SIZE_16, UI_COLOR_DEFAULT);
