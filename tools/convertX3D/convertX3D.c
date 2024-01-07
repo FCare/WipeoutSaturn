@@ -47,6 +47,59 @@ static void printChild(xmlNode* root) {
 
 //Besoin de gerer le USE vs DEF. Pour le moment pas plus besoin que ca...
 
+typedef struct {
+  uint32_t nbGeometry;
+  uint32_t offset[16];
+  uint32_t flags[16];
+  uint32_t *faceIndex[16];
+  uint32_t *vertexIndex[16];
+  uint32_t *colorFaces[16];
+  uint32_t *normal[16];
+  uint32_t *textures[16];
+} model;
+
+// NAME 32
+// VERTEX SIZE  4
+// VERTEX OFFSET 4
+// NB_GEOMETRY 4
+// NB_SECTORS 4
+// {
+//   NAME 28
+//   FLAG 4
+//   FACE SIZE 4
+//   FACE OFFSET 4 //Contains color
+//   TEXTURE SIZE 4
+//   TEXTURE OFFSET 4
+//   NORMAL SIZE 4
+//   NORMAL OFFSET 4
+// }
+
+// FACE
+// A 2
+// B 2
+// C 2
+// D 2
+// RGB 2
+// PADDING 2
+
+//
+// TEXTURE
+// W 2
+// H 2
+// FORMAT 1
+// PADDING 3
+// DATA
+//
+// VERTEX //fixed16
+// X 4
+// Y 4
+// Z 4
+//
+// NORMALS //fixed16
+// X 4
+// Y 4
+// Z 4
+
 int
 main(int argc, char **argv)
 {

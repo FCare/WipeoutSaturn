@@ -36,4 +36,3 @@ clean:
 	rm -f $(BUILD_DIR)/convertX3D $(BUILD_DIR)/*.o
 
 -include $(COMMON_DEPS)
-
