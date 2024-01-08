@@ -18,6 +18,8 @@
 #define MESH_FLAG       0x1
 #define POLYGON_FLAG    0x2
 
+extern int read_png_file(char *filename, uint8_t* buffer, uint16_t* w, uint16_t* h);
+
 static xmlNode* getNodeNamed(xmlNode * root, const char * name) {
   if (root->children == NULL) return NULL;
   for (xmlNode *node = root->children; node; node = node->next) {
@@ -131,17 +133,29 @@ main(int argc, char **argv)
     xmlDoc         *document;
     xmlNode        *root, *group, *shape;
     char           *filename;
+    char           *texturefilename;
 
     model modelOut;
     uint32_t vertexOut[2048*3];
     uint32_t normalOut[2048*3];
     face faceOut[32][2048];
 
-    if (argc < 2) {
-        fprintf(stderr, "Usage: %s filename.xml\n", argv[0]);
+    if (argc < 3) {
+        fprintf(stderr, "Usage: %s filename.x3D texture.png\n", argv[0]);
         return 1;
     }
     filename = argv[1];
+    texturefilename = argv[2];
+
+    uint8_t *texture;
+    uint16_t textureW, textureH;
+    if (read_png_file(texturefilename, texture, &textureW, &textureH) < 0) {
+      fprintf(stderr, "Texture can not be read\n");
+      return 1;
+    } else {
+      fprintf(stdout, "Texture is valid, size is %dx%d\n", textureW, textureH);
+    }
+
 
     document = xmlReadFile(filename, NULL, 0);
     root = xmlDocGetRootElement(document);

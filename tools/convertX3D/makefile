@@ -8,6 +8,7 @@ BUILD_DIR = build
 
 BUILD_SRC= \
 	convertX3D.c \
+	pngUtils.c \
 	# image.c \
 	# object.c \
 	# texture.c \
@@ -22,7 +23,7 @@ COMMON_DEPS = $(patsubst %.c, $(BUILD_DIR)/%.d, $(BUILD_SRC))
 
 
 convertModel: $(COMMON_OBJ)
-	gcc -Wall -Og -o $(BUILD_DIR)/convertX3D $^  -L$(LIBXML_LIB) -lxml2
+	gcc -Wall -Og -o $(BUILD_DIR)/convertX3D $^  -L$(LIBXML_LIB) -lxml2 -lpng
 
 $(BUILD_DIR):
 		mkdir -p $(BUILD_DIR)
