@@ -163,6 +163,7 @@ main(int argc, char **argv)
     group = getNodeNamed(root, "Group");
     if (group == NULL) {
       fprintf(stdout, "No group found\n");
+      free(texture);
       xmlFreeDoc(document);
       return -1;
     }
@@ -175,6 +176,7 @@ main(int argc, char **argv)
       xmlNode *material = getNodeNamed(shape, "Material");
       if (material == NULL) {
         fprintf(stdout, "No material found\n");
+        free(texture);
         xmlFreeDoc(document);
         return -1;
       }
@@ -184,16 +186,19 @@ main(int argc, char **argv)
       xmlNode *faceset = getNodeNamed(shape, "IndexedFaceSet");
       if (faceset == NULL) {
         fprintf(stdout, "No faceset found\n");
+        free(texture);
         xmlFreeDoc(document);
         return -1;
       }
       if(strcmp(xmlGetProp(faceset, "normalPerVertex"), "true")!=0) {
         printf("No normals - not supported\n");
+        free(texture);
         xmlFreeDoc(document);
         return -1;
       }
       if(strcmp(xmlGetProp(faceset, "colorPerVertex"), "false")!=0) {
         printf("Colors per vertex - not supported\n");
+        free(texture);
         xmlFreeDoc(document);
         return -1;
       }
@@ -230,6 +235,7 @@ main(int argc, char **argv)
       xmlNode *coordNode = getNodeNamed(shape, "Coordinate");
       if (coordNode == NULL) {
         fprintf(stdout, "No Coordinate found\n");
+        free(texture);
         xmlFreeDoc(document);
         return -1;
       }
@@ -247,6 +253,7 @@ main(int argc, char **argv)
         }
         if ((modelOut.vertexNb%3) != 0) {
           printf("Error with vertex number %d\n", modelOut.vertexNb);
+          free(texture);
           xmlFreeDoc(document);
           return -1;
         }
@@ -257,6 +264,7 @@ main(int argc, char **argv)
       xmlNode *normNode = getNodeNamed(shape, "Normal");
       if (normNode == NULL) {
         fprintf(stdout, "No Normal found\n");
+        free(texture);
         xmlFreeDoc(document);
         return -1;
       }
@@ -273,6 +281,7 @@ main(int argc, char **argv)
         }
         if ((nbNormals%3) != 0) {
           printf("Error with vertex number %d\n", nbNormals);
+          free(texture);
           xmlFreeDoc(document);
           return -1;
         }
@@ -281,6 +290,7 @@ main(int argc, char **argv)
 
       if (nbNormals/3 != modelOut.vertexNb) {
         printf("Not a normal per vertex\n");
+        free(texture);
         xmlFreeDoc(document);
         return -1;
       }
@@ -288,6 +298,7 @@ main(int argc, char **argv)
       xmlNode *texcoordNode = getNodeNamed(shape, "TextureCoordinate");
       if (texcoordNode == NULL) {
         fprintf(stdout, "No Coordinate found\n");
+        free(texture);
         xmlFreeDoc(document);
         return -1;
       }
@@ -299,6 +310,7 @@ main(int argc, char **argv)
       }
       if ((nbUv%2) != 0) {
         printf("Error with uv number %d\n", nbUv);
+        free(texture);
         xmlFreeDoc(document);
         return -1;
       }
@@ -308,6 +320,7 @@ main(int argc, char **argv)
       int faceId = 0;
       if (colorNode == NULL) {
         fprintf(stdout, "No Coordinate found\n");
+        free(texture);
         xmlFreeDoc(document);
         return -1;
       }
@@ -325,6 +338,7 @@ main(int argc, char **argv)
       }
       if ((nbColor%4) != 0) {
         printf("Error with color number %d\n", nbColor);
+        free(texture);
         xmlFreeDoc(document);
         return -1;
       }
@@ -333,6 +347,7 @@ main(int argc, char **argv)
       modelOut.nbGeometry++;
     }
 
+    free(texture);
     xmlFreeDoc(document);
     return 0;
 }

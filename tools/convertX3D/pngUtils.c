@@ -12,10 +12,15 @@ int read_png_file(char *filename, uint8_t* buffer, uint16_t* w, uint16_t* h)
   FILE *fp = fopen(filename, "rb");
 
   png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-  if(!png) return -1;
+  if(!png) {
+    return -1;
+  }
 
   png_infop info = png_create_info_struct(png);
-  if(!info) return -1;
+  if(!info) {
+    printf("Can not init\n");
+    return -1;
+  }
 
   if(setjmp(png_jmpbuf(png))) abort();
 
