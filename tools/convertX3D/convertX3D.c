@@ -32,6 +32,32 @@ static float uv[32][2048*2];
 static int currentGeo;
 static int currentFace;
 
+static rgb1555_t *palette;
+
+static rgb1555_t* extractPalette(texture_t *tex, int size) {
+  if (tex == NULL) {
+    printf("Error with palette exctract\n");
+    exit(-1);
+  }
+  rgb1555_t *pal = (rgb1555_t *)calloc(size,sizeof(rgb1555_t));
+  int paletteSize = 0;
+  for (int i = 0; i<tex->width*tex->height; i++) {
+    rgb1555_t pix = rgb155_from_u8(&tex->pixels[i*4]);
+    uint8_t isNewColor = 1;
+    for (int p=0; p<paletteSize; p++) {
+      if (pix == pal[p]) isNewColor = 0;
+    }
+    if (isNewColor == 1) {
+      if (paletteSize == size) {
+        printf("Error - Palette can not be built\n");
+        exit(-1);
+      }
+      pal[paletteSize++] = pix;
+    }
+  }
+  return palette;
+}
+
 static xmlNode* getNodeNamed(xmlNode * root, const char * name) {
   if (root->children == NULL) return NULL;
   for (xmlNode *node = root->children; node; node = node->next) {
@@ -176,6 +202,8 @@ main(int argc, char **argv)
     } else {
       fprintf(stdout, "Texture is valid, size is %dx%d\n", inputTexture.width, inputTexture.height);
     }
+
+    palette = extractPalette(&inputTexture, 16);
 
     document = xmlReadFile(filename, NULL, 0);
     root = xmlDocGetRootElement(document);

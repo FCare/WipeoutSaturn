@@ -86,6 +86,16 @@ rgb1555_t rgb155_from_u32(uint32_t v) {
   return convert_to_rgb(val);
 }
 
+rgb1555_t rgb155_from_u8(uint8_t *v) {
+	rgba_t val;
+	val.a = v[3] & 0xFF;
+	val.b = v[2] & 0xFF;
+	val.g = v[1] & 0xFF;
+	val.r = v[0] & 0xFF;
+	// LOGD("%x %x %x %x\n", val.a, val.b, val.g, val.r);
+  return convert_to_rgb(val);
+}
+
 static GLuint make_buffer(
     GLenum target,
     const void *buffer_data,
