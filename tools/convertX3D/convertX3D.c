@@ -14,11 +14,23 @@
 #include <stdio.h>
 #include <string.h>
 #include <libxml/parser.h>
+#include "type.h"
+#include "gl.h"
 
 #define MESH_FLAG       0x1
 #define POLYGON_FLAG    0x2
 
-extern int read_png_file(char *filename, uint8_t* buffer, uint16_t* w, uint16_t* h);
+extern int read_png_file(char *filename, texture_t *tex);
+
+static texture_t inputTexture;
+
+static model modelOut;
+//up to 2048 faces per geometry
+static int uv_index[32][2048*4];
+static float uv[32][2048*2];
+
+static int currentGeo;
+static int currentFace;
 
 static xmlNode* getNodeNamed(xmlNode * root, const char * name) {
   if (root->children == NULL) return NULL;
@@ -44,46 +56,11 @@ static xmlNode* getShapeInGroup(xmlNode *root) {
 static void printChild(xmlNode* root) {
   if (root->children == NULL) return;
   for (xmlNode *node = root->children; node; node = node->next) {
-    printf("%s contains %s\n", root->name, node->name);
+    LOGD("%s contains %s\n", root->name, node->name);
   }
 }
 
 //Besoin de gerer le USE vs DEF. Pour le moment pas plus besoin que ca...
-
-#define FIX16(x) ((uint32_t)(((x) >= 0)                                         \
-    ? ((x) * 65536.0f + 0.5f)                                                  \
-    : ((x) * 65536.0f - 0.5f)))
-
-typedef struct {
-  char name[32];
-  uint32_t flag;
-  uint32_t nbFaces;
-  uint32_t facesOffset;
-  uint32_t textureOffset;
-}geometry;
-
-typedef struct {
-  char name[32];
-  uint32_t vertexNb;
-  uint32_t vertexOffset;
-  uint32_t normalsOffset;
-  uint32_t nbGeometry;
-  uint32_t totalSectorNb;
-  geometry geometry[32];
-} model;
-
-typedef struct{
-  uint32_t vertex_id[4]; //A,B,C,D
-  uint16_t RGB;
-  uint16_t padding;
-} face;
-
-typedef struct{
-  uint16_t w; //Shall be a multiple of 8
-  uint16_t h;
-  uint32_t format;
-  uint32_t offset; //Address in the full texture.
-} texture;
 
 // NAME 32
 // VERTEX SIZE  4
@@ -127,6 +104,53 @@ typedef struct{
 // Y 4
 // Z 4
 
+static int conversionStep(void) {
+  if (currentFace == modelOut.geometry[currentGeo].nbFaces) {
+    LOGD("Last Geo was %d faces\n", currentFace);
+    currentFace = 0;
+    currentGeo++;
+  }
+  //Check if geometry needs conversion, otherwise, skip it
+  while(((modelOut.geometry[currentGeo].flag & POLYGON_FLAG) == POLYGON_FLAG) && (currentGeo<modelOut.nbGeometry)){
+    LOGD("Geo %d is polygon - bypass\n", currentGeo);
+    currentGeo++;
+  }
+  if (currentGeo == modelOut.nbGeometry) {
+    LOGD("All Geo done - Exit\n");
+    return 0;
+  }
+  quads_t quad;
+  render_texture_t out;
+
+  quad.uv[0].x = (int16_t) (uv[currentGeo][uv_index[currentGeo][currentFace*4]*2] * inputTexture.width);
+  quad.uv[0].y = (int16_t) (1.0 - uv[currentGeo][uv_index[currentGeo][currentFace*4]*2+1] * inputTexture.height);
+  quad.uv[1].x = (int16_t) (uv[currentGeo][uv_index[currentGeo][currentFace*4+1]*2] * inputTexture.width);
+  quad.uv[1].y = (int16_t) (1.0 - uv[currentGeo][uv_index[currentGeo][currentFace*4+1]*2+1] * inputTexture.height);
+  quad.uv[2].x = (int16_t) (uv[currentGeo][uv_index[currentGeo][currentFace*4+2]*2] * inputTexture.width);
+  quad.uv[2].y = (int16_t) (1.0 - uv[currentGeo][uv_index[currentGeo][currentFace*4+2]*2+1] * inputTexture.height);
+  quad.uv[3].x = (int16_t) (uv[currentGeo][uv_index[currentGeo][currentFace*4+3]*2] * inputTexture.width);
+  quad.uv[3].y = (int16_t) (1.0 - uv[currentGeo][uv_index[currentGeo][currentFace*4+3]*2+1] * inputTexture.height);
+
+  currentFace++;
+
+  gl_generate_texture_from_quad(&out, &quad, &inputTexture);
+  // uint16_t format = 0x1; //RGB/palette 16 bits
+  //
+  // if (currentModel < nb_objects) {
+  //   LOGD("Generating texture for model %s\n", model[currentModel]->name);
+  //   object_draw(model[currentModel++]);
+  //   return 1;
+  // }
+  return 1;
+}
+
+static int savingStep(void) {
+  LOGD("saving step\n");
+
+  free(inputTexture.pixels);
+  return 0;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -135,7 +159,6 @@ main(int argc, char **argv)
     char           *filename;
     char           *texturefilename;
 
-    model modelOut;
     uint32_t vertexOut[2048*3];
     uint32_t normalOut[2048*3];
     face faceOut[32][2048];
@@ -147,15 +170,12 @@ main(int argc, char **argv)
     filename = argv[1];
     texturefilename = argv[2];
 
-    uint8_t *texture;
-    uint16_t textureW, textureH;
-    if (read_png_file(texturefilename, texture, &textureW, &textureH) < 0) {
+    if (read_png_file(texturefilename, &inputTexture) < 0) {
       fprintf(stderr, "Texture can not be read\n");
       return 1;
     } else {
-      fprintf(stdout, "Texture is valid, size is %dx%d\n", textureW, textureH);
+      fprintf(stdout, "Texture is valid, size is %dx%d\n", inputTexture.width, inputTexture.height);
     }
-
 
     document = xmlReadFile(filename, NULL, 0);
     root = xmlDocGetRootElement(document);
@@ -163,58 +183,72 @@ main(int argc, char **argv)
     group = getNodeNamed(root, "Group");
     if (group == NULL) {
       fprintf(stdout, "No group found\n");
-      free(texture);
+      free(inputTexture.pixels);
       xmlFreeDoc(document);
       return -1;
     }
 
     modelOut.nbGeometry = 0;
     for(shape = group->children; shape = getShapeInGroup(shape); shape = shape->next) {
-      printf("New Geometry\n");
+      LOGD("New Geometry\n");
       geometry *geo = &modelOut.geometry[modelOut.nbGeometry];
       geo->flag = 0;
       xmlNode *material = getNodeNamed(shape, "Material");
       if (material == NULL) {
         fprintf(stdout, "No material found\n");
-        free(texture);
+        free(inputTexture.pixels);
         xmlFreeDoc(document);
         return -1;
       }
-      printf("Material name = %s\n", xmlGetProp(material, "DEF"));
-      if (strcasestr(xmlGetProp(material, "DEF"), "colored") != NULL)  geo->flag |= POLYGON_FLAG;
+      LOGD("Material name = %s\n", xmlGetProp(material, "DEF"));
+      if (strcasestr(xmlGetProp(material, "DEF"), "colored") != NULL)  {
+        LOGD("Geo %d is polygon only\n", modelOut.nbGeometry);
+        geo->flag |= POLYGON_FLAG;
+      }
       if (strcasestr(xmlGetProp(material, "DEF"), "fire") != NULL)     geo->flag |= MESH_FLAG;
       xmlNode *faceset = getNodeNamed(shape, "IndexedFaceSet");
       if (faceset == NULL) {
         fprintf(stdout, "No faceset found\n");
-        free(texture);
+        free(inputTexture.pixels);
         xmlFreeDoc(document);
         return -1;
       }
       if(strcmp(xmlGetProp(faceset, "normalPerVertex"), "true")!=0) {
-        printf("No normals - not supported\n");
-        free(texture);
+        LOGD("No normals - not supported\n");
+        free(inputTexture.pixels);
         xmlFreeDoc(document);
         return -1;
       }
       if(strcmp(xmlGetProp(faceset, "colorPerVertex"), "false")!=0) {
-        printf("Colors per vertex - not supported\n");
-        free(texture);
+        LOGD("Colors per vertex - not supported\n");
+        free(inputTexture.pixels);
         xmlFreeDoc(document);
         return -1;
       }
 
       char* texIndex = xmlGetProp(faceset, "texCoordIndex");
-      geo->nbFaces = 0;
-      int nbVertexForFaces = 0;
+      int nb_entry = 0;
       char *str;
+      geo->nbFaces = 0;
       while((str=strsep(&texIndex, " ")) != NULL) {
-        if ((int) strtol(str, NULL, 10) == -1) geo->nbFaces++;
-        else if (strlen(str)>0) nbVertexForFaces++;
-        //Add textureCoordinate to the face => nned a dedicated process.
+        int val = (int)strtol(str, NULL, 10);
+        if (val == -1) {
+          if (geo->nbFaces!=0) {
+            //Ensure face has 4 vertex
+            for (nb_entry; nb_entry <= 4; nb_entry++)
+              uv_index[modelOut.nbGeometry][geo->nbFaces*4+nb_entry] = uv_index[modelOut.nbGeometry][geo->nbFaces*4+nb_entry-1];
+          }
+          geo->nbFaces++;
+          nb_entry = 0;
+        }
+        else if (strlen(str)>0) {
+          uv_index[modelOut.nbGeometry][geo->nbFaces*4+nb_entry] = val;
+          nb_entry+=1;
+        }
       }
 
       char* coordIndex = xmlGetProp(faceset, "coordIndex");
-      int nb_entry = 0;
+      nb_entry = 0;
       geo->nbFaces = 0;
       while((str=strsep(&coordIndex, " ")) != NULL) {
         int val = (int)strtol(str, NULL, 10);
@@ -230,12 +264,12 @@ main(int argc, char **argv)
         else if (strlen(str)>0) faceOut[modelOut.nbGeometry][geo->nbFaces].vertex_id[nb_entry++] = val;
       }
 
-      printf("nbFaces = %d with nbVertex %d\n", geo->nbFaces,nbVertexForFaces);
+      LOGD("nbFaces = %d \n", geo->nbFaces);
 
       xmlNode *coordNode = getNodeNamed(shape, "Coordinate");
       if (coordNode == NULL) {
         fprintf(stdout, "No Coordinate found\n");
-        free(texture);
+        free(inputTexture.pixels);
         xmlFreeDoc(document);
         return -1;
       }
@@ -252,19 +286,19 @@ main(int argc, char **argv)
           }
         }
         if ((modelOut.vertexNb%3) != 0) {
-          printf("Error with vertex number %d\n", modelOut.vertexNb);
-          free(texture);
+          LOGD("Error with vertex number %d\n", modelOut.vertexNb);
+          free(inputTexture.pixels);
           xmlFreeDoc(document);
           return -1;
         }
         modelOut.vertexNb = modelOut.vertexNb/3;
-        printf("nbVertex = %d\n", modelOut.vertexNb);
+        LOGD("nbVertex = %d\n", modelOut.vertexNb);
       }
 
       xmlNode *normNode = getNodeNamed(shape, "Normal");
       if (normNode == NULL) {
         fprintf(stdout, "No Normal found\n");
-        free(texture);
+        free(inputTexture.pixels);
         xmlFreeDoc(document);
         return -1;
       }
@@ -280,17 +314,17 @@ main(int argc, char **argv)
           }
         }
         if ((nbNormals%3) != 0) {
-          printf("Error with vertex number %d\n", nbNormals);
-          free(texture);
+          LOGD("Error with vertex number %d\n", nbNormals);
+          free(inputTexture.pixels);
           xmlFreeDoc(document);
           return -1;
         }
-        printf("nbNormals = %d\n", nbNormals/3);
+        LOGD("nbNormals = %d\n", nbNormals/3);
       }
 
       if (nbNormals/3 != modelOut.vertexNb) {
-        printf("Not a normal per vertex\n");
-        free(texture);
+        LOGD("Not a normal per vertex\n");
+        free(inputTexture.pixels);
         xmlFreeDoc(document);
         return -1;
       }
@@ -298,7 +332,7 @@ main(int argc, char **argv)
       xmlNode *texcoordNode = getNodeNamed(shape, "TextureCoordinate");
       if (texcoordNode == NULL) {
         fprintf(stdout, "No Coordinate found\n");
-        free(texture);
+        free(inputTexture.pixels);
         xmlFreeDoc(document);
         return -1;
       }
@@ -306,21 +340,23 @@ main(int argc, char **argv)
       int nbUv = 0;
       char* texcoordIndex = xmlGetProp(texcoordNode, "point");
       while((str=strsep(&texcoordIndex, " ")) != NULL) {
-        if (strlen(str)>0) nbUv++;
+        if (strlen(str)>0) {
+          uv[modelOut.nbGeometry][nbUv++] = (float)(strtod(str, NULL));
+        }
       }
       if ((nbUv%2) != 0) {
-        printf("Error with uv number %d\n", nbUv);
-        free(texture);
+        LOGD("Error with uv number %d\n", nbUv);
+        free(inputTexture.pixels);
         xmlFreeDoc(document);
         return -1;
       }
-      printf("nbUv = %d\n", nbUv/2);
+      LOGD("nbUv = %d\n", nbUv/2);
 
       xmlNode *colorNode = getNodeNamed(shape, "ColorRGBA");
       int faceId = 0;
       if (colorNode == NULL) {
         fprintf(stdout, "No Coordinate found\n");
-        free(texture);
+        free(inputTexture.pixels);
         xmlFreeDoc(document);
         return -1;
       }
@@ -337,17 +373,22 @@ main(int argc, char **argv)
         }
       }
       if ((nbColor%4) != 0) {
-        printf("Error with color number %d\n", nbColor);
-        free(texture);
+        LOGD("Error with color number %d\n", nbColor);
+        free(inputTexture.pixels);
         xmlFreeDoc(document);
         return -1;
       }
-      printf("nbColor = %d\n", nbColor/4);
+      LOGD("nbColor = %d\n", nbColor/4);
 
       modelOut.nbGeometry++;
     }
 
-    free(texture);
+    currentGeo = 0;
+    currentFace = 0;
+
     xmlFreeDoc(document);
+
+    gl_init(conversionStep, savingStep);
+
     return 0;
 }

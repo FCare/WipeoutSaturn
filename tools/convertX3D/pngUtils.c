@@ -3,7 +3,9 @@
 #include <stdint.h>
 #include <png.h>
 
-int read_png_file(char *filename, uint8_t* buffer, uint16_t* w, uint16_t* h)
+#include "type.h"
+
+int read_png_file(char *filename, texture_t *tex)
 {
   png_byte color_type;
   png_byte bit_depth;
@@ -28,8 +30,8 @@ int read_png_file(char *filename, uint8_t* buffer, uint16_t* w, uint16_t* h)
 
   png_read_info(png, info);
 
-  *w      = png_get_image_width(png, info);
-  *h     = png_get_image_height(png, info);
+  tex->width      = png_get_image_width(png, info);
+  tex->height     = png_get_image_height(png, info);
   color_type = png_get_color_type(png, info);
   bit_depth  = png_get_bit_depth(png, info);
 
@@ -61,8 +63,8 @@ int read_png_file(char *filename, uint8_t* buffer, uint16_t* w, uint16_t* h)
 
   png_read_update_info(png, info);
 
-  row_pointers = (png_bytep*)malloc(sizeof(png_bytep) * *h);
-  for(int y = 0; y < *h; y++) {
+  row_pointers = (png_bytep*)malloc(sizeof(png_bytep) * tex->height);
+  for(int y = 0; y < tex->height; y++) {
     row_pointers[y] = (png_byte*)malloc(png_get_rowbytes(png,info));
   }
 
@@ -72,16 +74,16 @@ int read_png_file(char *filename, uint8_t* buffer, uint16_t* w, uint16_t* h)
 
   png_destroy_read_struct(&png, &info, NULL);
 
-  buffer = (uint8_t*) malloc(*w**h*4);
+  tex->pixels = (uint8_t*) malloc(tex->width*tex->height*4);
   int id = 0;
-  for(int y = 0; y < *h; y++) {
+  for(int y = 0; y < tex->height; y++) {
     png_bytep row = row_pointers[y];
-    for(int x = 0; x < *w; x++) {
+    for(int x = 0; x < tex->width; x++) {
       png_bytep px = &(row[x * 4]);
-      buffer[id++] = px[0];
-      buffer[id++] = px[1];
-      buffer[id++] = px[2];
-      buffer[id++] = px[3];
+      tex->pixels[id++] = px[0];
+      tex->pixels[id++] = px[1];
+      tex->pixels[id++] = px[2];
+      tex->pixels[id++] = px[3];
       // Do something awesome for each pixel here...
       //printf("%4d, %4d = RGBA(%3d, %3d, %3d, %3d)\n", x, y, px[0], px[1], px[2], px[3]);
     }
