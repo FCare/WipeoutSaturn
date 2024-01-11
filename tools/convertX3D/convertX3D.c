@@ -29,6 +29,9 @@ static model modelOut;
 static int uv_index[32][2048*4];
 static float uv[32][2048*2];
 
+//It means 2048 character max for 32 geometry max;
+static character characters[32][2048];
+
 static int currentGeo;
 static int currentFace;
 
@@ -55,7 +58,7 @@ static rgb1555_t* extractPalette(texture_t *tex, int size) {
       pal[paletteSize++] = pix;
     }
   }
-  return palette;
+  return pal;
 }
 
 static xmlNode* getNodeNamed(xmlNode * root, const char * name) {
@@ -157,16 +160,31 @@ static int conversionStep(void) {
   quad.uv[3].x = (int16_t) (uv[currentGeo][uv_index[currentGeo][currentFace*4+3]*2] * inputTexture.width);
   quad.uv[3].y = (int16_t) (1.0 - uv[currentGeo][uv_index[currentGeo][currentFace*4+3]*2+1] * inputTexture.height);
 
-  currentFace++;
-
+  //Request OpenGL to render the character
   gl_generate_texture_from_quad(&out, &quad, &inputTexture);
-  // uint16_t format = 0x1; //RGB/palette 16 bits
-  //
-  // if (currentModel < nb_objects) {
-  //   LOGD("Generating texture for model %s\n", model[currentModel]->name);
-  //   object_draw(model[currentModel++]);
-  //   return 1;
-  // }
+  //save the character as a paletized buffer
+  character *c = &characters[currentGeo][currentFace];
+  c->width = out.width;
+  c->height = out.height;
+  c->pixels = (uint32_t*) malloc(out.width*out.height/8);
+  for (int j=0; j < c->height; j++) {
+    for (int i=0; i < c->width; i+=8) {
+      uint32_t *val = &c->pixels[(i + j*c->width)/8];
+      *val = 0;
+      for (int p = 0; p<8; p++) {
+        rgb1555_t pix = out.pixels[i+p + j*c->width];
+        for(int k = 0; k<16; k++) {
+          if (pix == palette[k]) {
+            *val |= k<<p; //maybe need to reverse here
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  free(out.pixels);
+  currentFace++;
   return 1;
 }
 

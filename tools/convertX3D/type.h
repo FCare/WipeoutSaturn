@@ -40,6 +40,13 @@ typedef struct {
   uint32_t textureOffset;
 }geometry;
 
+
+typedef struct {
+  uint16_t width;
+  uint16_t height;
+  uint32_t *pixels;
+}character;
+
 typedef struct {
   char name[32];
   uint32_t vertexNb;
