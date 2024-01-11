@@ -35,6 +35,8 @@ static character characters[32][2048];
 static int currentGeo;
 static int currentFace;
 
+static char *outputObject;
+
 static rgb1555_t *palette;
 
 static rgb1555_t* extractPalette(texture_t *tex, int size) {
@@ -182,7 +184,6 @@ static int conversionStep(void) {
       }
     }
   }
-
   free(out.pixels);
   currentFace++;
   return 1;
@@ -191,8 +192,35 @@ static int conversionStep(void) {
 static int savingStep(void) {
   LOGD("saving step\n");
 
+  FILE *fobj = fopen(outputObject, "wb+");
+  fwrite(modelOut.name, 32, sizeof(char), fobj);
+  fclose(fobj);
   free(inputTexture.pixels);
   return 0;
+}
+
+static char *replace_ext(const char *org, const char *new_ext)
+{
+    char *ext;
+    char *tmp = strdup(org);
+    ext = strrchr(tmp , '.');
+    if (ext) { *ext = '\0'; }
+    size_t new_size = strlen(tmp) + strlen(new_ext) + 1;
+    char *new_name = malloc(new_size);
+    sprintf(new_name, "%s%s", tmp, new_ext);
+    free(tmp);
+    return new_name;
+}
+
+static void getNameFromPath(const char *org, char * out, int max) {
+  char *tmp = strdup(org);
+  char *start = tmp;
+  char *ext = strrchr(tmp , '/');
+  if (ext) { start = ext+1; }
+  ext = strrchr(start, '.');
+  if (ext) { *ext = '\0'; }
+  snprintf(out, 32, "%s", start);
+  free(tmp);
 }
 
 int
@@ -214,12 +242,18 @@ main(int argc, char **argv)
     filename = argv[1];
     texturefilename = argv[2];
 
+
     if (read_png_file(texturefilename, &inputTexture) < 0) {
       fprintf(stderr, "Texture can not be read\n");
       return 1;
     } else {
       fprintf(stdout, "Texture is valid, size is %dx%d\n", inputTexture.width, inputTexture.height);
     }
+    outputObject = replace_ext(filename, ".smf");
+
+    getNameFromPath(filename,modelOut.name, 32);
+
+    printf("Output to %s\n", outputObject);
 
     palette = extractPalette(&inputTexture, 16);
 
