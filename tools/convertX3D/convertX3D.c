@@ -166,7 +166,7 @@ static int conversionStep(void) {
   character *c = &characters[currentGeo][currentFace];
   c->width = out.width;
   c->height = out.height;
-  c->pixels = (uint32_t*) malloc(out.width*out.height/8);
+  c->pixels = (uint32_t*) malloc(out.width*out.height/8*sizeof(uint32_t));
   for (int j=0; j < c->height; j++) {
     for (int i=0; i < c->width; i+=8) {
       uint32_t *val = &c->pixels[(i + j*c->width)/8];
