@@ -324,14 +324,13 @@ void gl_generate_texture_from_quad(render_texture_t *out, quads_t *t, texture_t 
   }
   width = (width+0x7)&~0x7;
 
-  printf("height %d width %d\n", height, width);
-
-LOGD("Was %dx%d => %d\n", width, height, width*height);
+  LOGD("Was %dx%d => %d\n", width, height, width*height);
     int shift = 0;
-    while((width>>shift) > 320) {
+    //limit charcters to 80x60 max
+    while((width>>shift) > (320/4)) {
       shift++;
     }
-    while((height>>shift) > 240) {
+    while((height>>shift) > (240/4)) {
       shift++;
     }
     if (shift != 0) {
