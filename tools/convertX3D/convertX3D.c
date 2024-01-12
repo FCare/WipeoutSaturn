@@ -207,6 +207,7 @@ static int savingStep(void) {
   long vertexPos = 0;
   long normalPos = 0;
   long facePos[MAX_GEOMETRY] = {0};
+  long charTablePos[MAX_GEOMETRY] = {0};
   long charPos[MAX_GEOMETRY][MAX_FACE] = {0};
 
   FILE *fobj = fopen(outputObject, "wb+");
@@ -225,14 +226,12 @@ static int savingStep(void) {
     write_32(modelOut.geometry[i].nbFaces, fobj);
     facePos[i] = ftell(fobj);
     write_32(0, fobj); //facesoffset
-    for (int j=0; j<modelOut.geometry[i].nbFaces; j++) {
-      charPos[i][j] = ftell(fobj);
-      write_32(0, fobj); //characterOffset
-    }
+    charTablePos[i] = ftell(fobj);
+    write_32(0, fobj); //characterOffset
   }
   //Write vertex
   long pos = ftell(fobj);
-  pos = (pos + BINARY_SECTOR_SIZE) & ~(BINARY_SECTOR_SIZE-1);
+  // pos = (pos + BINARY_SECTOR_SIZE) & ~(BINARY_SECTOR_SIZE-1);
   //pack all starting the next sector
   fseek(fobj, vertexPos, SEEK_SET);
   write_32(pos, fobj); //vertexOffset
@@ -271,15 +270,19 @@ static int savingStep(void) {
   pos = ftell(fobj);
   for (int i=0; i<modelOut.nbGeometry; i++) {
     for (int j=0; j<modelOut.geometry[i].nbFaces; j++) {
-      pos = ftell(fobj);
-      fseek(fobj, charPos[i][j], SEEK_SET);
-      write_32(pos, fobj); //characteroffset
-      fseek(fobj, pos, SEEK_SET);
+      charPos[i][j] = ftell(fobj);
       write_32(characters[i][j].width, fobj);
       write_32(characters[i][j].height, fobj);
       for (int p=0; p<characters[i][j].width*characters[i][j].height/8; p++) {
         write_32(characters[i][j].pixels[p], fobj);
       }
+    }
+    pos = ftell(fobj);
+    fseek(fobj, charTablePos[i], SEEK_SET);
+    write_32(pos, fobj); //characteroffset
+    fseek(fobj, pos, SEEK_SET);
+    for (int j=0; j<modelOut.geometry[i].nbFaces; j++) {
+      write_32(charPos[i][j], fobj); //characterOffset
     }
   }
 
