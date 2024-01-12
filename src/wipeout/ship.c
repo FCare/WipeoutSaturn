@@ -18,32 +18,20 @@
 
 void ships_load(void) {
 	// Object_Saturn_list *ship_models = objects_saturn_load("wipeout/common/allsh.smf");
-	Object_Saturn* ship_models[8];
-	ship_models[0] = object_saturn_load("wipeout/ship/solaar.smf");
-	ship_models[1] = object_saturn_load("wipeout/ship/anasta.smf");
-	ship_models[2] = object_saturn_load("wipeout/ship/arial.smf");
-	ship_models[3] = object_saturn_load("wipeout/ship/arian.smf");
-	ship_models[4] = object_saturn_load("wipeout/ship/chang.smf");
-	ship_models[5] = object_saturn_load("wipeout/ship/dekka.smf");
-	ship_models[6] = object_saturn_load("wipeout/ship/jacko.smf");
-	ship_models[7] = object_saturn_load("wipeout/ship/sophia.smf");
-	LOGD("!!!!!!!!!!!!!!!!!!!!Load objects\n");
-#ifdef DUMP
-	for (int i =0; i<8; i++)
-		object_dump_saturn(ship_models[i]);
-#endif
+
 	// Object_Saturn_list *collision_models = objects_saturn_load("wipeout/common/alcol.smf");
 	//
 	// error_if(ship_models->length != NUM_PILOTS, "Expected %ld ship models, got %d", NUM_PILOTS, ship_models->length);
 	// error_if(collision_models->length != NUM_PILOTS, "Expected %ld collison models, got %d", NUM_PILOTS, collision_models->length);
 	//
-	// for (int object_index = 0; object_index < NUM_PILOTS; object_index++) {
-	// 	int ship_index = def.ship_model_to_pilot[object_index];
-	// 	g.ships[ship_index].model = ship_models->objects[object_index];
-	// 	g.ships[ship_index].collision_model = collision_models->objects[object_index];
-	// 	ship_init_exhaust_plume(&g.ships[ship_index]);
-	// }
-
+	for (int object_index = 0; object_index < NUM_PILOTS; object_index++) {
+		g.ships[object_index].model = object_saturn_load(def.pilots[object_index].ship);
+		// g.ships[ship_index].collision_model = collision_models->objects[object_index];
+		// ship_init_exhaust_plume(&g.ships[ship_index]);
+#ifdef DUMP
+	object_dump_saturn(g.ships[object_index].model);
+#endif
+	}
 /*
 	uint16_t shadow_textures_start = render_textures_len();
 	image_get_texture_semi_trans("wipeout/textures/shad1.tim");

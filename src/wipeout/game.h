@@ -120,6 +120,7 @@ typedef struct {
 typedef struct {
 	char *name;
 	char *portrait;
+	char *ship;
 	int logo_model;
 	int team;
 } pilot_t;
