@@ -229,6 +229,8 @@ static int savingStep(void) {
   }
   //Write vertex
   long pos = ftell(fobj);
+  pos = (pos + BINARY_SECTOR_SIZE) & ~(BINARY_SECTOR_SIZE-1);
+  //pack all starting the next sector
   fseek(fobj, vertexPos, SEEK_SET);
   write_32(pos, fobj); //vertexOffset
   fseek(fobj, pos, SEEK_SET);
