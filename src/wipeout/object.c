@@ -500,382 +500,422 @@ Object *objects_load(char *name, texture_list_t tl) {
 	return objectList;
 }
 
-Object_Saturn_list* objects_saturn_load(char *name) {
-	LOGD("load: %s\n", name);
-	uint16_t texture;
-	uint16_t *bytes = (uint16_t*)platform_load_saturn_asset(name, &texture);
-	CHECK_ALIGN_4(bytes);
-	if (!bytes) {
-		die("Failed to load file %s\n", name);
+Object_Saturn *object_saturn_load(char *name) {
+	//read first sector so that we have the detail of the model
+	printf("Load %s\n", name);
+	Object_Saturn *object = (Object_Saturn*)platform_load_saturn_file(name);
+	//process de l'objet au niveau des memoires
+	object->vertices = (fix16_vec3_t *)((uint32_t)object+(uint32_t)object->vertices);
+	object->normals = (fix16_vec3_t *)((uint32_t)object+(uint32_t)object->normals);
+	printf("Name is %s\n", object->name);
+	printf("Got %d vertices\n", object->vertices_len);
+	printf("Vertices @ 0x%x\n", object->vertices);
+	printf("Normals @ 0x%x\n", object->normals);
+	printf("Nb Objects %d\n", object->nbObjects);
+	printf("Palette = ");
+	for (int i = 0; i<16; i++)
+		printf("0x%x ", object->palette[i]);
+	printf("\n");
+	for (int i = 0; i<object->nbObjects; i++) {
+		object->object[i].faces = (fix16_vec3_t *)((uint32_t)object+(uint32_t)object->object[i].faces);
+		object->object[i].characters = (fix16_vec3_t *)((uint32_t)object+(uint32_t)object->object[i].characters);
+		for (int j=0; j<object->object[i].faces_len; j++) {
+			object->object[i].characters[j] = (fix16_vec3_t *)((uint32_t)object+(uint32_t)object->object[i].characters[j]);
+		}
+		printf("Object %d = \n", i);
+		printf("\tflags 0x%x\n", object->object[i].flags);
+		printf("\tnb_faces %d\n", object->object[i].faces_len);
+		printf("Face offset %x\n", object->object[i].faces);
+		if ((object->object[i].flags & 0x2)==0) {
+			printf("Character offset %x\n", object->object[i].characters);
+			for (int j=0; j<object->object[i].faces_len; j++) {
+				printf("Character[%d] is %dx%d\n",j, object->object[i].characters[j]->width, object->object[i].characters[j]->height);
+			}
+		} else {
+			printf("Polygon model only\n");
+		}
 	}
-	uint32_t p = 0;
-	uint16_t length = get_u16(bytes, &p);
-	Object_Saturn_list *list = mem_bump(sizeof(Object_Saturn_list));
-	CHECK_ALIGN_4(list);
-	list->objects = mem_bump(sizeof(Object_Saturn*)*length);
-	CHECK_ALIGN_4(list->objects);
-	list->length = length;
-	LOGD("Input Nb Objects = %d\n", length);
-	for(int i = 0; i < length; i++) {
-		// int nb_texture = 0;
-		Object_Saturn *object = mem_bump(sizeof(Object_Saturn));
-		CHECK_ALIGN_4(object);
-		object->info = (object_info *)&bytes[p/2];
-		list->objects[i] = object;
-		LOGD("Object[%d]@0x%x %s\n", i, p, list->objects[i]->info->name);
-		// object->characters = &tl->characters[i];
-		// object->pal = tl->pal;
-		// CHECK_ALIGN_4(object->pal);
-		p+=sizeof(object_info);
-		object->primitives = mem_bump(sizeof(PRM_saturn*)*object->info->primitives_len);
-		CHECK_ALIGN_4(object->primitives);
-		LOGD("Input primitives %d @0x%x\n", object->info->primitives_len, p);
-		for (int j=0; j< object->info->primitives_len; j++) {
-			ALIGN_4(p);
-			LOGD("Input primitives[%d] @0x%x\n", j, p);
-			object->primitives[j] = (PRM_saturn*)&bytes[p/2];
-			CHECK_ALIGN_4(object->primitives[j]);
-			PRM_saturn *prm = object->primitives[j];
-			LOGD("Primitive type %d\n", prm->type);
-			switch (prm->type) {
-			case PRM_TYPE_F3:
-				p += sizeof(F3_S);
-				break;
-			case PRM_TYPE_F4:
-				p += sizeof(F4_S);
-				break;
-			case PRM_TYPE_FT3:
-			LOGD("palette prim[%d] = %d\n", j, prm->palette);
-				// prm->texture = nb_texture++;
-				p += sizeof(FT3_S);
-				break;
-			case PRM_TYPE_FT4:
-			LOGD("palette prim[%d] = %d (0x%x 0x%x)\n", j, prm->palette, p, sizeof(FT4_S));
-				// prm->texture = nb_texture++;
-				p += sizeof(FT4_S);
-				break;
-			case PRM_TYPE_G3:
-				p += sizeof(G3_S);
-				break;
-			case PRM_TYPE_G4:
-				p += sizeof(G4_S);
-				break;
-			case PRM_TYPE_GT3:
-			LOGD("palette prim[%d] = %d\n", j, prm->palette);
-				// prm->texture = nb_texture++;
-				p += sizeof(GT3_S);
-				break;
-			case PRM_TYPE_GT4:
-			LOGD("palette prim[%d] = %d\n", j, prm->palette);
-				// prm->texture = nb_texture++;
-				p += sizeof(GT4_S);
-				break;
-			case PRM_TYPE_LSF3:
-				p += sizeof(LSF3_S);
-				break;
-			case PRM_TYPE_LSF4:
-				p += sizeof(LSF4_S);
-				break;
-			case PRM_TYPE_LSFT3:
-			LOGD("palette prim[%d] = %d\n", j, prm->palette);
-				// prm->texture = nb_texture++;
-				p += sizeof(LSFT3_S);
-				break;
-			case PRM_TYPE_LSFT4:
-			LOGD("palette prim[%d] = %d\n", j, prm->palette);
-				// prm->texture = nb_texture++;
-				p += sizeof(LSFT4_S);
-				break;
-			case PRM_TYPE_LSG3:
-				p += sizeof(LSG3_S);
-				break;
-			case PRM_TYPE_LSG4:
-				p += sizeof(LSG4_S);
-				break;
-			case PRM_TYPE_LSGT3:
-			LOGD("palette prim[%d] = %d\n", j, prm->palette);
-				// prm->texture = nb_texture++;
-				p += sizeof(LSGT3_S);
-				break;
-			case PRM_TYPE_LSGT4:
-			LOGD("palette prim[%d] = %d\n", j, prm->palette);
-				// prm->texture = nb_texture++;
-				p += sizeof(LSGT4_S);
-				break;
-			case PRM_TYPE_TSPR:
-			case PRM_TYPE_BSPR:
-				// prm->texture = nb_texture++;
-				p += sizeof(SPR_S);
-				break;
-			case PRM_TYPE_SPLINE:
-				p += sizeof(Spline_S);
-				break;
-			case PRM_TYPE_POINT_LIGHT:
-				p += sizeof(PointLight_S);
-				break;
-			case PRM_TYPE_SPOT_LIGHT:
-				p += sizeof(SpotLight_S);
-				break;
-			case PRM_TYPE_INFINITE_LIGHT:
-				p += sizeof(InfiniteLight_S);
-				break;
-			default:
-				die("bad primitive type %x Object %d Vertices %d positios 0x%x\n", prm->type, i, j, p);
-			} // switch
-		} // each prim
-		object->vertices = (fix16_vec3_t*)&bytes[p/2];
-		p += object->info->vertices_len*sizeof(fix16_vec3_t);
-		object->normals = (fix16_vec3_t*)&bytes[p/2];
-		p += object->info->normals_len*sizeof(fix16_vec3_t);
-	} // each object
 
-	return list;
+	return object;
+}
+
+Object_Saturn_list* objects_saturn_load(char *name) {
+	// LOGD("load: %s\n", name);
+	// uint16_t texture;
+	// uint16_t *bytes = (uint16_t*)platform_load_saturn_asset(name, &texture);
+	// CHECK_ALIGN_4(bytes);
+	// if (!bytes) {
+	// 	die("Failed to load file %s\n", name);
+	// }
+	// uint32_t p = 0;
+	// uint16_t length = get_u16(bytes, &p);
+	// Object_Saturn_list *list = mem_bump(sizeof(Object_Saturn_list));
+	// CHECK_ALIGN_4(list);
+	// list->objects = mem_bump(sizeof(Object_Saturn*)*length);
+	// CHECK_ALIGN_4(list->objects);
+	// list->length = length;
+	// LOGD("Input Nb Objects = %d\n", length);
+	// for(int i = 0; i < length; i++) {
+	// 	// int nb_texture = 0;
+	// 	Object_Saturn *object = mem_bump(sizeof(Object_Saturn));
+	// 	CHECK_ALIGN_4(object);
+	// 	object->info = (object_info *)&bytes[p/2];
+	// 	list->objects[i] = object;
+	// 	LOGD("Object[%d]@0x%x %s\n", i, p, list->objects[i]->info->name);
+	// 	// object->characters = &tl->characters[i];
+	// 	// object->pal = tl->pal;
+	// 	// CHECK_ALIGN_4(object->pal);
+	// 	p+=sizeof(object_info);
+	// 	object->primitives = mem_bump(sizeof(PRM_saturn*)*object->info->primitives_len);
+	// 	CHECK_ALIGN_4(object->primitives);
+	// 	LOGD("Input primitives %d @0x%x\n", object->info->primitives_len, p);
+	// 	for (int j=0; j< object->info->primitives_len; j++) {
+	// 		ALIGN_4(p);
+	// 		LOGD("Input primitives[%d] @0x%x\n", j, p);
+	// 		object->primitives[j] = (PRM_saturn*)&bytes[p/2];
+	// 		CHECK_ALIGN_4(object->primitives[j]);
+	// 		PRM_saturn *prm = object->primitives[j];
+	// 		LOGD("Primitive type %d\n", prm->type);
+	// 		switch (prm->type) {
+	// 		case PRM_TYPE_F3:
+	// 			p += sizeof(F3_S);
+	// 			break;
+	// 		case PRM_TYPE_F4:
+	// 			p += sizeof(F4_S);
+	// 			break;
+	// 		case PRM_TYPE_FT3:
+	// 		LOGD("palette prim[%d] = %d\n", j, prm->palette);
+	// 			// prm->texture = nb_texture++;
+	// 			p += sizeof(FT3_S);
+	// 			break;
+	// 		case PRM_TYPE_FT4:
+	// 		LOGD("palette prim[%d] = %d (0x%x 0x%x)\n", j, prm->palette, p, sizeof(FT4_S));
+	// 			// prm->texture = nb_texture++;
+	// 			p += sizeof(FT4_S);
+	// 			break;
+	// 		case PRM_TYPE_G3:
+	// 			p += sizeof(G3_S);
+	// 			break;
+	// 		case PRM_TYPE_G4:
+	// 			p += sizeof(G4_S);
+	// 			break;
+	// 		case PRM_TYPE_GT3:
+	// 		LOGD("palette prim[%d] = %d\n", j, prm->palette);
+	// 			// prm->texture = nb_texture++;
+	// 			p += sizeof(GT3_S);
+	// 			break;
+	// 		case PRM_TYPE_GT4:
+	// 		LOGD("palette prim[%d] = %d\n", j, prm->palette);
+	// 			// prm->texture = nb_texture++;
+	// 			p += sizeof(GT4_S);
+	// 			break;
+	// 		case PRM_TYPE_LSF3:
+	// 			p += sizeof(LSF3_S);
+	// 			break;
+	// 		case PRM_TYPE_LSF4:
+	// 			p += sizeof(LSF4_S);
+	// 			break;
+	// 		case PRM_TYPE_LSFT3:
+	// 		LOGD("palette prim[%d] = %d\n", j, prm->palette);
+	// 			// prm->texture = nb_texture++;
+	// 			p += sizeof(LSFT3_S);
+	// 			break;
+	// 		case PRM_TYPE_LSFT4:
+	// 		LOGD("palette prim[%d] = %d\n", j, prm->palette);
+	// 			// prm->texture = nb_texture++;
+	// 			p += sizeof(LSFT4_S);
+	// 			break;
+	// 		case PRM_TYPE_LSG3:
+	// 			p += sizeof(LSG3_S);
+	// 			break;
+	// 		case PRM_TYPE_LSG4:
+	// 			p += sizeof(LSG4_S);
+	// 			break;
+	// 		case PRM_TYPE_LSGT3:
+	// 		LOGD("palette prim[%d] = %d\n", j, prm->palette);
+	// 			// prm->texture = nb_texture++;
+	// 			p += sizeof(LSGT3_S);
+	// 			break;
+	// 		case PRM_TYPE_LSGT4:
+	// 		LOGD("palette prim[%d] = %d\n", j, prm->palette);
+	// 			// prm->texture = nb_texture++;
+	// 			p += sizeof(LSGT4_S);
+	// 			break;
+	// 		case PRM_TYPE_TSPR:
+	// 		case PRM_TYPE_BSPR:
+	// 			// prm->texture = nb_texture++;
+	// 			p += sizeof(SPR_S);
+	// 			break;
+	// 		case PRM_TYPE_SPLINE:
+	// 			p += sizeof(Spline_S);
+	// 			break;
+	// 		case PRM_TYPE_POINT_LIGHT:
+	// 			p += sizeof(PointLight_S);
+	// 			break;
+	// 		case PRM_TYPE_SPOT_LIGHT:
+	// 			p += sizeof(SpotLight_S);
+	// 			break;
+	// 		case PRM_TYPE_INFINITE_LIGHT:
+	// 			p += sizeof(InfiniteLight_S);
+	// 			break;
+	// 		default:
+	// 			die("bad primitive type %x Object %d Vertices %d positios 0x%x\n", prm->type, i, j, p);
+	// 		} // switch
+	// 	} // each prim
+	// 	object->vertices = (fix16_vec3_t*)&bytes[p/2];
+	// 	p += object->info->vertices_len*sizeof(fix16_vec3_t);
+	// 	object->normals = (fix16_vec3_t*)&bytes[p/2];
+	// 	p += object->info->normals_len*sizeof(fix16_vec3_t);
+	// } // each object
+
+	// return list;
+	return NULL;
 }
 
 int nb_texture = 0;
 
 void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
-	vec3_t *vertex = mem_temp_alloc(object->info->vertices_len * sizeof(vec3_t));
-
-	uint16_t primitives_len = object->info->primitives_len;
-
-	render_set_model_mat(mat);
-
-	render_object_transform(vertex, object->vertices, object->info->vertices_len);
-
-	for (uint16_t i = 0; i < primitives_len; i++) {
-		int coord0;
-		int coord1;
-		int coord2;
-		int coord3;
-		PRM_saturn *poly = object->primitives[i];
-		switch (poly->type) {
-		case PRM_TYPE_GT3:
-			coord0 = poly->gt3.coords[0];
-			coord1 = poly->gt3.coords[1];
-			coord2 = poly->gt3.coords[2];
-			render_push_tris_saturn((tris_saturn_t) {
-				.vertices = {
-					{
-						.pos = vertex[coord2],
-						.color = poly->gt3.color[2]
-					},
-					{
-						.pos = vertex[coord1],
-						.color = poly->gt3.color[1]
-					},
-					{
-						.pos = vertex[coord0],
-						.color = poly->gt3.color[0]
-					},
-				}
-			}, poly->gt3.texture, object);
-			break;
-
-		case PRM_TYPE_GT4:
-			coord0 = poly->gt4.coords[0];
-			coord1 = poly->gt4.coords[1];
-			coord2 = poly->gt4.coords[2];
-			coord3 = poly->gt4.coords[3];
-
-			quads_saturn_t q1 = {
-				.vertices = {
-					{
-						.pos = vertex[coord0],
-						.color = poly->gt4.color[0]
-					},
-					{
-						.pos = vertex[coord2],
-						.color = poly->gt4.color[2]
-					},
-					{
-						.pos = vertex[coord3],
-						.color = poly->gt4.color[3]
-					},
-					{
-						.pos = vertex[coord1],
-						.color = poly->gt4.color[1]
-					},
-				}
-			};
-			render_push_stripe_saturn( &q1, poly->gt4.texture, object);
-			break;
-
-		case PRM_TYPE_FT3:
-			coord0 = poly->ft3.coords[0];
-			coord1 = poly->ft3.coords[1];
-			coord2 = poly->ft3.coords[2];
-			render_push_tris_saturn((tris_saturn_t) {
-				.vertices = {
-					{
-						.pos = vertex[coord2],
-						.color = poly->ft3.color
-					},
-					{
-						.pos = vertex[coord1],
-						.color = poly->ft3.color
-					},
-					{
-						.pos = vertex[coord0],
-						.color = poly->ft3.color
-					},
-				}
-			}, poly->ft3.texture, object);
-			break;
-
-		case PRM_TYPE_FT4:
-			coord0 = poly->ft4.coords[0];
-			coord1 = poly->ft4.coords[1];
-			coord2 = poly->ft4.coords[2];
-			coord3 = poly->ft4.coords[3];
-
-			quads_saturn_t q2 = {
-				.vertices = {
-					{
-						.pos = vertex[coord3],
-						.color = poly->ft4.color
-					},
-					{
-						.pos = vertex[coord1],
-						.color = poly->ft4.color
-					},
-					{
-						.pos = vertex[coord0],
-						.color = poly->ft4.color
-					},
-					{
-						.pos = vertex[coord2],
-						.color = poly->ft4.color
-					},
-				}
-			};
-			render_push_stripe_saturn( &q2, poly->ft4.texture, object);
-			break;
-
-		case PRM_TYPE_G3:
-			coord0 = poly->g3.coords[0];
-			coord1 = poly->g3.coords[1];
-			coord2 = poly->g3.coords[2];
-			render_push_tris_saturn((tris_saturn_t) {
-				.vertices = {
-					{
-						.pos = vertex[coord2],
-						.color = poly->g3.color[2]
-					},
-					{
-						.pos = vertex[coord1],
-						.color = poly->g3.color[1]
-					},
-					{
-						.pos = vertex[coord0],
-						.color = poly->g3.color[0]
-					},
-				}
-			}, RENDER_NO_TEXTURE_SATURN, object);
-			break;
-
-		case PRM_TYPE_G4:
-			coord0 = poly->g4.coords[0];
-			coord1 = poly->g4.coords[1];
-			coord2 = poly->g4.coords[2];
-			coord3 = poly->g4.coords[3];
-
-			quads_saturn_t q3 = {
-				.vertices = {
-					{
-						.pos = vertex[coord3],
-						.color = poly->g4.color[3]
-					},
-					{
-						.pos = vertex[coord1],
-						.color = poly->g4.color[1]
-					},
-					{
-						.pos = vertex[coord0],
-						.color = poly->g4.color[0]
-					},
-					{
-						.pos = vertex[coord2],
-						.color = poly->g4.color[2]
-					},
-				}
-			};
-			render_push_stripe_saturn( &q3, RENDER_NO_TEXTURE_SATURN, object);
-			break;
-
-		case PRM_TYPE_F3:
-			coord0 = poly->f3.coords[0];
-			coord1 = poly->f3.coords[1];
-			coord2 = poly->f3.coords[2];
-			render_push_tris_saturn((tris_saturn_t) {
-				.vertices = {
-					{
-						.pos = vertex[coord2],
-						.color = poly->f3.color
-					},
-					{
-						.pos = vertex[coord1],
-						.color = poly->f3.color
-					},
-					{
-						.pos = vertex[coord0],
-						.color = poly->f3.color
-					},
-				}
-			}, RENDER_NO_TEXTURE_SATURN, object);
-			break;
-
-		case PRM_TYPE_F4:
-			coord0 = poly->f4.coords[0];
-			coord1 = poly->f4.coords[1];
-			coord2 = poly->f4.coords[2];
-			coord3 = poly->f4.coords[3];
-
-			quads_saturn_t q4 = {
-				.vertices = {
-					{
-						.pos = vertex[coord3],
-						.color = poly->f4.color
-					},
-					{
-						.pos = vertex[coord1],
-						.color = poly->f4.color
-					},
-					{
-						.pos = vertex[coord0],
-						.color = poly->f4.color
-					},
-					{
-						.pos = vertex[coord2],
-						.color = poly->f4.color
-					},
-				}
-			};
-			render_push_stripe_saturn( &q4, RENDER_NO_TEXTURE_SATURN, object);
-			break;
-
-		case PRM_TYPE_TSPR:
-		case PRM_TYPE_BSPR:
-			// coord0 = poly->spr.coord;
-			//
-			// render_push_sprite(
-			// 	vec3_fix16(
-			// 		vertex[coord0].x,
-			// 		vertex[coord0].y + ((poly->type == PRM_TYPE_TSPR ? poly->spr.height : -poly->spr.height) >> 1),
-			// 		vertex[coord0].z
-			// 	),
-			// 	vec2i(poly->spr.width, poly->spr.height),
-			// 	poly->spr.color,
-			// 	poly->spr.texture
-			// );
-			break;
-
-		default:
-			break;
-		}
-	}
-
-	mem_temp_free(vertex);
+	// vec3_t *vertex = mem_temp_alloc(object->info->vertices_len * sizeof(vec3_t));
+	//
+	// uint16_t primitives_len = object->info->primitives_len;
+	//
+	// render_set_model_mat(mat);
+	//
+	// render_object_transform(vertex, object->vertices, object->info->vertices_len);
+	//
+	// for (uint16_t i = 0; i < primitives_len; i++) {
+	// 	int coord0;
+	// 	int coord1;
+	// 	int coord2;
+	// 	int coord3;
+	// 	PRM_saturn *poly = object->primitives[i];
+	// 	switch (poly->type) {
+	// 	case PRM_TYPE_GT3:
+	// 		coord0 = poly->gt3.coords[0];
+	// 		coord1 = poly->gt3.coords[1];
+	// 		coord2 = poly->gt3.coords[2];
+	// 		render_push_tris_saturn((tris_saturn_t) {
+	// 			.vertices = {
+	// 				{
+	// 					.pos = vertex[coord2],
+	// 					.color = poly->gt3.color[2]
+	// 				},
+	// 				{
+	// 					.pos = vertex[coord1],
+	// 					.color = poly->gt3.color[1]
+	// 				},
+	// 				{
+	// 					.pos = vertex[coord0],
+	// 					.color = poly->gt3.color[0]
+	// 				},
+	// 			}
+	// 		}, poly->gt3.texture, object);
+	// 		break;
+	//
+	// 	case PRM_TYPE_GT4:
+	// 		coord0 = poly->gt4.coords[0];
+	// 		coord1 = poly->gt4.coords[1];
+	// 		coord2 = poly->gt4.coords[2];
+	// 		coord3 = poly->gt4.coords[3];
+	//
+	// 		quads_saturn_t q1 = {
+	// 			.vertices = {
+	// 				{
+	// 					.pos = vertex[coord0],
+	// 					.color = poly->gt4.color[0]
+	// 				},
+	// 				{
+	// 					.pos = vertex[coord2],
+	// 					.color = poly->gt4.color[2]
+	// 				},
+	// 				{
+	// 					.pos = vertex[coord3],
+	// 					.color = poly->gt4.color[3]
+	// 				},
+	// 				{
+	// 					.pos = vertex[coord1],
+	// 					.color = poly->gt4.color[1]
+	// 				},
+	// 			}
+	// 		};
+	// 		render_push_stripe_saturn( &q1, poly->gt4.texture, object);
+	// 		break;
+	//
+	// 	case PRM_TYPE_FT3:
+	// 		coord0 = poly->ft3.coords[0];
+	// 		coord1 = poly->ft3.coords[1];
+	// 		coord2 = poly->ft3.coords[2];
+	// 		render_push_tris_saturn((tris_saturn_t) {
+	// 			.vertices = {
+	// 				{
+	// 					.pos = vertex[coord2],
+	// 					.color = poly->ft3.color
+	// 				},
+	// 				{
+	// 					.pos = vertex[coord1],
+	// 					.color = poly->ft3.color
+	// 				},
+	// 				{
+	// 					.pos = vertex[coord0],
+	// 					.color = poly->ft3.color
+	// 				},
+	// 			}
+	// 		}, poly->ft3.texture, object);
+	// 		break;
+	//
+	// 	case PRM_TYPE_FT4:
+	// 		coord0 = poly->ft4.coords[0];
+	// 		coord1 = poly->ft4.coords[1];
+	// 		coord2 = poly->ft4.coords[2];
+	// 		coord3 = poly->ft4.coords[3];
+	//
+	// 		quads_saturn_t q2 = {
+	// 			.vertices = {
+	// 				{
+	// 					.pos = vertex[coord3],
+	// 					.color = poly->ft4.color
+	// 				},
+	// 				{
+	// 					.pos = vertex[coord1],
+	// 					.color = poly->ft4.color
+	// 				},
+	// 				{
+	// 					.pos = vertex[coord0],
+	// 					.color = poly->ft4.color
+	// 				},
+	// 				{
+	// 					.pos = vertex[coord2],
+	// 					.color = poly->ft4.color
+	// 				},
+	// 			}
+	// 		};
+	// 		render_push_stripe_saturn( &q2, poly->ft4.texture, object);
+	// 		break;
+	//
+	// 	case PRM_TYPE_G3:
+	// 		coord0 = poly->g3.coords[0];
+	// 		coord1 = poly->g3.coords[1];
+	// 		coord2 = poly->g3.coords[2];
+	// 		render_push_tris_saturn((tris_saturn_t) {
+	// 			.vertices = {
+	// 				{
+	// 					.pos = vertex[coord2],
+	// 					.color = poly->g3.color[2]
+	// 				},
+	// 				{
+	// 					.pos = vertex[coord1],
+	// 					.color = poly->g3.color[1]
+	// 				},
+	// 				{
+	// 					.pos = vertex[coord0],
+	// 					.color = poly->g3.color[0]
+	// 				},
+	// 			}
+	// 		}, RENDER_NO_TEXTURE_SATURN, object);
+	// 		break;
+	//
+	// 	case PRM_TYPE_G4:
+	// 		coord0 = poly->g4.coords[0];
+	// 		coord1 = poly->g4.coords[1];
+	// 		coord2 = poly->g4.coords[2];
+	// 		coord3 = poly->g4.coords[3];
+	//
+	// 		quads_saturn_t q3 = {
+	// 			.vertices = {
+	// 				{
+	// 					.pos = vertex[coord3],
+	// 					.color = poly->g4.color[3]
+	// 				},
+	// 				{
+	// 					.pos = vertex[coord1],
+	// 					.color = poly->g4.color[1]
+	// 				},
+	// 				{
+	// 					.pos = vertex[coord0],
+	// 					.color = poly->g4.color[0]
+	// 				},
+	// 				{
+	// 					.pos = vertex[coord2],
+	// 					.color = poly->g4.color[2]
+	// 				},
+	// 			}
+	// 		};
+	// 		render_push_stripe_saturn( &q3, RENDER_NO_TEXTURE_SATURN, object);
+	// 		break;
+	//
+	// 	case PRM_TYPE_F3:
+	// 		coord0 = poly->f3.coords[0];
+	// 		coord1 = poly->f3.coords[1];
+	// 		coord2 = poly->f3.coords[2];
+	// 		render_push_tris_saturn((tris_saturn_t) {
+	// 			.vertices = {
+	// 				{
+	// 					.pos = vertex[coord2],
+	// 					.color = poly->f3.color
+	// 				},
+	// 				{
+	// 					.pos = vertex[coord1],
+	// 					.color = poly->f3.color
+	// 				},
+	// 				{
+	// 					.pos = vertex[coord0],
+	// 					.color = poly->f3.color
+	// 				},
+	// 			}
+	// 		}, RENDER_NO_TEXTURE_SATURN, object);
+	// 		break;
+	//
+	// 	case PRM_TYPE_F4:
+	// 		coord0 = poly->f4.coords[0];
+	// 		coord1 = poly->f4.coords[1];
+	// 		coord2 = poly->f4.coords[2];
+	// 		coord3 = poly->f4.coords[3];
+	//
+	// 		quads_saturn_t q4 = {
+	// 			.vertices = {
+	// 				{
+	// 					.pos = vertex[coord3],
+	// 					.color = poly->f4.color
+	// 				},
+	// 				{
+	// 					.pos = vertex[coord1],
+	// 					.color = poly->f4.color
+	// 				},
+	// 				{
+	// 					.pos = vertex[coord0],
+	// 					.color = poly->f4.color
+	// 				},
+	// 				{
+	// 					.pos = vertex[coord2],
+	// 					.color = poly->f4.color
+	// 				},
+	// 			}
+	// 		};
+	// 		render_push_stripe_saturn( &q4, RENDER_NO_TEXTURE_SATURN, object);
+	// 		break;
+	//
+	// 	case PRM_TYPE_TSPR:
+	// 	case PRM_TYPE_BSPR:
+	// 		// coord0 = poly->spr.coord;
+	// 		//
+	// 		// render_push_sprite(
+	// 		// 	vec3_fix16(
+	// 		// 		vertex[coord0].x,
+	// 		// 		vertex[coord0].y + ((poly->type == PRM_TYPE_TSPR ? poly->spr.height : -poly->spr.height) >> 1),
+	// 		// 		vertex[coord0].z
+	// 		// 	),
+	// 		// 	vec2i(poly->spr.width, poly->spr.height),
+	// 		// 	poly->spr.color,
+	// 		// 	poly->spr.texture
+	// 		// );
+	// 		break;
+	//
+	// 	default:
+	// 		break;
+	// 	}
+	// }
+	//
+	// mem_temp_free(vertex);
 }
 
 void object_draw(Object *object, mat4_t *mat) {

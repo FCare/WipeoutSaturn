@@ -280,12 +280,32 @@ typedef struct {
 } object_info;
 
 typedef struct {
-	object_info *info;
-	// character_list_t *characters;
-	// palette_t **pal;
-	PRM_saturn **primitives;
+	uint32_t width;
+	uint32_t height;
+	uint32_t *pixels;
+} character;
+
+typedef struct{
+	uint32_t vertex_id[4]; //A,B,C,D
+	uint32_t RGB;
+} face;
+
+typedef struct {
+	uint32_t flags;
+	uint32_t faces_len;
+	face *faces;
+	character **characters;
+} geometry;
+
+typedef struct {
+	char name[32];
+	uint32_t vertices_len;
 	fix16_vec3_t *vertices;
 	fix16_vec3_t *normals;
+	// fix16_vec3_t origin;
+	uint32_t nbObjects;
+	uint16_t palette[16];
+	geometry object[];
 } Object_Saturn;
 
 typedef struct{
@@ -294,5 +314,6 @@ typedef struct{
 } Object_Saturn_list;
 
 extern Object_Saturn_list* objects_saturn_load(char *name);
+extern Object_Saturn *object_saturn_load(char *name);
 extern void object_saturn_draw(Object_Saturn *object, mat4_t *mat);
 #endif

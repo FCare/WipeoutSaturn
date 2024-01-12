@@ -17,20 +17,29 @@
 #include "sfx.h"
 
 void ships_load(void) {
-	Object_Saturn_list *ship_models = objects_saturn_load("wipeout/common/allsh.smf");
+	// Object_Saturn_list *ship_models = objects_saturn_load("wipeout/common/allsh.smf");
+	Object_Saturn* ship_models[8];
+	ship_models[0] = object_saturn_load("wipeout/ship/solaar.smf");
+	ship_models[1] = object_saturn_load("wipeout/ship/anasta.smf");
+	ship_models[2] = object_saturn_load("wipeout/ship/arial.smf");
+	ship_models[3] = object_saturn_load("wipeout/ship/arian.smf");
+	ship_models[4] = object_saturn_load("wipeout/ship/chang.smf");
+	ship_models[5] = object_saturn_load("wipeout/ship/dekka.smf");
+	ship_models[6] = object_saturn_load("wipeout/ship/jacko.smf");
+	ship_models[7] = object_saturn_load("wipeout/ship/sophia.smf");
 	LOGD("!!!!!!!!!!!!!!!!!!!!Load objects\n");
 	// all_object_dump_saturn(ship_models);
-	Object_Saturn_list *collision_models = objects_saturn_load("wipeout/common/alcol.smf");
-
-	error_if(ship_models->length != NUM_PILOTS, "Expected %ld ship models, got %d", NUM_PILOTS, ship_models->length);
-	error_if(collision_models->length != NUM_PILOTS, "Expected %ld collison models, got %d", NUM_PILOTS, collision_models->length);
-
-	for (int object_index = 0; object_index < NUM_PILOTS; object_index++) {
-		int ship_index = def.ship_model_to_pilot[object_index];
-		g.ships[ship_index].model = ship_models->objects[object_index];
-		g.ships[ship_index].collision_model = collision_models->objects[object_index];
-		ship_init_exhaust_plume(&g.ships[ship_index]);
-	}
+	// Object_Saturn_list *collision_models = objects_saturn_load("wipeout/common/alcol.smf");
+	//
+	// error_if(ship_models->length != NUM_PILOTS, "Expected %ld ship models, got %d", NUM_PILOTS, ship_models->length);
+	// error_if(collision_models->length != NUM_PILOTS, "Expected %ld collison models, got %d", NUM_PILOTS, collision_models->length);
+	//
+	// for (int object_index = 0; object_index < NUM_PILOTS; object_index++) {
+	// 	int ship_index = def.ship_model_to_pilot[object_index];
+	// 	g.ships[ship_index].model = ship_models->objects[object_index];
+	// 	g.ships[ship_index].collision_model = collision_models->objects[object_index];
+	// 	ship_init_exhaust_plume(&g.ships[ship_index]);
+	// }
 
 /*
 	uint16_t shadow_textures_start = render_textures_len();
@@ -273,121 +282,122 @@ void ship_init(ship_t *self, section_t *section, int pilot, int inv_start_rank) 
 }
 
 void ship_init_exhaust_plume(ship_t *self) {
-	int16_t indices[64];
-	int16_t indices_len = 0;
-
-	for (int i = 0; i < self->model->info->primitives_len; i++) {
-		PRM_saturn *prm = self->model->primitives[i];
-		switch (prm->type) {
-		case PRM_TYPE_F3 :
-			if (flags_is(prm->f3.flag, PRM_SHIP_ENGINE)) {
-				die("F3 ::SE marked polys should be ft3's");
-			}
-			break;
-
-		case PRM_TYPE_F4 :
-			if (flags_is(prm->f4.flag, PRM_SHIP_ENGINE)) {
-				die("F4 ::SE marked polys should be ft3's");
-			}
-			break;
-
-		case PRM_TYPE_FT3 :
-			if (flags_is(prm->ft3.flag, PRM_SHIP_ENGINE)) {
-				indices[indices_len++] = prm->ft3.coords[0];
-				indices[indices_len++] = prm->ft3.coords[1];
-				indices[indices_len++] = prm->ft3.coords[2];
-
-				flags_add(prm->ft3.flag, PRM_TRANSLUCENT);
-				prm->ft3.color.r = 180>>3;
-				prm->ft3.color.g = 97>>3 ;
-				prm->ft3.color.b = 120>>3;
-				prm->ft3.color.msb = 1; //140; //to be review here. Shall use mesh
-			}
-			break;
-
-		case PRM_TYPE_FT4 :
-			if (flags_is(prm->ft4.flag, PRM_SHIP_ENGINE)) {
-				die("FT4 ::SE marked polys should be ft3's");
-			}
-			break;
-
-		case PRM_TYPE_G3 :
-			if (flags_is(prm->g3.flag, PRM_SHIP_ENGINE)) {
-				die("G3 ::SE marked polys should be ft3's");
-			}
-			break;
-
-		case PRM_TYPE_G4 :
-			if (flags_is(prm->g4.flag, PRM_SHIP_ENGINE)) {
-				die("G4 ::SE marked polys should be ft3's");
-			}
-			break;
-
-		case PRM_TYPE_GT3 :
-			if (flags_is(prm->gt3.flag, PRM_SHIP_ENGINE)) {
-				indices[indices_len++] = prm->gt3.coords[0];
-				indices[indices_len++] = prm->gt3.coords[1];
-				indices[indices_len++] = prm->gt3.coords[2];
-
-				flags_add(prm->gt3.flag, PRM_TRANSLUCENT);
-				for (int j = 0; j < 3; j++) {
-					prm->gt3.color[j].r = 180>>3;
-					prm->gt3.color[j].g = 97>>3 ;
-					prm->gt3.color[j].b = 120>>3;
-					prm->gt3.color[j].msb = 1; //140; //to be review here. Shall use mesh
-				}
-			}
-			break;
-
-		case PRM_TYPE_GT4 :
-			if (flags_is(prm->gt4.flag, PRM_SHIP_ENGINE)) {
-				die("GT4 ::SE marked polys should be ft3's");
-			}
-			break;
-
-		default :
-			die("cone.c::InitCone:Bad primitive type %x\n", prm->f3.type);
-			break;
-		}
-	}
-
-
-	// get out the center vertex
-
-	self->exhaust_plume[0].v = NULL;
-	self->exhaust_plume[1].v = NULL;
-	self->exhaust_plume[2].v = NULL;
-
-	int shared[3] = {-1, -1, -1};
-	int booster = 0;
-	for (int i = 0; (i < indices_len) && (booster < 3); i++) {
-		int similar = 0;
-		for (int j = 0; j < indices_len; j++) {
-			if (indices[i] == indices[j]) {
-				similar++;
-				if (similar > 3) {
-					int found = 0;
-					for (int k = 0; k < 3; k++) {
-						if (shared[k] == indices[i]) {
-							found = 1;
-						}
-					}
-
-					if (!found) {
-						shared[booster] = indices[i];
-						booster++;
-					}
-				}
-			}
-		}
-	}
-
-	for (int j = 0; j < 3; j++) {
-		if (shared[j] != -1) {
-			self->exhaust_plume[j].v = &self->model->vertices[shared[j]];
-			self->exhaust_plume[j].initial = self->model->vertices[shared[j]];
-		}
-	}
+	// //Draw the fire below the ship
+	// int16_t indices[64];
+	// int16_t indices_len = 0;
+	//
+	// for (int i = 0; i < self->model->info->primitives_len; i++) {
+	// 	PRM_saturn *prm = self->model->primitives[i];
+	// 	switch (prm->type) {
+	// 	case PRM_TYPE_F3 :
+	// 		if (flags_is(prm->f3.flag, PRM_SHIP_ENGINE)) {
+	// 			die("F3 ::SE marked polys should be ft3's");
+	// 		}
+	// 		break;
+	//
+	// 	case PRM_TYPE_F4 :
+	// 		if (flags_is(prm->f4.flag, PRM_SHIP_ENGINE)) {
+	// 			die("F4 ::SE marked polys should be ft3's");
+	// 		}
+	// 		break;
+	//
+	// 	case PRM_TYPE_FT3 :
+	// 		if (flags_is(prm->ft3.flag, PRM_SHIP_ENGINE)) {
+	// 			indices[indices_len++] = prm->ft3.coords[0];
+	// 			indices[indices_len++] = prm->ft3.coords[1];
+	// 			indices[indices_len++] = prm->ft3.coords[2];
+	//
+	// 			flags_add(prm->ft3.flag, PRM_TRANSLUCENT);
+	// 			prm->ft3.color.r = 180>>3;
+	// 			prm->ft3.color.g = 97>>3 ;
+	// 			prm->ft3.color.b = 120>>3;
+	// 			prm->ft3.color.msb = 1; //140; //to be review here. Shall use mesh
+	// 		}
+	// 		break;
+	//
+	// 	case PRM_TYPE_FT4 :
+	// 		if (flags_is(prm->ft4.flag, PRM_SHIP_ENGINE)) {
+	// 			die("FT4 ::SE marked polys should be ft3's");
+	// 		}
+	// 		break;
+	//
+	// 	case PRM_TYPE_G3 :
+	// 		if (flags_is(prm->g3.flag, PRM_SHIP_ENGINE)) {
+	// 			die("G3 ::SE marked polys should be ft3's");
+	// 		}
+	// 		break;
+	//
+	// 	case PRM_TYPE_G4 :
+	// 		if (flags_is(prm->g4.flag, PRM_SHIP_ENGINE)) {
+	// 			die("G4 ::SE marked polys should be ft3's");
+	// 		}
+	// 		break;
+	//
+	// 	case PRM_TYPE_GT3 :
+	// 		if (flags_is(prm->gt3.flag, PRM_SHIP_ENGINE)) {
+	// 			indices[indices_len++] = prm->gt3.coords[0];
+	// 			indices[indices_len++] = prm->gt3.coords[1];
+	// 			indices[indices_len++] = prm->gt3.coords[2];
+	//
+	// 			flags_add(prm->gt3.flag, PRM_TRANSLUCENT);
+	// 			for (int j = 0; j < 3; j++) {
+	// 				prm->gt3.color[j].r = 180>>3;
+	// 				prm->gt3.color[j].g = 97>>3 ;
+	// 				prm->gt3.color[j].b = 120>>3;
+	// 				prm->gt3.color[j].msb = 1; //140; //to be review here. Shall use mesh
+	// 			}
+	// 		}
+	// 		break;
+	//
+	// 	case PRM_TYPE_GT4 :
+	// 		if (flags_is(prm->gt4.flag, PRM_SHIP_ENGINE)) {
+	// 			die("GT4 ::SE marked polys should be ft3's");
+	// 		}
+	// 		break;
+	//
+	// 	default :
+	// 		die("cone.c::InitCone:Bad primitive type %x\n", prm->f3.type);
+	// 		break;
+	// 	}
+	// }
+	//
+	//
+	// // get out the center vertex
+	//
+	// self->exhaust_plume[0].v = NULL;
+	// self->exhaust_plume[1].v = NULL;
+	// self->exhaust_plume[2].v = NULL;
+	//
+	// int shared[3] = {-1, -1, -1};
+	// int booster = 0;
+	// for (int i = 0; (i < indices_len) && (booster < 3); i++) {
+	// 	int similar = 0;
+	// 	for (int j = 0; j < indices_len; j++) {
+	// 		if (indices[i] == indices[j]) {
+	// 			similar++;
+	// 			if (similar > 3) {
+	// 				int found = 0;
+	// 				for (int k = 0; k < 3; k++) {
+	// 					if (shared[k] == indices[i]) {
+	// 						found = 1;
+	// 					}
+	// 				}
+	//
+	// 				if (!found) {
+	// 					shared[booster] = indices[i];
+	// 					booster++;
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
+	//
+	// for (int j = 0; j < 3; j++) {
+	// 	if (shared[j] != -1) {
+	// 		self->exhaust_plume[j].v = &self->model->vertices[shared[j]];
+	// 		self->exhaust_plume[j].initial = self->model->vertices[shared[j]];
+	// 	}
+	// }
 }
 
 void ship_reset_exhaust_plume(ship_t* self)
@@ -899,95 +909,95 @@ void ship_collide_with_track(ship_t *self, track_face_t *face) {
 
 
 bool ship_intersects_ship(ship_t *self, ship_t *other) {
-	// Get 4 points of collision model relative to the
-	// camera
-	vec3_t a = vec3_transform(other->collision_model->vertices[0], &other->mat);
-	vec3_t b = vec3_transform(other->collision_model->vertices[1], &other->mat);
-	vec3_t c = vec3_transform(other->collision_model->vertices[2], &other->mat);
-	vec3_t d = vec3_transform(other->collision_model->vertices[3], &other->mat);
-
-	vec3_t other_points[6] = {b, a, d, a, a, b};
-	vec3_t other_lines[6] = {
-		vec3_sub(c, b),
-		vec3_sub(c, a),
-		vec3_sub(c, d),
-		vec3_sub(b, a),
-		vec3_sub(d, a),
-		vec3_sub(d, b)
-	};
-
-
-	int primitives_len = other->collision_model->info->primitives_len;
-
-	vec3_t p1, p2, p3;
-
-	// for all 4 planes of the enemy ship
-	for (int pi = 0; pi < other->collision_model->info->primitives_len; pi++) {
-		PRM_saturn *poly = other->collision_model->primitives[pi];
-		int16_t *indices;
-		switch (poly->type) {
-			case PRM_TYPE_F3:
-				indices = poly->f3.coords;
-				p1 =  vec3_transform(self->collision_model->vertices[indices[0]], &self->mat);
-				p2 =  vec3_transform(self->collision_model->vertices[indices[1]], &self->mat);
-				p3 =  vec3_transform(self->collision_model->vertices[indices[2]], &self->mat);
-				break;
-			case PRM_TYPE_G3:
-				indices = poly->g3.coords;
-				p1 =  vec3_transform(self->collision_model->vertices[indices[0]], &self->mat);
-				p2 =  vec3_transform(self->collision_model->vertices[indices[1]], &self->mat);
-				p3 =  vec3_transform(self->collision_model->vertices[indices[2]], &self->mat);
-				break;
-			case PRM_TYPE_FT3:
-				indices = poly->ft3.coords;
-				p1 =  vec3_transform(self->collision_model->vertices[indices[0]], &self->mat);
-				p2 =  vec3_transform(self->collision_model->vertices[indices[1]], &self->mat);
-				p3 =  vec3_transform(self->collision_model->vertices[indices[2]], &self->mat);
-				break;
-			case PRM_TYPE_GT3:
-				indices = poly->gt3.coords;
-				p1 =  vec3_transform(self->collision_model->vertices[indices[0]], &self->mat);
-				p2 =  vec3_transform(self->collision_model->vertices[indices[1]], &self->mat);
-				p3 =  vec3_transform(self->collision_model->vertices[indices[2]], &self->mat);
-				break;
-			default:
-				break;
-		}
-
-		// Find polyGon line vectors
-		vec3_t p1p2 = vec3_sub(p2, p1);
-		vec3_t p1p3 = vec3_sub(p3, p1);
-
-		// Find plane equations
-		vec3_t plane1 = vec3_cross(p1p2, p1p3);
-
-		for (int vi = 0; vi < 6; vi++) {
-			fix16_t dp1 = vec3_dot(vec3_sub(p1, other_points[vi]), plane1);
-			fix16_t dp2 = vec3_dot(other_lines[vi], plane1);
-
-			if (dp2 != 0) {
-				fix16_t norm = dp1 / dp2;
-
-				if ((norm >= 0) && (norm <= 1)) {
-					vec3_t term = vec3_mulf(other_lines[vi], norm);
-					vec3_t res = vec3_add(term, other_points[vi]);
-
-					vec3_t v0 = vec3_sub(p1, res);
-					vec3_t v1 = vec3_sub(p2, res);
-					vec3_t v2 = vec3_sub(p3, res);
-
-					fix16_t angle =
-						vec3_angle(v0, v1) +
-						vec3_angle(v1, v2) +
-						vec3_angle(v2, v0);
-
-					if ((angle >= PLATFORM_PI * 2 - PLATFORM_PI * 0.1)) {
-						return true;
-					}
-				}
-			}
-		}
-	}
+	// // Get 4 points of collision model relative to the
+	// // camera
+	// vec3_t a = vec3_transform(other->collision_model->vertices[0], &other->mat);
+	// vec3_t b = vec3_transform(other->collision_model->vertices[1], &other->mat);
+	// vec3_t c = vec3_transform(other->collision_model->vertices[2], &other->mat);
+	// vec3_t d = vec3_transform(other->collision_model->vertices[3], &other->mat);
+	//
+	// vec3_t other_points[6] = {b, a, d, a, a, b};
+	// vec3_t other_lines[6] = {
+	// 	vec3_sub(c, b),
+	// 	vec3_sub(c, a),
+	// 	vec3_sub(c, d),
+	// 	vec3_sub(b, a),
+	// 	vec3_sub(d, a),
+	// 	vec3_sub(d, b)
+	// };
+	//
+	//
+	// int primitives_len = other->collision_model->info->primitives_len;
+	//
+	// vec3_t p1, p2, p3;
+	//
+	// // for all 4 planes of the enemy ship
+	// for (int pi = 0; pi < other->collision_model->info->primitives_len; pi++) {
+	// 	PRM_saturn *poly = other->collision_model->primitives[pi];
+	// 	int16_t *indices;
+	// 	switch (poly->type) {
+	// 		case PRM_TYPE_F3:
+	// 			indices = poly->f3.coords;
+	// 			p1 =  vec3_transform(self->collision_model->vertices[indices[0]], &self->mat);
+	// 			p2 =  vec3_transform(self->collision_model->vertices[indices[1]], &self->mat);
+	// 			p3 =  vec3_transform(self->collision_model->vertices[indices[2]], &self->mat);
+	// 			break;
+	// 		case PRM_TYPE_G3:
+	// 			indices = poly->g3.coords;
+	// 			p1 =  vec3_transform(self->collision_model->vertices[indices[0]], &self->mat);
+	// 			p2 =  vec3_transform(self->collision_model->vertices[indices[1]], &self->mat);
+	// 			p3 =  vec3_transform(self->collision_model->vertices[indices[2]], &self->mat);
+	// 			break;
+	// 		case PRM_TYPE_FT3:
+	// 			indices = poly->ft3.coords;
+	// 			p1 =  vec3_transform(self->collision_model->vertices[indices[0]], &self->mat);
+	// 			p2 =  vec3_transform(self->collision_model->vertices[indices[1]], &self->mat);
+	// 			p3 =  vec3_transform(self->collision_model->vertices[indices[2]], &self->mat);
+	// 			break;
+	// 		case PRM_TYPE_GT3:
+	// 			indices = poly->gt3.coords;
+	// 			p1 =  vec3_transform(self->collision_model->vertices[indices[0]], &self->mat);
+	// 			p2 =  vec3_transform(self->collision_model->vertices[indices[1]], &self->mat);
+	// 			p3 =  vec3_transform(self->collision_model->vertices[indices[2]], &self->mat);
+	// 			break;
+	// 		default:
+	// 			break;
+	// 	}
+	//
+	// 	// Find polyGon line vectors
+	// 	vec3_t p1p2 = vec3_sub(p2, p1);
+	// 	vec3_t p1p3 = vec3_sub(p3, p1);
+	//
+	// 	// Find plane equations
+	// 	vec3_t plane1 = vec3_cross(p1p2, p1p3);
+	//
+	// 	for (int vi = 0; vi < 6; vi++) {
+	// 		fix16_t dp1 = vec3_dot(vec3_sub(p1, other_points[vi]), plane1);
+	// 		fix16_t dp2 = vec3_dot(other_lines[vi], plane1);
+	//
+	// 		if (dp2 != 0) {
+	// 			fix16_t norm = dp1 / dp2;
+	//
+	// 			if ((norm >= 0) && (norm <= 1)) {
+	// 				vec3_t term = vec3_mulf(other_lines[vi], norm);
+	// 				vec3_t res = vec3_add(term, other_points[vi]);
+	//
+	// 				vec3_t v0 = vec3_sub(p1, res);
+	// 				vec3_t v1 = vec3_sub(p2, res);
+	// 				vec3_t v2 = vec3_sub(p3, res);
+	//
+	// 				fix16_t angle =
+	// 					vec3_angle(v0, v1) +
+	// 					vec3_angle(v1, v2) +
+	// 					vec3_angle(v2, v0);
+	//
+	// 				if ((angle >= PLATFORM_PI * 2 - PLATFORM_PI * 0.1)) {
+	// 					return true;
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
 	return false;
 }
 

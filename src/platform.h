@@ -15,6 +15,8 @@ uint8_t *platform_load_userdata(const char *name, uint32_t *bytes_read);
 uint32_t platform_store_userdata(const char *name, void *bytes, int32_t len);
 uint8_t *platform_load_saturn_asset(const char *name, uint16_t *texture);
 
+extern uint8_t *platform_load_saturn_file(const char *name);
+
 #if defined(RENDERER_SOFTWARE)
 	rgba_t *platform_get_screenbuffer(int32_t *pitch);
 #endif

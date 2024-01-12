@@ -228,6 +228,18 @@ static cdfs_filelist_entry_t* getEntry(const char *file) {
   return file_entry;
 }
 
+uint8_t *platform_load_saturn_file(const char *name) {
+  LOGD("Loading %s\n", name);
+  int ret __unused;
+  uint8_t *out = NULL;
+  cdfs_filelist_entry_t *file_entry = getEntry(name);
+  error_if(file_entry==NULL, "File not found\n");
+  LOGD("File size = %d\n", file_entry->size);
+  out = (uint8_t*)mem_bump(file_entry->size);
+  ret = cd_block_sectors_read(file_entry->starting_fad, (void *)out, file_entry->size);
+  return out;
+}
+
 uint8_t *platform_load_saturn_asset(const char *name, uint16_t *texture) {
   LOGD("Loading %s\n", name);
   int ret __unused;
