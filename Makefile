@@ -56,7 +56,7 @@ include $(YAUL_INSTALL_ROOT)/share/build.pre.mk
 ifeq ($(DEBUG), ON)
 NO_SFX=ON
 PORT_MSG?=ON
-USER_CFLAGS += -DDEBUG_PRINT
+USER_CFLAGS += -DDEBUG_PRINT -DDUMP
 ifeq ($(PORT_MSG), ON)
 USER_CFLAGS += -DLOGD="printf"
 endif

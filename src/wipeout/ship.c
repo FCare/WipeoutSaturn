@@ -28,7 +28,10 @@ void ships_load(void) {
 	ship_models[6] = object_saturn_load("wipeout/ship/jacko.smf");
 	ship_models[7] = object_saturn_load("wipeout/ship/sophia.smf");
 	LOGD("!!!!!!!!!!!!!!!!!!!!Load objects\n");
-	// all_object_dump_saturn(ship_models);
+#ifdef DUMP
+	for (int i =0; i<8; i++)
+		object_dump_saturn(ship_models[i]);
+#endif
 	// Object_Saturn_list *collision_models = objects_saturn_load("wipeout/common/alcol.smf");
 	//
 	// error_if(ship_models->length != NUM_PILOTS, "Expected %ld ship models, got %d", NUM_PILOTS, ship_models->length);

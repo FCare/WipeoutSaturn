@@ -42,19 +42,31 @@ void image_ctrl_dump(saturn_image_ctrl_t * img) {
 	}
 }
 
-void object_dump_saturn(Object_Saturn *obj) {
-	LOGD("\t================ %s ===============\n", obj->info->name);
-	LOGD("\tsize: vertices:%d normals:%d primitives:%d\n", obj->info->vertices_len, obj->info->normals_len, obj->info->primitives_len);
-	LOGD("\tflags: 0x%x, origine %x %x %x\n", obj->info->flags, obj->info->origin.x, obj->info->origin.y, obj->info->origin.z);
-	// character_ctrl_dump(obj->characters);
-}
-
-void all_object_dump_saturn(Object_Saturn_list* list) {
-	LOGD("============ %d objects ===============\n", list->length);
-
-	for (int obj_id = 0; obj_id<list->length; obj_id++) {
-		Object_Saturn *obj = list->objects[obj_id];
-		object_dump_saturn(obj);
+void object_dump_saturn(Object_Saturn *object) {
+	LOGD("\t================ %s ===============\n", object->name);
+	//process de l'objet au niveau des memoires
+	LOGD("Name is %s\n", object->name);
+	LOGD("Got %d vertices\n", object->vertices_len);
+	LOGD("Vertices @ 0x%x\n", object->vertices);
+	LOGD("Normals @ 0x%x\n", object->normals);
+	LOGD("Nb Objects %d\n", object->nbObjects);
+	LOGD("Palette = ");
+	for (int i = 0; i<16; i++)
+		LOGD("0x%x ", object->palette[i]);
+	LOGD("\n");
+	for (int i = 0; i<object->nbObjects; i++) {
+		LOGD("Object %d = \n", i);
+		LOGD("\tflags 0x%x\n", object->object[i].flags);
+		LOGD("\tnb_faces %d\n", object->object[i].faces_len);
+		LOGD("Face offset %x\n", object->object[i].faces);
+		if ((object->object[i].flags & 0x2)==0) {
+			LOGD("Character offset %x\n", object->object[i].characters);
+			for (int j=0; j<object->object[i].faces_len; j++) {
+				LOGD("Character[%d] is %dx%d\n",j, object->object[i].characters[j]->width, object->object[i].characters[j]->height);
+			}
+		} else {
+			LOGD("Polygon model only\n");
+		}
 	}
 }
 #endif
@@ -507,32 +519,11 @@ Object_Saturn *object_saturn_load(char *name) {
 	//process de l'objet au niveau des memoires
 	object->vertices = (fix16_vec3_t *)((uint32_t)object+(uint32_t)object->vertices);
 	object->normals = (fix16_vec3_t *)((uint32_t)object+(uint32_t)object->normals);
-	printf("Name is %s\n", object->name);
-	printf("Got %d vertices\n", object->vertices_len);
-	printf("Vertices @ 0x%x\n", object->vertices);
-	printf("Normals @ 0x%x\n", object->normals);
-	printf("Nb Objects %d\n", object->nbObjects);
-	printf("Palette = ");
-	for (int i = 0; i<16; i++)
-		printf("0x%x ", object->palette[i]);
-	printf("\n");
 	for (int i = 0; i<object->nbObjects; i++) {
 		object->object[i].faces = (fix16_vec3_t *)((uint32_t)object+(uint32_t)object->object[i].faces);
 		object->object[i].characters = (fix16_vec3_t *)((uint32_t)object+(uint32_t)object->object[i].characters);
 		for (int j=0; j<object->object[i].faces_len; j++) {
 			object->object[i].characters[j] = (fix16_vec3_t *)((uint32_t)object+(uint32_t)object->object[i].characters[j]);
-		}
-		printf("Object %d = \n", i);
-		printf("\tflags 0x%x\n", object->object[i].flags);
-		printf("\tnb_faces %d\n", object->object[i].faces_len);
-		printf("Face offset %x\n", object->object[i].faces);
-		if ((object->object[i].flags & 0x2)==0) {
-			printf("Character offset %x\n", object->object[i].characters);
-			for (int j=0; j<object->object[i].faces_len; j++) {
-				printf("Character[%d] is %dx%d\n",j, object->object[i].characters[j]->width, object->object[i].characters[j]->height);
-			}
-		} else {
-			printf("Polygon model only\n");
 		}
 	}
 
