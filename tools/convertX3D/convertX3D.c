@@ -217,6 +217,9 @@ static int savingStep(void) {
   normalPos = ftell(fobj);
   write_32(0, fobj); //normalOffset
   write_32(modelOut.nbGeometry, fobj);
+  for (int i=0; i<16; i++) {
+    write_16(palette[i], fobj);
+  }
   for (int i=0; i<modelOut.nbGeometry; i++) {
     write_32(modelOut.geometry[i].flag, fobj);
     write_32(modelOut.geometry[i].nbFaces, fobj);
