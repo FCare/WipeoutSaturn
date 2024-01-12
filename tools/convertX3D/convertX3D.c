@@ -17,20 +17,21 @@
 #include "type.h"
 #include "gl.h"
 
-#define MESH_FLAG       0x1
-#define POLYGON_FLAG    0x2
-
 extern int read_png_file(char *filename, texture_t *tex);
 
 static texture_t inputTexture;
 
 static model modelOut;
 //up to 2048 faces per geometry
-static int uv_index[32][2048*4];
-static float uv[32][2048*2];
+static int uv_index[MAX_GEOMETRY][MAX_FACE*4];
+static float uv[MAX_GEOMETRY][MAX_FACE*2];
+
+static uint32_t vertexOut[MAX_FACE*3];
+static uint32_t normalOut[MAX_FACE*3];
+static face faceOut[MAX_GEOMETRY][MAX_FACE];
 
 //It means 2048 character max for 32 geometry max;
-static character characters[32][2048];
+static character characters[MAX_GEOMETRY][MAX_FACE];
 
 static int currentGeo;
 static int currentFace;
@@ -47,7 +48,8 @@ static rgb1555_t* extractPalette(texture_t *tex, int size) {
   rgb1555_t *pal = (rgb1555_t *)calloc(size,sizeof(rgb1555_t));
   int paletteSize = 0;
   for (int i = 0; i<tex->width*tex->height; i++) {
-    rgb1555_t pix = rgb155_from_u8(&tex->pixels[i*4]);
+    uint32_t val = (tex->pixels[i*4+3]<<24) | (tex->pixels[i*4+2]<<16) | (tex->pixels[i*4+1]<<8) | (tex->pixels[i*4+0]);
+    rgb1555_t pix = rgb155_from_u32(val);
     uint8_t isNewColor = 1;
     for (int p=0; p<paletteSize; p++) {
       if (pix == pal[p]) isNewColor = 0;
@@ -177,7 +179,7 @@ static int conversionStep(void) {
         rgb1555_t pix = out.pixels[i+p + j*c->width];
         for(int k = 0; k<16; k++) {
           if (pix == palette[k]) {
-            *val |= k<<p; //maybe need to reverse here
+            *val |= k<<((7-p)*4); //maybe need to reverse here
             break;
           }
         }
@@ -189,11 +191,94 @@ static int conversionStep(void) {
   return 1;
 }
 
+static void write_16(uint16_t val, FILE *f) {
+	uint16_t tmp = SWAP(val);
+	fwrite(&tmp, 2, sizeof(uint8_t), f);
+}
+
+static void write_32(uint32_t val, FILE *f) {
+	uint32_t tmp = SWAP_32(val);
+	fwrite(&tmp, 4, sizeof(uint8_t), f);
+}
+
 static int savingStep(void) {
   LOGD("saving step\n");
 
+  long vertexPos = 0;
+  long normalPos = 0;
+  long facePos[MAX_GEOMETRY] = {0};
+  long charPos[MAX_GEOMETRY] = {0};
+
   FILE *fobj = fopen(outputObject, "wb+");
   fwrite(modelOut.name, 32, sizeof(char), fobj);
+  write_32(modelOut.vertexNb, fobj);
+  vertexPos = ftell(fobj);
+  write_32(0, fobj); //vertexOffset
+  normalPos = ftell(fobj);
+  write_32(0, fobj); //normalOffset
+  write_32(modelOut.nbGeometry, fobj);
+  for (int i=0; i<modelOut.nbGeometry; i++) {
+    write_32(modelOut.geometry[i].flag, fobj);
+    write_32(modelOut.geometry[i].nbFaces, fobj);
+    facePos[i] = ftell(fobj);
+    write_32(0, fobj); //facesoffset
+    charPos[i] = ftell(fobj);
+    write_32(0, fobj); //characterOffset
+  }
+  //Write vertex
+  long pos = ftell(fobj);
+  pos = (pos + BINARY_SECTOR_SIZE) & ~(BINARY_SECTOR_SIZE-1);
+  //pack all starting the next sector
+  fseek(fobj, vertexPos, SEEK_SET);
+  write_32(pos, fobj); //vertexOffset
+  fseek(fobj, pos, SEEK_SET);
+  for (int i=0; i<modelOut.vertexNb;i++) {
+    write_32(vertexOut[i*3], fobj);
+    write_32(vertexOut[i*3+1], fobj);
+    write_32(vertexOut[i*3+2], fobj);
+  }
+  //Write normals
+  pos = ftell(fobj);
+  fseek(fobj, normalPos, SEEK_SET);
+  write_32(pos, fobj); //normalOffset
+  fseek(fobj, pos, SEEK_SET);
+  for (int i=0; i<modelOut.vertexNb;i++) {
+    write_32(normalOut[i*3], fobj);
+    write_32(normalOut[i*3+1], fobj);
+    write_32(normalOut[i*3+2], fobj);
+  }
+  //Write faces
+  for (int i=0; i<modelOut.nbGeometry; i++) {
+    pos = ftell(fobj);
+    fseek(fobj, facePos[i], SEEK_SET);
+    write_32(pos, fobj); //facesoffset
+    fseek(fobj, pos, SEEK_SET);
+    for (int j=0; j<modelOut.geometry[i].nbFaces; j++) {
+      write_32(faceOut[i][j].vertex_id[0], fobj);
+      write_32(faceOut[i][j].vertex_id[1], fobj);
+      write_32(faceOut[i][j].vertex_id[2], fobj);
+      write_32(faceOut[i][j].vertex_id[3], fobj);
+      write_32(faceOut[i][j].RGB, fobj);
+    }
+  }
+
+  //Write characters
+  pos = ftell(fobj);
+  for (int i=0; i<modelOut.nbGeometry; i++) {
+    pos = ftell(fobj);
+    fseek(fobj, charPos[i], SEEK_SET);
+    write_32(pos, fobj); //characteroffset
+    fseek(fobj, pos, SEEK_SET);
+    for (int j=0; j<modelOut.geometry[i].nbFaces; j++) {
+      write_32(characters[i][j].width, fobj);
+      write_32(characters[i][j].height, fobj);
+      for (int p=0; p<characters[i][j].width*characters[i][j].height/8; p++) {
+        write_32(characters[i][j].pixels[p], fobj);
+      }
+    }
+  }
+
+  printf("Wrote %ld bytes\n", pos);
   fclose(fobj);
   free(inputTexture.pixels);
   return 0;
@@ -230,10 +315,7 @@ main(int argc, char **argv)
     xmlNode        *root, *group, *shape;
     char           *filename;
     char           *texturefilename;
-
-    uint32_t vertexOut[2048*3];
-    uint32_t normalOut[2048*3];
-    face faceOut[32][2048];
+    int             nbNormals = 0;
 
     if (argc < 3) {
         fprintf(stderr, "Usage: %s filename.x3D texture.png\n", argv[0]);
@@ -269,6 +351,7 @@ main(int argc, char **argv)
     }
 
     modelOut.nbGeometry = 0;
+    modelOut.vertexNb = 0;
     for(shape = group->children; shape = getShapeInGroup(shape); shape = shape->next) {
       LOGD("New Geometry\n");
       geometry *geo = &modelOut.geometry[modelOut.nbGeometry];
@@ -354,9 +437,9 @@ main(int argc, char **argv)
         return -1;
       }
 
-      modelOut.vertexNb = 0;
       char* DEFIndex = xmlGetProp(coordNode, "DEF");
       if (DEFIndex != NULL) {
+        modelOut.vertexNb = 0;
         char* coordIndex = xmlGetProp(coordNode, "point");
         while((str=strsep(&coordIndex, " ")) != NULL) {
           if (strlen(str)>0) {
@@ -383,7 +466,6 @@ main(int argc, char **argv)
         return -1;
       }
 
-      int nbNormals = 0;
       if(xmlGetProp(normNode, "DEF") != NULL) {
         char* coordIndex = xmlGetProp(normNode, "vector");
         while((str=strsep(&coordIndex, " ")) != NULL) {
@@ -403,7 +485,7 @@ main(int argc, char **argv)
       }
 
       if (nbNormals/3 != modelOut.vertexNb) {
-        LOGD("Not a normal per vertex\n");
+        LOGD("Not a normal per vertex %d %d\n", nbNormals/3, modelOut.vertexNb);
         free(inputTexture.pixels);
         xmlFreeDoc(document);
         return -1;
@@ -448,7 +530,7 @@ main(int argc, char **argv)
           nbColor++;
           uint16_t col = (uint16_t)(strtod(str, NULL) * 32.0 + 0.5);
           int component = nbColor%4;
-          if (component != 3) faceOut[modelOut.nbGeometry][nbColor/4].RGB |= (col<<(component*5));
+          if (component != 3) faceOut[modelOut.nbGeometry][nbColor/4].RGB |= (col&0x1F)<<(component*5);
           faceOut[modelOut.nbGeometry][nbColor/4].RGB |= 0x8000;
         }
       }

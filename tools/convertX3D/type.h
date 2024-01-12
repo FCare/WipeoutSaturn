@@ -5,6 +5,17 @@
     ? ((x) * 65536.0f + 0.5f)                                                  \
     : ((x) * 65536.0f - 0.5f)))
 
+#define MESH_FLAG       0x1
+#define POLYGON_FLAG    0x2
+
+#define SWAP(X) (((X&0xFF)<<8)|(X>>8))
+#define SWAP_32(X) (((X&0xFF)<<24)|((X&0xFF00)<<8)|((X&0xFF0000)>>8)|(X>>24))
+
+#define BINARY_SECTOR_SIZE 2048
+
+#define MAX_GEOMETRY 32
+#define MAX_FACE 2048
+
 #define true 1
 #define false 0
 
@@ -33,17 +44,16 @@ typedef struct {
 } quads_t;
 
 typedef struct {
-  char name[32];
   uint32_t flag;
   uint32_t nbFaces;
   uint32_t facesOffset;
-  uint32_t textureOffset;
+  uint32_t characterOffset;
 }geometry;
 
 
 typedef struct {
-  uint16_t width;
-  uint16_t height;
+  uint32_t width;
+  uint32_t height;
   uint32_t *pixels;
 }character;
 
@@ -53,14 +63,12 @@ typedef struct {
   uint32_t vertexOffset;
   uint32_t normalsOffset;
   uint32_t nbGeometry;
-  uint32_t totalSectorNb;
-  geometry geometry[32];
+  geometry geometry[MAX_GEOMETRY];
 } model;
 
 typedef struct{
   uint32_t vertex_id[4]; //A,B,C,D
-  uint16_t RGB;
-  uint16_t padding;
+  uint32_t RGB;
 } face;
 
 typedef struct{

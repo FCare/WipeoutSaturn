@@ -23,7 +23,7 @@ COMMON_DEPS = $(patsubst %.c, $(BUILD_DIR)/%.d, $(BUILD_SRC))
 
 
 convertModel: $(COMMON_OBJ)
-	gcc -Wall -Og -o $(BUILD_DIR)/convertX3D $^  -L$(GL_LIB) -L$(LIBXML_LIB) -lGL -lglut -lGLEW -lxml2 -lpng -lm
+	gcc -Wall -g -o $(BUILD_DIR)/convertX3D $^  -L$(GL_LIB) -L$(LIBXML_LIB) -lGL -lglut -lGLEW -lxml2 -lpng -lm
 
 $(BUILD_DIR):
 		mkdir -p $(BUILD_DIR)
