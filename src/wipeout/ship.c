@@ -27,7 +27,7 @@ void ships_load(void) {
 	for (int object_index = 0; object_index < NUM_PILOTS; object_index++) {
 		g.ships[object_index].model = object_saturn_load(def.pilots[object_index].ship);
 		g.ships[object_index].collision_model = object_saturn_load(def.pilots[object_index].collision);
-		// ship_init_exhaust_plume(&g.ships[ship_index]);
+		ship_init_exhaust_plume(&g.ships[object_index]);
 #ifdef DUMP
 	object_dump_saturn(g.ships[object_index].model);
 #endif
@@ -273,122 +273,62 @@ void ship_init(ship_t *self, section_t *section, int pilot, int inv_start_rank) 
 }
 
 void ship_init_exhaust_plume(ship_t *self) {
-	// //Draw the fire below the ship
-	// int16_t indices[64];
-	// int16_t indices_len = 0;
-	//
-	// for (int i = 0; i < self->model->info->primitives_len; i++) {
-	// 	PRM_saturn *prm = self->model->primitives[i];
-	// 	switch (prm->type) {
-	// 	case PRM_TYPE_F3 :
-	// 		if (flags_is(prm->f3.flag, PRM_SHIP_ENGINE)) {
-	// 			die("F3 ::SE marked polys should be ft3's");
-	// 		}
-	// 		break;
-	//
-	// 	case PRM_TYPE_F4 :
-	// 		if (flags_is(prm->f4.flag, PRM_SHIP_ENGINE)) {
-	// 			die("F4 ::SE marked polys should be ft3's");
-	// 		}
-	// 		break;
-	//
-	// 	case PRM_TYPE_FT3 :
-	// 		if (flags_is(prm->ft3.flag, PRM_SHIP_ENGINE)) {
-	// 			indices[indices_len++] = prm->ft3.coords[0];
-	// 			indices[indices_len++] = prm->ft3.coords[1];
-	// 			indices[indices_len++] = prm->ft3.coords[2];
-	//
-	// 			flags_add(prm->ft3.flag, PRM_TRANSLUCENT);
-	// 			prm->ft3.color.r = 180>>3;
-	// 			prm->ft3.color.g = 97>>3 ;
-	// 			prm->ft3.color.b = 120>>3;
-	// 			prm->ft3.color.msb = 1; //140; //to be review here. Shall use mesh
-	// 		}
-	// 		break;
-	//
-	// 	case PRM_TYPE_FT4 :
-	// 		if (flags_is(prm->ft4.flag, PRM_SHIP_ENGINE)) {
-	// 			die("FT4 ::SE marked polys should be ft3's");
-	// 		}
-	// 		break;
-	//
-	// 	case PRM_TYPE_G3 :
-	// 		if (flags_is(prm->g3.flag, PRM_SHIP_ENGINE)) {
-	// 			die("G3 ::SE marked polys should be ft3's");
-	// 		}
-	// 		break;
-	//
-	// 	case PRM_TYPE_G4 :
-	// 		if (flags_is(prm->g4.flag, PRM_SHIP_ENGINE)) {
-	// 			die("G4 ::SE marked polys should be ft3's");
-	// 		}
-	// 		break;
-	//
-	// 	case PRM_TYPE_GT3 :
-	// 		if (flags_is(prm->gt3.flag, PRM_SHIP_ENGINE)) {
-	// 			indices[indices_len++] = prm->gt3.coords[0];
-	// 			indices[indices_len++] = prm->gt3.coords[1];
-	// 			indices[indices_len++] = prm->gt3.coords[2];
-	//
-	// 			flags_add(prm->gt3.flag, PRM_TRANSLUCENT);
-	// 			for (int j = 0; j < 3; j++) {
-	// 				prm->gt3.color[j].r = 180>>3;
-	// 				prm->gt3.color[j].g = 97>>3 ;
-	// 				prm->gt3.color[j].b = 120>>3;
-	// 				prm->gt3.color[j].msb = 1; //140; //to be review here. Shall use mesh
-	// 			}
-	// 		}
-	// 		break;
-	//
-	// 	case PRM_TYPE_GT4 :
-	// 		if (flags_is(prm->gt4.flag, PRM_SHIP_ENGINE)) {
-	// 			die("GT4 ::SE marked polys should be ft3's");
-	// 		}
-	// 		break;
-	//
-	// 	default :
-	// 		die("cone.c::InitCone:Bad primitive type %x\n", prm->f3.type);
-	// 		break;
-	// 	}
-	// }
-	//
-	//
-	// // get out the center vertex
-	//
-	// self->exhaust_plume[0].v = NULL;
-	// self->exhaust_plume[1].v = NULL;
-	// self->exhaust_plume[2].v = NULL;
-	//
-	// int shared[3] = {-1, -1, -1};
-	// int booster = 0;
-	// for (int i = 0; (i < indices_len) && (booster < 3); i++) {
-	// 	int similar = 0;
-	// 	for (int j = 0; j < indices_len; j++) {
-	// 		if (indices[i] == indices[j]) {
-	// 			similar++;
-	// 			if (similar > 3) {
-	// 				int found = 0;
-	// 				for (int k = 0; k < 3; k++) {
-	// 					if (shared[k] == indices[i]) {
-	// 						found = 1;
-	// 					}
-	// 				}
-	//
-	// 				if (!found) {
-	// 					shared[booster] = indices[i];
-	// 					booster++;
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// }
-	//
-	// for (int j = 0; j < 3; j++) {
-	// 	if (shared[j] != -1) {
-	// 		self->exhaust_plume[j].v = &self->model->vertices[shared[j]];
-	// 		self->exhaust_plume[j].initial = self->model->vertices[shared[j]];
-	// 	}
-	// }
+	//Draw the fire below the ship
+	int16_t indices[64];
+	int16_t indices_len = 0;
+
+	for (int i = 0; i<self->model->nbObjects; i++) {
+		if ((self->model->object[i].flags & EXHAUST_FLAG) != 0) {
+			//We found the exhaust
+			geometry *geo = &self->model->object[i];
+			for (int j=0; j<geo->faces_len; j++) {
+				indices[indices_len++] = geo->faces[j].vertex_id[0];
+				indices[indices_len++] = geo->faces[j].vertex_id[1];
+				indices[indices_len++] = geo->faces[j].vertex_id[2];
+				indices[indices_len++] = geo->faces[j].vertex_id[3];
+			}
+			break;
+		}
+	}
+	// get out the center vertex
+
+	self->exhaust_plume[0].v = NULL;
+	self->exhaust_plume[1].v = NULL;
+	self->exhaust_plume[2].v = NULL;
+
+	int shared[3] = {-1, -1, -1};
+	int booster = 0;
+	for (int i = 0; (i < indices_len) && (booster < 3); i++) {
+		int similar = 0;
+		for (int j = 0; j < indices_len; j++) {
+			if (indices[i] == indices[j]) {
+				similar++;
+				if (similar > 3) {
+					int found = 0;
+					for (int k = 0; k < 3; k++) {
+						if (shared[k] == indices[i]) {
+							found = 1;
+						}
+					}
+
+					if (!found) {
+						shared[booster] = indices[i];
+						booster++;
+					}
+				}
+			}
+		}
+	}
+
+	int init = 0;
+	for (int j = 0; j < 3; j++) {
+		if (shared[j] != -1) {
+			init = 1;
+			self->exhaust_plume[j].v = &self->model->vertices[shared[j]];
+			self->exhaust_plume[j].initial = self->model->vertices[shared[j]];
+		}
+	}
+	error_if(init == 0, "Exhaust was not found for model %s\n", self->model->name);
 }
 
 void ship_reset_exhaust_plume(ship_t* self)

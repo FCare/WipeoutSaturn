@@ -6,6 +6,10 @@
 #include "../utils.h"
 #include "../wipeout/image.h"
 
+#define EXHAUST_FLAG       0x1
+#define POLYGON_FLAG    0x2
+#define FLAT_FLAG       0x4
+
 // Primitive Structure Stub ( Structure varies with primitive type )
 
 typedef struct F3_S {
