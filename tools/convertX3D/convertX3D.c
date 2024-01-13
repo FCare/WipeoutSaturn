@@ -419,11 +419,9 @@ main(int argc, char **argv)
         while((str=strsep(&texIndex, " ")) != NULL) {
           int val = (int)strtol(str, NULL, 10);
           if (val == -1) {
-            if (geo->nbFaces!=0) {
-              //Ensure face has 4 vertex
-              for (nb_entry; nb_entry <= 4; nb_entry++)
-                uv_index[modelOut.nbGeometry][geo->nbFaces*4+nb_entry] = uv_index[modelOut.nbGeometry][geo->nbFaces*4+nb_entry-1];
-            }
+            //Ensure face has 4 vertex
+            for (nb_entry; nb_entry < 4; nb_entry++)
+              uv_index[modelOut.nbGeometry][geo->nbFaces*4+nb_entry] = uv_index[modelOut.nbGeometry][geo->nbFaces*4+nb_entry-1];
             geo->nbFaces++;
             nb_entry = 0;
           }
@@ -440,11 +438,9 @@ main(int argc, char **argv)
       while((str=strsep(&coordIndex, " ")) != NULL) {
         int val = (int)strtol(str, NULL, 10);
         if (val == -1) {
-          if (geo->nbFaces!=0) {
-            //Ensure face has 4 vertex
-            for (nb_entry; nb_entry <= 4; nb_entry++)
-              faceOut[modelOut.nbGeometry][geo->nbFaces].vertex_id[nb_entry] = faceOut[modelOut.nbGeometry][geo->nbFaces].vertex_id[nb_entry-1];
-          }
+          //Ensure face has 4 vertex
+          for (nb_entry; nb_entry < 4; nb_entry++)
+            faceOut[modelOut.nbGeometry][geo->nbFaces].vertex_id[nb_entry] = faceOut[modelOut.nbGeometry][geo->nbFaces].vertex_id[nb_entry-1];
           geo->nbFaces++;
           nb_entry = 0;
         }
