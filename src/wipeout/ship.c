@@ -26,7 +26,7 @@ void ships_load(void) {
 	//
 	for (int object_index = 0; object_index < NUM_PILOTS; object_index++) {
 		g.ships[object_index].model = object_saturn_load(def.pilots[object_index].ship);
-		// g.ships[ship_index].collision_model = collision_models->objects[object_index];
+		g.ships[object_index].collision_model = object_saturn_load(def.pilots[object_index].collision);
 		// ship_init_exhaust_plume(&g.ships[ship_index]);
 #ifdef DUMP
 	object_dump_saturn(g.ships[object_index].model);

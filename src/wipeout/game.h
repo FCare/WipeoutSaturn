@@ -121,6 +121,7 @@ typedef struct {
 	char *name;
 	char *portrait;
 	char *ship;
+	char *collision;
 	int logo_model;
 	int team;
 } pilot_t;

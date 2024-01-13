@@ -37,14 +37,14 @@ const game_def_t def = {
 	},
 
 	.pilots = {
-		[PILOT_JOHN_DEKKA]           = {.name = "JOHN DEKKA",           .portrait = "wipeout/textures/dekka.cmp", .ship = "wipeout/ship/dekka.smf", .team = 0, .logo_model = 0},
-		[PILOT_DANIEL_CHANG]         = {.name = "DANIEL CHANG",         .portrait = "wipeout/textures/chang.cmp", .ship = "wipeout/ship/chang.smf", .team = 0, .logo_model = 4},
-		[PILOT_ARIAL_TETSUO]         = {.name = "ARIAL TETSUO",         .portrait = "wipeout/textures/arial.cmp", .ship = "wipeout/ship/arial.smf", .team = 1, .logo_model = 6},
-		[PILOT_ANASTASIA_CHEROVOSKI] = {.name = "ANASTASIA CHEROVOSKI", .portrait = "wipeout/textures/anast.cmp", .ship = "wipeout/ship/anasta.smf", .team = 1, .logo_model = 7},
-		[PILOT_KEL_SOLAAR]           = {.name = "KEL SOLAAR",           .portrait = "wipeout/textures/solar.cmp", .ship = "wipeout/ship/solaar.smf", .team = 2, .logo_model = 2},
-		[PILOT_ARIAN_TETSUO]         = {.name = "ARIAN TETSUO",         .portrait = "wipeout/textures/arian.cmp", .ship = "wipeout/ship/arian.smf", .team = 2, .logo_model = 5},
-		[PILOT_SOFIA_DE_LA_RENTE]    = {.name = "SOFIA DE LA RENTE",    .portrait = "wipeout/textures/sophi.cmp", .ship = "wipeout/ship/sophia.smf", .team = 3, .logo_model = 1},
-		[PILOT_PAUL_JACKSON]         = {.name = "PAUL JACKSON",         .portrait = "wipeout/textures/paul.cmp",  .ship = "wipeout/ship/jacko.smf", .team = 3, .logo_model = 3},
+		[PILOT_JOHN_DEKKA]           = {.name = "JOHN DEKKA",           .portrait = "wipeout/textures/dekka.cmp", .ship = "wipeout/ship/dekka.smf", .collision = "wipeout/ship/col_dekk.smf", .team = 0, .logo_model = 0},
+		[PILOT_DANIEL_CHANG]         = {.name = "DANIEL CHANG",         .portrait = "wipeout/textures/chang.cmp", .ship = "wipeout/ship/chang.smf", .collision = "wipeout/ship/col_chan.smf", .team = 0, .logo_model = 4},
+		[PILOT_ARIAL_TETSUO]         = {.name = "ARIAL TETSUO",         .portrait = "wipeout/textures/arial.cmp", .ship = "wipeout/ship/arial.smf", .collision = "wipeout/ship/col_ari0.smf", .team = 1, .logo_model = 6},
+		[PILOT_ANASTASIA_CHEROVOSKI] = {.name = "ANASTASIA CHEROVOSKI", .portrait = "wipeout/textures/anast.cmp", .ship = "wipeout/ship/anasta.smf", .collision = "wipeout/ship/col_anas.smf", .team = 1, .logo_model = 7},
+		[PILOT_KEL_SOLAAR]           = {.name = "KEL SOLAAR",           .portrait = "wipeout/textures/solar.cmp", .ship = "wipeout/ship/solaar.smf", .collision = "wipeout/ship/col_sola.smf", .team = 2, .logo_model = 2},
+		[PILOT_ARIAN_TETSUO]         = {.name = "ARIAN TETSUO",         .portrait = "wipeout/textures/arian.cmp", .ship = "wipeout/ship/arian.smf", .collision = "wipeout/ship/col_ari1.smf", .team = 2, .logo_model = 5},
+		[PILOT_SOFIA_DE_LA_RENTE]    = {.name = "SOFIA DE LA RENTE",    .portrait = "wipeout/textures/sophi.cmp", .ship = "wipeout/ship/sophia.smf", .collision = "wipeout/ship/col_soph.smf", .team = 3, .logo_model = 1},
+		[PILOT_PAUL_JACKSON]         = {.name = "PAUL JACKSON",         .portrait = "wipeout/textures/paul.cmp",  .ship = "wipeout/ship/jacko.smf", .collision = "wipeout/ship/col_jack.smf", .team = 3, .logo_model = 3},
 	},
 
 	.race_points_for_rank = {9, 7, 5, 3, 2, 1, 0, 0},
