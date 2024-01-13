@@ -7,6 +7,7 @@
 
 #define MESH_FLAG       0x1
 #define POLYGON_FLAG    0x2
+#define FLAT_FLAG       0x4
 
 #define SWAP(X) (((X&0xFF)<<8)|(X>>8))
 #define SWAP_32(X) (((X&0xFF)<<24)|((X&0xFF00)<<8)|((X&0xFF0000)>>8)|(X>>24))
