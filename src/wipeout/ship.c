@@ -17,13 +17,6 @@
 #include "sfx.h"
 
 void ships_load(void) {
-	// Object_Saturn_list *ship_models = objects_saturn_load("wipeout/common/allsh.smf");
-
-	// Object_Saturn_list *collision_models = objects_saturn_load("wipeout/common/alcol.smf");
-	//
-	// error_if(ship_models->length != NUM_PILOTS, "Expected %ld ship models, got %d", NUM_PILOTS, ship_models->length);
-	// error_if(collision_models->length != NUM_PILOTS, "Expected %ld collison models, got %d", NUM_PILOTS, collision_models->length);
-	//
 	for (int object_index = 0; object_index < NUM_PILOTS; object_index++) {
 		g.ships[object_index].model = object_saturn_load(def.pilots[object_index].ship);
 		g.ships[object_index].collision_model = object_saturn_load(def.pilots[object_index].collision);
@@ -33,6 +26,7 @@ void ships_load(void) {
 #endif
 	}
 /*
+//This is pSX image 4bits. Can be converted as VDP1 Half-transparent
 	uint16_t shadow_textures_start = render_textures_len();
 	image_get_texture_semi_trans("wipeout/textures/shad1.tim");
 	image_get_texture_semi_trans("wipeout/textures/shad2.tim");

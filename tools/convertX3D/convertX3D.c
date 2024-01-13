@@ -262,7 +262,8 @@ static int savingStep(void) {
       write_32(faceOut[i][j].vertex_id[1], fobj);
       write_32(faceOut[i][j].vertex_id[2], fobj);
       write_32(faceOut[i][j].vertex_id[3], fobj);
-      write_32(faceOut[i][j].RGB, fobj);
+      write_16(faceOut[i][j].RGB, fobj);
+      write_16(0, fobj);
     }
   }
 
@@ -534,11 +535,14 @@ main(int argc, char **argv)
         char* colorIndex = xmlGetProp(colorNode, "color");
         while((str=strsep(&colorIndex, " ")) != NULL) {
           if (strlen(str)>0) {
-            nbColor++;
-            uint16_t col = (uint16_t)(strtod(str, NULL) * 32.0 + 0.5);
+            uint16_t col = ((uint16_t)(strtod(str, NULL) * 255.0))>>3;
             int component = nbColor%4;
+            printf("Color [%d][%d] = 0x%x\n", nbColor/4,component, col);
+            if (component == 0) faceOut[modelOut.nbGeometry][nbColor/4].RGB = 0;
             if (component != 3) faceOut[modelOut.nbGeometry][nbColor/4].RGB |= (col&0x1F)<<(component*5);
-            faceOut[modelOut.nbGeometry][nbColor/4].RGB |= 0x8000;
+            else faceOut[modelOut.nbGeometry][nbColor/4].RGB |= 0x8000;
+            printf("==> 0x%x\n",faceOut[modelOut.nbGeometry][nbColor/4].RGB);
+            nbColor++;
           }
         }
         if ((nbColor%4) != 0) {

@@ -291,7 +291,8 @@ typedef struct {
 
 typedef struct{
 	uint32_t vertex_id[4]; //A,B,C,D
-	uint32_t RGB;
+	rgb1555_t RGB;
+	uint16_t pad;
 } face;
 
 typedef struct {

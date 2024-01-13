@@ -666,247 +666,44 @@ Object_Saturn_list* objects_saturn_load(char *name) {
 int nb_texture = 0;
 
 void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
-	// vec3_t *vertex = mem_temp_alloc(object->info->vertices_len * sizeof(vec3_t));
-	//
-	// uint16_t primitives_len = object->info->primitives_len;
-	//
-	// render_set_model_mat(mat);
-	//
-	// render_object_transform(vertex, object->vertices, object->info->vertices_len);
-	//
-	// for (uint16_t i = 0; i < primitives_len; i++) {
-	// 	int coord0;
-	// 	int coord1;
-	// 	int coord2;
-	// 	int coord3;
-	// 	PRM_saturn *poly = object->primitives[i];
-	// 	switch (poly->type) {
-	// 	case PRM_TYPE_GT3:
-	// 		coord0 = poly->gt3.coords[0];
-	// 		coord1 = poly->gt3.coords[1];
-	// 		coord2 = poly->gt3.coords[2];
-	// 		render_push_tris_saturn((tris_saturn_t) {
-	// 			.vertices = {
-	// 				{
-	// 					.pos = vertex[coord2],
-	// 					.color = poly->gt3.color[2]
-	// 				},
-	// 				{
-	// 					.pos = vertex[coord1],
-	// 					.color = poly->gt3.color[1]
-	// 				},
-	// 				{
-	// 					.pos = vertex[coord0],
-	// 					.color = poly->gt3.color[0]
-	// 				},
-	// 			}
-	// 		}, poly->gt3.texture, object);
-	// 		break;
-	//
-	// 	case PRM_TYPE_GT4:
-	// 		coord0 = poly->gt4.coords[0];
-	// 		coord1 = poly->gt4.coords[1];
-	// 		coord2 = poly->gt4.coords[2];
-	// 		coord3 = poly->gt4.coords[3];
-	//
-	// 		quads_saturn_t q1 = {
-	// 			.vertices = {
-	// 				{
-	// 					.pos = vertex[coord0],
-	// 					.color = poly->gt4.color[0]
-	// 				},
-	// 				{
-	// 					.pos = vertex[coord2],
-	// 					.color = poly->gt4.color[2]
-	// 				},
-	// 				{
-	// 					.pos = vertex[coord3],
-	// 					.color = poly->gt4.color[3]
-	// 				},
-	// 				{
-	// 					.pos = vertex[coord1],
-	// 					.color = poly->gt4.color[1]
-	// 				},
-	// 			}
-	// 		};
-	// 		render_push_stripe_saturn( &q1, poly->gt4.texture, object);
-	// 		break;
-	//
-	// 	case PRM_TYPE_FT3:
-	// 		coord0 = poly->ft3.coords[0];
-	// 		coord1 = poly->ft3.coords[1];
-	// 		coord2 = poly->ft3.coords[2];
-	// 		render_push_tris_saturn((tris_saturn_t) {
-	// 			.vertices = {
-	// 				{
-	// 					.pos = vertex[coord2],
-	// 					.color = poly->ft3.color
-	// 				},
-	// 				{
-	// 					.pos = vertex[coord1],
-	// 					.color = poly->ft3.color
-	// 				},
-	// 				{
-	// 					.pos = vertex[coord0],
-	// 					.color = poly->ft3.color
-	// 				},
-	// 			}
-	// 		}, poly->ft3.texture, object);
-	// 		break;
-	//
-	// 	case PRM_TYPE_FT4:
-	// 		coord0 = poly->ft4.coords[0];
-	// 		coord1 = poly->ft4.coords[1];
-	// 		coord2 = poly->ft4.coords[2];
-	// 		coord3 = poly->ft4.coords[3];
-	//
-	// 		quads_saturn_t q2 = {
-	// 			.vertices = {
-	// 				{
-	// 					.pos = vertex[coord3],
-	// 					.color = poly->ft4.color
-	// 				},
-	// 				{
-	// 					.pos = vertex[coord1],
-	// 					.color = poly->ft4.color
-	// 				},
-	// 				{
-	// 					.pos = vertex[coord0],
-	// 					.color = poly->ft4.color
-	// 				},
-	// 				{
-	// 					.pos = vertex[coord2],
-	// 					.color = poly->ft4.color
-	// 				},
-	// 			}
-	// 		};
-	// 		render_push_stripe_saturn( &q2, poly->ft4.texture, object);
-	// 		break;
-	//
-	// 	case PRM_TYPE_G3:
-	// 		coord0 = poly->g3.coords[0];
-	// 		coord1 = poly->g3.coords[1];
-	// 		coord2 = poly->g3.coords[2];
-	// 		render_push_tris_saturn((tris_saturn_t) {
-	// 			.vertices = {
-	// 				{
-	// 					.pos = vertex[coord2],
-	// 					.color = poly->g3.color[2]
-	// 				},
-	// 				{
-	// 					.pos = vertex[coord1],
-	// 					.color = poly->g3.color[1]
-	// 				},
-	// 				{
-	// 					.pos = vertex[coord0],
-	// 					.color = poly->g3.color[0]
-	// 				},
-	// 			}
-	// 		}, RENDER_NO_TEXTURE_SATURN, object);
-	// 		break;
-	//
-	// 	case PRM_TYPE_G4:
-	// 		coord0 = poly->g4.coords[0];
-	// 		coord1 = poly->g4.coords[1];
-	// 		coord2 = poly->g4.coords[2];
-	// 		coord3 = poly->g4.coords[3];
-	//
-	// 		quads_saturn_t q3 = {
-	// 			.vertices = {
-	// 				{
-	// 					.pos = vertex[coord3],
-	// 					.color = poly->g4.color[3]
-	// 				},
-	// 				{
-	// 					.pos = vertex[coord1],
-	// 					.color = poly->g4.color[1]
-	// 				},
-	// 				{
-	// 					.pos = vertex[coord0],
-	// 					.color = poly->g4.color[0]
-	// 				},
-	// 				{
-	// 					.pos = vertex[coord2],
-	// 					.color = poly->g4.color[2]
-	// 				},
-	// 			}
-	// 		};
-	// 		render_push_stripe_saturn( &q3, RENDER_NO_TEXTURE_SATURN, object);
-	// 		break;
-	//
-	// 	case PRM_TYPE_F3:
-	// 		coord0 = poly->f3.coords[0];
-	// 		coord1 = poly->f3.coords[1];
-	// 		coord2 = poly->f3.coords[2];
-	// 		render_push_tris_saturn((tris_saturn_t) {
-	// 			.vertices = {
-	// 				{
-	// 					.pos = vertex[coord2],
-	// 					.color = poly->f3.color
-	// 				},
-	// 				{
-	// 					.pos = vertex[coord1],
-	// 					.color = poly->f3.color
-	// 				},
-	// 				{
-	// 					.pos = vertex[coord0],
-	// 					.color = poly->f3.color
-	// 				},
-	// 			}
-	// 		}, RENDER_NO_TEXTURE_SATURN, object);
-	// 		break;
-	//
-	// 	case PRM_TYPE_F4:
-	// 		coord0 = poly->f4.coords[0];
-	// 		coord1 = poly->f4.coords[1];
-	// 		coord2 = poly->f4.coords[2];
-	// 		coord3 = poly->f4.coords[3];
-	//
-	// 		quads_saturn_t q4 = {
-	// 			.vertices = {
-	// 				{
-	// 					.pos = vertex[coord3],
-	// 					.color = poly->f4.color
-	// 				},
-	// 				{
-	// 					.pos = vertex[coord1],
-	// 					.color = poly->f4.color
-	// 				},
-	// 				{
-	// 					.pos = vertex[coord0],
-	// 					.color = poly->f4.color
-	// 				},
-	// 				{
-	// 					.pos = vertex[coord2],
-	// 					.color = poly->f4.color
-	// 				},
-	// 			}
-	// 		};
-	// 		render_push_stripe_saturn( &q4, RENDER_NO_TEXTURE_SATURN, object);
-	// 		break;
-	//
-	// 	case PRM_TYPE_TSPR:
-	// 	case PRM_TYPE_BSPR:
-	// 		// coord0 = poly->spr.coord;
-	// 		//
-	// 		// render_push_sprite(
-	// 		// 	vec3_fix16(
-	// 		// 		vertex[coord0].x,
-	// 		// 		vertex[coord0].y + ((poly->type == PRM_TYPE_TSPR ? poly->spr.height : -poly->spr.height) >> 1),
-	// 		// 		vertex[coord0].z
-	// 		// 	),
-	// 		// 	vec2i(poly->spr.width, poly->spr.height),
-	// 		// 	poly->spr.color,
-	// 		// 	poly->spr.texture
-	// 		// );
-	// 		break;
-	//
-	// 	default:
-	// 		break;
-	// 	}
-	// }
-	//
-	// mem_temp_free(vertex);
+	render_set_model_mat(mat);
+
+	vec3_t *vertex = mem_temp_alloc(object->vertices_len * sizeof(vec3_t));
+	render_object_transform(vertex, object->vertices, object->vertices_len);
+
+	for (int geoId = 0; geoId < object->nbObjects; geoId++) {
+		geometry *geo = &object->object[geoId];
+		if ((geo->flags & POLYGON_FLAG) != 0) {
+			for (int faceId = 0; faceId < geo->faces_len; faceId++){
+				face *curFace = &geo->faces[faceId];
+				character *curChar = geo->characters[faceId];
+				quads_saturn_t q = {
+					.vertices = {
+						{
+							.pos = vertex[curFace->vertex_id[0]],
+							.color = curFace->RGB
+						},
+						{
+							.pos = vertex[curFace->vertex_id[1]],
+							.color = curFace->RGB
+						},
+						{
+							.pos = vertex[curFace->vertex_id[2]],
+							.color = curFace->RGB
+						},
+						{
+							.pos = vertex[curFace->vertex_id[3]],
+							.color = curFace->RGB
+						},
+					}
+				};
+				uint16_t texture_index = RENDER_NO_TEXTURE_SATURN;
+				//We need to copy the character to the vdp1 and provide the texture_index
+				render_push_distorted_saturn( &q, texture_index, object);
+			}
+		}
+	}
+	mem_temp_free(vertex);
 }
 
 void object_draw(Object *object, mat4_t *mat) {

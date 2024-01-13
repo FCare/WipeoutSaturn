@@ -207,7 +207,7 @@ void render_push_quads(quads_t *quad, uint16_t texture_index) {
   render_push_native_quads(quad, rgba(128,128,128,255), RENDER_NO_TEXTURE);
 }
 
-void render_push_stripe_saturn(quads_saturn_t *quad, uint16_t texture_index, Object_Saturn *object) {
+void render_push_distorted_saturn(quads_saturn_t *quad, uint16_t texture_index, Object_Saturn *object) {
   LOGD("%s\n", __FUNCTION__);
 
   nb_planes++;
@@ -244,28 +244,6 @@ void render_push_stripe(quads_t *quad, uint16_t texture_index __unused) {
   quad->vertices[3].uv.y = 1;
 
   render_push_native_quads(quad, quad->vertices[0].color, RENDER_NO_TEXTURE);
-}
-void render_push_tris_saturn(tris_saturn_t tris, uint16_t texture_index, Object_Saturn *object){
-  LOGD("%s\n", __FUNCTION__);
-  fix16_t minZ = FIX16_ZERO;
-  nb_planes++;
-  for (int i = 0; i<3; i++) {
-    if (tris.vertices[i].pos.z >= FIX16_ONE) {
-      LOGD("discard due to Z=%d\n", (uint32_t)tris.vertices[i].pos.z);
-      return;
-    }
-    minZ = min(minZ, tris.vertices[i].pos.z);
-  }
-
-  currentminZ = min(currentminZ, minZ);
-
-  quads_saturn_t q= (quads_saturn_t){
-    .vertices = {
-      tris.vertices[0], tris.vertices[1], tris.vertices[2], tris.vertices[2]
-    }
-  };
-  //Add a quad to the vdp1 list v0,v1,v2,v3
-  render_vdp1_add_saturn(&q, texture_index, object);
 }
 
 void render_push_tris(tris_t tris, uint16_t texture_index __unused){

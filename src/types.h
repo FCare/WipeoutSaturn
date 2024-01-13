@@ -41,7 +41,6 @@ typedef struct {
 
 typedef struct {
 	vec3_t pos;
-	vec2_t uv;
 	rgb1555_t color;
 } vertex_saturn_t;
 

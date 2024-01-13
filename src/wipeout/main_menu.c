@@ -529,17 +529,17 @@ static void objects_unpack_saturn_imp(Object_Saturn **dest_array, Object_Saturn_
 
 void main_menu_init(void) {
 
-	// ships_load();
-
 	g.is_attract_mode = false;
 
 	ships_reset_exhaust_plumes();
 
 	main_menu = mem_bump(sizeof(menu_t));
 
+//See if it can be optimized
 	background = image_get_texture("wipeout/textures/wipeout1.tim");
 	track_images = image_get_compressed_textures("wipeout/textures/track.cmp");
 
+//To be converted
 	objects_unpack_saturn(models.misc, objects_saturn_load("wipeout/common/msdos.smf"));
 	objects_unpack_saturn(models.race_classes, objects_saturn_load("wipeout/common/leeg.smf"));
 	objects_unpack_saturn(models.teams, objects_saturn_load("wipeout/common/teams.smf"));
