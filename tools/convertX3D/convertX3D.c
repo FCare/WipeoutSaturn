@@ -138,6 +138,71 @@ static void printChild(xmlNode* root) {
 // Y 4
 // Z 4
 
+void convertSW(render_texture_t *out, quads_t *t, texture_t *texture) {
+  int16_t width = 0;
+  for (int i = 0; i<4; i++) {
+    int16_t delta_x = t->uv[i].x - t->uv[(i+1)%4].x;
+    int16_t delta_y = t->uv[i].y - t->uv[(i+1)%4].y;
+    int16_t new_length = sqrt(delta_x*delta_x+delta_y*delta_y);
+    width = max(width, new_length);
+  }
+
+  int16_t height = 0;
+  for (int i = 0; i<4; i+=2) {
+    int16_t delta_x = t->uv[i].x - t->uv[(i+3)%4].x;
+    int16_t delta_y = t->uv[i].y - t->uv[(i+3)%4].y;
+    int16_t new_length = sqrt(delta_x*delta_x+delta_y*delta_y);
+    height = max(height, new_length);
+  }
+  width = (width+0x7)&~0x7;
+
+  LOGD("Was %dx%d => %d\n", width, height, width*height);
+  int shift = 0;
+  //limit charcters to 80x60 max
+  while((width>>shift) > (320/4)) {
+    shift++;
+  }
+  while((height>>shift) > (240/4)) {
+    shift++;
+  }
+  if (shift != 0) {
+    width = ((int)(width>>shift)+0x7)& ~0x7;
+    if (width == 0) width = 8;
+    height = height>>shift;
+  }
+
+  out->width = width;
+  out->height = height;
+  out->pixels = malloc(sizeof(rgb1555_t)*width*height);
+
+  LOGD("Got %dx%d => %d\n", width, height, width*height);
+
+  float deltaXHStart = (float)(t->uv[3].x - t->uv[0].x)/(float)(height-1); //XD-XA
+  float deltaYHStart = (float)(t->uv[3].y - t->uv[0].y)/(float)(height-1); //YD-YA
+  float deltaXHEnd = (float)(t->uv[2].x - t->uv[1].x)/(float)(height-1); //XC-XB
+  float deltaYHEnd = (float)(t->uv[2].y - t->uv[1].y)/(float)(height-1); //YC-YB
+  for (int line = 0; line< height; line++) {
+    float startX = t->uv[0].x + deltaXHStart*line;
+    float startY = t->uv[0].y + deltaYHStart*line;
+    float endX = t->uv[1].x + deltaXHEnd*line;
+    float endY = t->uv[1].y + deltaYHEnd*line;
+
+    float deltaXW = (float)(endX - startX)/(float)(width-1);
+    float deltaYW = (float)(endY - startY)/(float)(width-1);
+    for (int row = 0; row < width; row++) {
+      int x = startX + row*deltaXW;
+      int y = startY + row*deltaYW;
+      uint32_t val = 0;
+      uint8_t *p = &texture->pixels[((texture->height - y)*texture->width+x)*4];
+      val |= p[0];
+      val |= p[1]<<8;
+      val |= p[2]<<16;
+      val |= p[3]<<24;
+      out->pixels[line*width+row] = rgb155_from_u32(val);
+    }
+  }
+}
+
 static int conversionStep(void) {
   if (currentFace == modelOut.geometry[currentGeo].nbFaces) {
     LOGD("Last Geo was %d faces\n", currentFace);
@@ -157,16 +222,20 @@ static int conversionStep(void) {
   render_texture_t out;
 
   quad.uv[0].x = (int16_t) (uv[currentGeo][uv_index[currentGeo][currentFace*4]*2] * inputTexture.width);
-  quad.uv[0].y = (int16_t) (1.0 - uv[currentGeo][uv_index[currentGeo][currentFace*4]*2+1] * inputTexture.height);
+  quad.uv[0].y = (int16_t) (uv[currentGeo][uv_index[currentGeo][currentFace*4]*2+1] * inputTexture.height);
   quad.uv[1].x = (int16_t) (uv[currentGeo][uv_index[currentGeo][currentFace*4+1]*2] * inputTexture.width);
-  quad.uv[1].y = (int16_t) (1.0 - uv[currentGeo][uv_index[currentGeo][currentFace*4+1]*2+1] * inputTexture.height);
+  quad.uv[1].y = (int16_t) (uv[currentGeo][uv_index[currentGeo][currentFace*4+1]*2+1] * inputTexture.height);
   quad.uv[2].x = (int16_t) (uv[currentGeo][uv_index[currentGeo][currentFace*4+2]*2] * inputTexture.width);
-  quad.uv[2].y = (int16_t) (1.0 - uv[currentGeo][uv_index[currentGeo][currentFace*4+2]*2+1] * inputTexture.height);
+  quad.uv[2].y = (int16_t) (uv[currentGeo][uv_index[currentGeo][currentFace*4+2]*2+1] * inputTexture.height);
   quad.uv[3].x = (int16_t) (uv[currentGeo][uv_index[currentGeo][currentFace*4+3]*2] * inputTexture.width);
-  quad.uv[3].y = (int16_t) (1.0 - uv[currentGeo][uv_index[currentGeo][currentFace*4+3]*2+1] * inputTexture.height);
+  quad.uv[3].y = (int16_t) (uv[currentGeo][uv_index[currentGeo][currentFace*4+3]*2+1] * inputTexture.height);
 
+#if 0
   //Request OpenGL to render the character
   gl_generate_texture_from_quad(&out, &quad, &inputTexture);
+#endif
+
+  convertSW(&out, & quad, &inputTexture);
   //save the character as a paletized buffer
   character *c = &characters[currentGeo][currentFace];
   c->width = out.width;
@@ -563,10 +632,14 @@ main(int argc, char **argv)
 
     xmlFreeDoc(document);
 
-    if (inputTexture.pixels != NULL)
+    if (inputTexture.pixels != NULL){
+#if 0
       gl_init(conversionStep, savingStep);
-    else
-      savingStep();
+#else
+      while(conversionStep()!=0);
+#endif
+    }
+    savingStep();
 
     return 0;
 }

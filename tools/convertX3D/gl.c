@@ -14,9 +14,6 @@
 #include "image.h"
 #endif
 
-#define min(A,B) ((A)<(B)?(A):(B))
-#define max(A,B) ((A)>(B)?(A):(B))
-
 static volatile int jobToProcess;
 static GLfloat g_vertex_buffer_data[8] =
   {

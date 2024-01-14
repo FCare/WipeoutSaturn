@@ -12,6 +12,9 @@
 #define SWAP(X) (((X&0xFF)<<8)|(X>>8))
 #define SWAP_32(X) (((X&0xFF)<<24)|((X&0xFF00)<<8)|((X&0xFF0000)>>8)|(X>>24))
 
+#define min(A,B) ((A)<(B)?(A):(B))
+#define max(A,B) ((A)>(B)?(A):(B))
+
 #define BINARY_SECTOR_SIZE 2048
 
 #define MAX_GEOMETRY 32
