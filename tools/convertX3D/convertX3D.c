@@ -158,13 +158,8 @@ void convertSW(render_texture_t *out, quads_t *t, texture_t *texture) {
 
   LOGD("Was %dx%d => %d\n", width, height, width*height);
   int shift = 0;
-  //limit charcters to 80x60 max
-  while((width>>shift) > (320/4)) {
-    shift++;
-  }
-  while((height>>shift) > (240/4)) {
-    shift++;
-  }
+  //limit characters size
+  shift = 3;
   if (shift != 0) {
     width = ((int)(width>>shift)+0x7)& ~0x7;
     if (width == 0) width = 8;
