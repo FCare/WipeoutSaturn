@@ -283,16 +283,10 @@ typedef struct {
 	fix16_vec3_t origin;
 } object_info;
 
-typedef struct {
-	uint32_t width;
-	uint32_t height;
-	uint32_t *pixels;
-} character;
-
 typedef struct{
 	uint32_t vertex_id[4]; //A,B,C,D
 	rgb1555_t RGB;
-	uint16_t pad;
+	uint16_t texture_id;
 } face;
 
 typedef struct {
@@ -310,6 +304,8 @@ typedef struct {
 	// fix16_vec3_t origin;
 	uint32_t nbObjects;
 	uint16_t palette[16];
+	uint16_t palette_id;
+	uint16_t pad;
 	geometry object[];
 } Object_Saturn;
 

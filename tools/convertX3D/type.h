@@ -42,6 +42,7 @@ typedef struct vec2 {
 
 typedef struct {
 	vec2_t uv[4];
+  vec2_t pos[4];
 } quads_t;
 
 typedef struct {

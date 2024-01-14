@@ -15,12 +15,14 @@
 #include "hud.h"
 #include "object.h"
 
+extern uint16_t allocate_vdp1_texture(void* pixel, uint16_t w, uint16_t h, uint8_t elt_size);
+
 #ifdef DUMP
 void character_ctrl_dump(character_list_t * ch_list) {
 	LOGD("\t************** %d characters ***************\n", ch_list->nb_characters);
 	for (int char_id = 0; char_id < ch_list->nb_characters; char_id++) {
 		character_t *character = ch_list->character[char_id];
-		LOGD("\t\character[%d] 0x%x: id %d, size %dx%d, length %d, texture %d\n", char_id, character, character->id, character->width, character->height, character->length, character->texture);
+		LOGD("\tcharacter[%d] 0x%x: id %d, size %dx%d, length %d, texture %d\n", char_id, character, character->id, character->width, character->height, character->length, character->texture);
 	}
 }
 
@@ -54,14 +56,14 @@ void object_dump_saturn(Object_Saturn *object) {
 	for (int i = 0; i<16; i++)
 		LOGD("0x%x ", object->palette[i]);
 	LOGD("\n");
-	for (int i = 0; i<object->nbObjects; i++) {
+	for (uint32_t i = 0; i<object->nbObjects; i++) {
 		LOGD("Object %d = \n", i);
 		LOGD("\tflags 0x%x\n", object->object[i].flags);
 		LOGD("\tnb_faces %d\n", object->object[i].faces_len);
 		LOGD("Face offset %x\n", object->object[i].faces);
 		if ((object->object[i].flags & 0x2)==0) {
 			LOGD("Character offset %x\n", object->object[i].characters);
-			for (int j=0; j<object->object[i].faces_len; j++) {
+			for (uint32_t j=0; j<object->object[i].faces_len; j++) {
 				LOGD("Character[%d] is %dx%d\n",j, object->object[i].characters[j]->width, object->object[i].characters[j]->height);
 			}
 		} else {
@@ -519,11 +521,14 @@ Object_Saturn *object_saturn_load(char *name) {
 	//process de l'objet au niveau des memoires
 	object->vertices = (fix16_vec3_t *)((uint32_t)object+(uint32_t)object->vertices);
 	object->normals = (fix16_vec3_t *)((uint32_t)object+(uint32_t)object->normals);
-	for (int i = 0; i<object->nbObjects; i++) {
-		object->object[i].faces = (fix16_vec3_t *)((uint32_t)object+(uint32_t)object->object[i].faces);
-		object->object[i].characters = (fix16_vec3_t *)((uint32_t)object+(uint32_t)object->object[i].characters);
-		for (int j=0; j<object->object[i].faces_len; j++) {
-			object->object[i].characters[j] = (fix16_vec3_t *)((uint32_t)object+(uint32_t)object->object[i].characters[j]);
+	object->palette_id = 0xFFFF;
+	for (uint32_t i = 0; i<object->nbObjects; i++) {
+		object->object[i].faces = (face *)((uint32_t)object+(uint32_t)object->object[i].faces);
+		object->object[i].characters = (character **)((uint32_t)object+(uint32_t)object->object[i].characters);
+		for (uint32_t j=0; j<object->object[i].faces_len; j++) {
+			object->object[i].characters[j] = (character *)((uint32_t)object+(uint32_t)object->object[i].characters[j]);
+			printf("obj[%d] Character[%d] is set to %x\n", i, j, object->object[i].characters[j]);
+			object->object[i].faces[j].texture_id = 0xFFFF;
 		}
 	}
 
@@ -671,36 +676,43 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 	vec3_t *vertex = mem_temp_alloc(object->vertices_len * sizeof(vec3_t));
 	render_object_transform(vertex, object->vertices, object->vertices_len);
 
-	for (int geoId = 0; geoId < object->nbObjects; geoId++) {
+	for (uint32_t geoId = 0; geoId < object->nbObjects; geoId++) {
 		geometry *geo = &object->object[geoId];
-		if ((geo->flags & POLYGON_FLAG) != 0) {
-			for (int faceId = 0; faceId < geo->faces_len; faceId++){
-				face *curFace = &geo->faces[faceId];
-				character *curChar = geo->characters[faceId];
-				quads_saturn_t q = {
-					.vertices = {
-						{
-							.pos = vertex[curFace->vertex_id[0]],
-							.color = curFace->RGB
-						},
-						{
-							.pos = vertex[curFace->vertex_id[1]],
-							.color = curFace->RGB
-						},
-						{
-							.pos = vertex[curFace->vertex_id[2]],
-							.color = curFace->RGB
-						},
-						{
-							.pos = vertex[curFace->vertex_id[3]],
-							.color = curFace->RGB
-						},
-					}
-				};
-				uint16_t texture_index = RENDER_NO_TEXTURE_SATURN;
-				//We need to copy the character to the vdp1 and provide the texture_index
-				render_push_distorted_saturn( &q, texture_index, object);
+		for (uint32_t faceId = 0; faceId < geo->faces_len; faceId++){
+			face *curFace = &geo->faces[faceId];
+			character *curChar = geo->characters[faceId];
+			quads_saturn_t q = {
+				.color = curFace->RGB,
+				.vertices = {
+					{
+						.pos = vertex[curFace->vertex_id[0]],
+						.light = FIX16_ZERO
+					},
+					{
+						.pos = vertex[curFace->vertex_id[1]],
+						.light = FIX16_ZERO
+					},
+					{
+						.pos = vertex[curFace->vertex_id[2]],
+						.light = FIX16_ZERO
+					},
+					{
+						.pos = vertex[curFace->vertex_id[3]],
+						.light = FIX16_ZERO
+					},
+				}
+			};
+			uint16_t texture_index = RENDER_NO_TEXTURE_SATURN;
+			if ((geo->flags & POLYGON_FLAG) == 0) {
+				if (curFace->texture_id == 0xFFFF) {
+					//needs to allocate the character on vdp1 - 4bpp LUT
+					printf("Ship[%d] texture[%d] 0x%x\n", geoId, faceId, curChar->pixels);
+					curFace->texture_id = allocate_vdp1_texture((void*)curChar->pixels, curChar->width, curChar->height, 4);
+				}
+				texture_index = curFace->texture_id;
 			}
+			//We need to copy the character to the vdp1 and provide the texture_index
+			render_push_distorted_saturn( &q, texture_index, object, (geo->flags & EXHAUST_FLAG)!=0);
 		}
 	}
 	mem_temp_free(vertex);

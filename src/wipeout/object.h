@@ -381,6 +381,6 @@ typedef union Prm {
 
 Object *objects_load(char *name, texture_list_t tl);
 
-void render_push_distorted_saturn(quads_saturn_t *quad, uint16_t texture_index, Object_Saturn *object);
+void render_push_distorted_saturn(quads_saturn_t *quad, uint16_t texture_index, Object_Saturn *object, int useMesh);
 
 #endif

@@ -86,8 +86,8 @@ void vdp1_init(void)
   vdp1_sync_interval_set(0);
 }
 
-void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object_Saturn *object __unused){
-  uint16_t *character = NULL;
+void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object_Saturn *object __unused, int useMesh){
+  vdp1_vram_t character = 0;
   vec2i_t size = vec2i(0,0);
   LOGD(
     "vdp1 add saturn %dx%d %dx%d %dx%d %dx%d\n",
@@ -131,89 +131,68 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object
   vdp1_cmdt_draw_mode_t draw_mode = {
     .trans_pixel_disable  = true,
     .pre_clipping_disable = true,
-    .end_code_disable     = false,
+    .end_code_disable     = true,
   };
 
   if (texture_index == RENDER_NO_TEXTURE_SATURN) {
     LOGD("No color, using a white polygon\n");
-    rgb1555_t white = (rgb1555_t){
-      .r = 0x10,
-      .g = 0x10,
-      .b = 0x10,
-      .msb = 1,
-    };
+    // rgb1555_t white = (rgb1555_t){
+    //   .r = 0x10,
+    //   .g = 0x10,
+    //   .b = 0x10,
+    //   .msb = 1,
+    // };
     vdp1_cmdt_polygon_set(cmd);
-    vdp1_cmdt_color_set(cmd, white);
-  // } else {
-  //   error_if(texture_index > object->characters->nb_characters, "texture index %d is out of bounds %d\n", texture_index, object->characters->nb_characters);
-  //   character_t *chrt = object->characters->character[texture_index];
-  //   uint16_t character_texture = chrt->texture;
-  //   LOGD("%d\n", __LINE__);
-  //   size = get_tex(character_texture)->size;
-  //
-  //   // error_if((size.x*size.y > 256), "texture index %d (character texture %d) is too big %dx%d\n", texture_index, character_texture, size.x, size.y);
-  //   character = getVdp1VramAddress_Saturn(character_texture, id);
-  //   palette_t *plt = object->pal[chrt->palette_id];
-  //   uint16_t palette_texture = plt->texture;
-  //   uint16_t *palette = getVdp1VramAddress_Saturn(palette_texture, id);
-  //   LOGD("Rendering character %d from @x%x (%s) using palette %d @ 0x%x\n", texture_index,character, object->info->name, chrt->palette_id, palette);
-  //
-  //   vdp1_cmdt_color_bank_t color_bank; //not used yet
-  //   switch(plt->format) {
-  //     case COLOR_BANK_16_COL 	:
-  //     die("Not supported\n");
-  //     // vdp1_cmdt_color_mode0_set(&draw_mode, palette);
-  //     break;
-  //     case LOOKUP_TABLE_16_COL:
-  //     vdp1_cmdt_color_mode1_set(cmd, (uint32_t)palette);
-  //     break;
-  //     case COLOR_BANK_64_COL 	:
-  //     die("Not supported\n");
-  //     // vdp1_cmdt_color_mode2_set(&draw_mode, palette);
-  //     break;
-  //     case COLOR_BANK_128_COL :
-  //     die("Not supported\n");
-  //     // vdp1_cmdt_color_mode3_set(&draw_mode, palette);
-  //     break;
-  //     case COLOR_BANK_256_COL :
-  //     die("Not supported\n");
-  //     // vdp1_cmdt_color_mode4_set(&draw_mode, palette);
-  //     break;
-  //     case COLOR_BANK_RGB 		:
-  //     default:
-  //     // vdp1_cmdt_color_mode5_set(&draw_mode, palette);
-  //     break;
-  //   }
-  //   draw_mode.color_mode    = plt->format;
-  //   vdp1_cmdt_distorted_sprite_set(cmd); //Use distorted by default but it can be normal or scaled
+    vdp1_cmdt_color_set(cmd, quad->color);
+  } else {
+    vdp1_texture_t *tex = get_vdp1_texture(texture_index);
+    character = (vdp1_vram_t)tex->pixels;
+    printf("Pix is %x\n", tex->pixels);
+    printf("Char is %x\n", character);
+    size = tex->size;
+    if (object->palette_id == 0xFFFF) {
+      printf("Allocate palette from %x\n", object->palette);
+      object->palette_id = allocate_vdp1_texture((void*)object->palette, 16,1, 16);
+    }
+    vdp1_texture_t *pal = get_vdp1_texture(object->palette_id);
+    //All vdp1 texture are 4bpp LUT
+    vdp1_cmdt_color_mode1_set(cmd, (uint32_t)pal->pixels);
+    draw_mode.color_mode    = LOOKUP_TABLE_16_COL;
+    vdp1_cmdt_distorted_sprite_set(cmd); //Use distorted by default but it can be normal or scaled
   }
 
+  if (useMesh != 0) {
+    draw_mode.mesh_enable = 1;
+  }
   vdp1_cmdt_draw_mode_set(cmd, draw_mode);
   vdp1_cmdt_char_size_set(cmd, size.x, size.y);
-  vdp1_cmdt_char_base_set(cmd, (vdp1_vram_t)character);
+  printf("Setup character to 0x%x\n", character);
+  vdp1_cmdt_char_base_set(cmd, character);
   vdp1_cmdt_link_type_set(cmd, VDP1_CMDT_LINK_TYPE_JUMP_ASSIGN);
   cmd->cmd_link = (uint16_t)((uint32_t)&cmdts[nbCommand+1]-(uint32_t)&cmdt_list->cmdts[0])>>3;
   chain[nbCommand].id = nbCommand;
 
   uint8_t needGouraud = 0;
-  for (int i =0; i<4; i++) {
-    rgb1555_t gouraud = quad->vertices[i].color;
-    needGouraud |= ((gouraud.r != 0x10) || (gouraud.g != 0x10) || (gouraud.b != 0x10));
-  }
-  if (needGouraud != 0) {
-    //apply gouraud
-    //Shall not be shared between lists
-    vdp1_gouraud_table_t *gouraud_base;
-    gouraud_base = &_vdp1_vram_partitions.gouraud_base[gouraud_cmd];
-    gouraud_base->colors[0] = quad->vertices[0].color;
-    gouraud_base->colors[1] = quad->vertices[1].color;
-    gouraud_base->colors[2] = quad->vertices[2].color;
-    gouraud_base->colors[3] = quad->vertices[3].color;
-    gouraud_cmd++;
-    draw_mode.cc_mode = VDP1_CMDT_CC_GOURAUD;
-
-    vdp1_cmdt_gouraud_base_set(cmd, (uint32_t)gouraud_base);
-  }
+  ///Revoir le gouraud basé sur les lights
+  // for (int i =0; i<4; i++) {
+  //   rgb1555_t gouraud = quad->vertices[i].color;
+  //   printf("Color is R=%x G=%x B=%x\n", quad->vertices[i].color.r, quad->vertices[i].color.g, quad->vertices[i].color.b);
+  //   needGouraud |= ((gouraud.r != 0x10) || (gouraud.g != 0x10) || (gouraud.b != 0x10));
+  // }
+  // if (needGouraud != 0) {
+  //   //apply gouraud
+  //   //Shall not be shared between lists
+  //   vdp1_gouraud_table_t *gouraud_base;
+  //   gouraud_base = &_vdp1_vram_partitions.gouraud_base[gouraud_cmd];
+  //   gouraud_base->colors[0] = quad->vertices[0].color;
+  //   gouraud_base->colors[1] = quad->vertices[1].color;
+  //   gouraud_base->colors[2] = quad->vertices[2].color;
+  //   gouraud_base->colors[3] = quad->vertices[3].color;
+  //   gouraud_cmd++;
+  //   draw_mode.cc_mode = VDP1_CMDT_CC_GOURAUD;
+  //
+  //   vdp1_cmdt_gouraud_base_set(cmd, (uint32_t)gouraud_base);
+  // }
   vdp1_cmdt_draw_mode_set(cmd, draw_mode);
 
   cmd->cmd_xa = fix16_int32_to(quad->vertices[0].pos.x);

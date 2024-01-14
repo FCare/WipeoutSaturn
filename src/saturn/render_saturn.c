@@ -207,7 +207,7 @@ void render_push_quads(quads_t *quad, uint16_t texture_index) {
   render_push_native_quads(quad, rgba(128,128,128,255), RENDER_NO_TEXTURE);
 }
 
-void render_push_distorted_saturn(quads_saturn_t *quad, uint16_t texture_index, Object_Saturn *object) {
+void render_push_distorted_saturn(quads_saturn_t *quad, uint16_t texture_index, Object_Saturn *object, int useMesh) {
   LOGD("%s\n", __FUNCTION__);
 
   nb_planes++;
@@ -222,7 +222,7 @@ void render_push_distorted_saturn(quads_saturn_t *quad, uint16_t texture_index, 
   currentminZ = min(currentminZ, minZ);
 
   //Add a quad to the vdp1 list v0,v1,v2,v3
-  render_vdp1_add_saturn(quad, texture_index, object);
+  render_vdp1_add_saturn(quad, texture_index, object, useMesh);
 }
 
 

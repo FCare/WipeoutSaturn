@@ -50,6 +50,7 @@ static rgb1555_t* extractPalette(texture_t *tex, int size) {
   for (int i = 0; i<tex->width*tex->height; i++) {
     uint32_t val = (tex->pixels[i*4+3]<<24) | (tex->pixels[i*4+2]<<16) | (tex->pixels[i*4+1]<<8) | (tex->pixels[i*4+0]);
     rgb1555_t pix = rgb155_from_u32(val);
+    // printf("Look for %x converted to %x\n", val, pix);
     uint8_t isNewColor = 1;
     for (int p=0; p<paletteSize; p++) {
       if (pix == pal[p]) isNewColor = 0;
@@ -178,8 +179,10 @@ static int conversionStep(void) {
       for (int p = 0; p<8; p++) {
         rgb1555_t pix = out.pixels[i+p + j*c->width];
         for(int k = 0; k<16; k++) {
+          // printf("Pix is %x Palette[%d] is %x\n", pix, k, palette[k]);
           if (pix == palette[k]) {
             *val |= k<<((7-p)*4); //maybe need to reverse here
+            // printf("Printf val is %x\n", *val);
             break;
           }
         }
@@ -221,6 +224,8 @@ static int savingStep(void) {
     if (palette != NULL) write_16(palette[i], fobj);
     else write_16(0, fobj);
   }
+  write_16(0, fobj); //palette_id
+  write_16(0, fobj); //pad
   for (int i=0; i<modelOut.nbGeometry; i++) {
     write_32(modelOut.geometry[i].flag, fobj);
     write_32(modelOut.geometry[i].nbFaces, fobj);
@@ -533,11 +538,11 @@ main(int argc, char **argv)
           if (strlen(str)>0) {
             uint16_t col = ((uint16_t)(strtod(str, NULL) * 255.0))>>3;
             int component = nbColor%4;
-            printf("Color [%d][%d] = 0x%x\n", nbColor/4,component, col);
+            // printf("Color [%d][%d] = 0x%x\n", nbColor/4,component, col);
             if (component == 0) faceOut[modelOut.nbGeometry][nbColor/4].RGB = 0;
             if (component != 3) faceOut[modelOut.nbGeometry][nbColor/4].RGB |= (col&0x1F)<<(component*5);
             else faceOut[modelOut.nbGeometry][nbColor/4].RGB |= 0x8000;
-            printf("==> 0x%x\n",faceOut[modelOut.nbGeometry][nbColor/4].RGB);
+            // printf("==> 0x%x\n",faceOut[modelOut.nbGeometry][nbColor/4].RGB);
             nbColor++;
           }
         }

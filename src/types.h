@@ -41,7 +41,7 @@ typedef struct {
 
 typedef struct {
 	vec3_t pos;
-	rgb1555_t color;
+	fix16_t light;
 } vertex_saturn_t;
 
 typedef struct {
@@ -50,7 +50,15 @@ typedef struct {
 
 typedef struct {
 	vertex_saturn_t vertices[4];
+	rgb1555_t color;
 } quads_saturn_t;
+
+
+typedef struct {
+	uint32_t width;
+	uint32_t height;
+	uint32_t pixels[];
+} character;
 
 
 #define rgba(R, G, B, A) ((rgba_t){.r = R, .g = G, .b = B, .a = A})

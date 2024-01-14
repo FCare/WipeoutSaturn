@@ -5,14 +5,6 @@
 
 #define VDP1_TEXTURES_MAX  128
 
-typedef struct {
-	vec2i_t size;
-  uint16_t index;
-	vec2_t uv[4];
-	rgb1555_t *pixels;
-	uint8_t used;
-} vdp1_texture_t;
-
 static vdp1_texture_t textures[VDP1_TEXTURES_MAX];
 
 static uint8_t* tex;
@@ -40,12 +32,43 @@ void init_vdp1_tex(void) {
   tex = (uint8_t*)vdp1_vram_partitions.texture_base;
 }
 
+
+uint16_t allocate_vdp1_texture(void* pixel, uint16_t w, uint16_t h, uint8_t elt_size) {
+	//Not found, bump a new one
+	int id = textures_len;
+	textures_len += 1;
+	textures[id].used = 1;
+  textures[id].index = id;
+  textures[id].size.x = w,
+	textures[id].size.y = h;
+	int length = w*h*elt_size/8; //each pixel is 4bits for the moment
+  textures[id].pixels = vdp1_tex_bump(length);
+	printf("Pix is %x\n", textures[id].pixels);
+	scu_dma_transfer(0, (void *)textures[id].pixels, pixel, length);
+	printf("Copy 0x%x from 0x%x to 0x%x\n", length, pixel, textures[id].pixels);
+	scu_dma_transfer_wait(0);
+  return id;
+}
+
+
 static uint8_t isSameUv(vec2_t *uv, quads_t *q) {
 	for (int i = 0; i<4; i++) {
 		if (uv[i].x != q->vertices[i].uv.x) return 0;
 		if (uv[i].y != q->vertices[i].uv.y) return 0;
 	}
 	return 1;
+}
+
+vdp1_texture_t* get_vdp1_texture(uint16_t texture_index){
+	render_texture_t* src = get_tex(texture_index);
+	for (uint16_t i=0; i<textures_len; i++) {
+    if (textures[i].index == texture_index)
+		{
+			textures[i].used = 1;
+      return &textures[i];
+    }
+  }
+	return NULL;
 }
 
 uint16_t* getVdp1VramAddress_Saturn(uint16_t texture_index){

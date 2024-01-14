@@ -68,20 +68,20 @@ static rgb1555_t RGB888_RGB1555(uint8_t msb, uint8_t r, uint8_t g, uint8_t b) {
 
 rgb1555_t convert_to_rgb(rgba_t val) {
   //RGB 16bits, MSB 1, transparent code 0
-  if (val.a == 0) return RGB888_RGB1555(0,0,0,0);
-  if ((val.b == 0) && (val.r == 0) && (val.g == 0)) {
-    //Should be black but transparent usage makes it impossible
-    return RGB888_RGB1555(1,0,0,1);
-  }
+  // if (val.a == 0) return RGB888_RGB1555(0,0,0,0);
+  // if ((val.b == 0) && (val.r == 0) && (val.g == 0)) {
+  //   //Should be black but transparent usage makes it impossible
+  //   return RGB888_RGB1555(1,0,0,1);
+  // }
   return RGB888_RGB1555(1, val.b, val.g, val.r);
 }
 
 rgb1555_t rgb155_from_u32(uint32_t v) {
-	rgba_t val;
-	val.a = v & 0xFF;
-	val.b = (v>>8) & 0xFF;
-	val.g = (v>>16) & 0xFF;
-	val.r = (v>24) & 0xFF;
+  rgba_t val;
+	val.r = v & 0xFF;
+	val.g = (v>>8) & 0xFF;
+	val.b = (v>>16) & 0xFF;
+	val.a = (v>24) & 0xFF;
 	// LOGD("%x %x %x %x\n", val.a, val.b, val.g, val.r);
   return convert_to_rgb(val);
 }
@@ -257,6 +257,7 @@ static void render(void)
     g_resources.dstTexture->pixels = malloc(sizeof(rgb1555_t)*g_resources.dstTexture->width*g_resources.dstTexture->height);
     for (int i=0; i<g_resources.dstTexture->height*g_resources.dstTexture->width; i++) {
       g_resources.dstTexture->pixels[i] = rgb155_from_u32(out[i]);
+      // printf("Convert %x to %x\n", out[i], g_resources.dstTexture->pixels[i]);
     }
 
 #ifdef SAVE_EXTRACT
@@ -354,10 +355,10 @@ void gl_generate_texture_from_quad(render_texture_t *out, quads_t *t, texture_t 
 
   g_texcoord_buffer_data[0] = (float)t->uv[0].x / (float)texture->width;
   g_texcoord_buffer_data[1] = (float)t->uv[0].y / (float)texture->height;
-  g_texcoord_buffer_data[2] = (float)t->uv[1].x / (float)texture->width;
-  g_texcoord_buffer_data[3] = (float)t->uv[1].y / (float)texture->height;
-  g_texcoord_buffer_data[4] = (float)t->uv[3].x / (float)texture->width;
-  g_texcoord_buffer_data[5] = (float)t->uv[3].y / (float)texture->height;
+  g_texcoord_buffer_data[2] = (float)t->uv[3].x / (float)texture->width;
+  g_texcoord_buffer_data[3] = (float)t->uv[3].y / (float)texture->height;
+  g_texcoord_buffer_data[4] = (float)t->uv[1].x / (float)texture->width;
+  g_texcoord_buffer_data[5] = (float)t->uv[1].y / (float)texture->height;
   g_texcoord_buffer_data[6] = (float)t->uv[2].x / (float)texture->width;
   g_texcoord_buffer_data[7] = (float)t->uv[2].y / (float)texture->height;
 
