@@ -84,7 +84,6 @@ void ships_init(section_t *section) {
 			section = section->next;
 		}
 	}
-printf("Rank to pilot is %d\n", len(ranks_to_pilots));
 	for (uint32_t i = 0; i < len(ranks_to_pilots); i++) {
 		int rank_inv = (len(g.ships)-1) - i;
 		int pilot = ranks_to_pilots[i];
@@ -110,34 +109,25 @@ static inline bool sort_rank_compare(pilot_points_t *pa, pilot_points_t *pb) {
 
 void ships_update(void) {
 	if (g.race_type == RACE_TYPE_TIME_TRIAL) {
-		printf("%d\n", __LINE__);
 		ship_update(&g.ships[g.pilot]);
-		printf("%d\n", __LINE__);
 	}
 	else {
 		for (uint32_t i = 0; i < len(g.ships); i++) {
-			printf("%d\n", __LINE__);
 			ship_update(&g.ships[i]);
-			printf("%d\n", __LINE__);
 		}
 		for (uint32_t j = 0; j < (len(g.ships) - 1); j++) {
 			for (uint32_t i = j + 1; i < len(g.ships); i++) {
-				printf("%d\n", __LINE__);
 				ship_collide_with_ship(&g.ships[i], &g.ships[j]);
-				printf("%d\n", __LINE__);
 			}
 		}
 
 		if (flags_is(g.ships[g.pilot].flags, SHIP_RACING)) {
-			printf("%d\n", __LINE__);
 			sort(g.race_ranks, len(g.race_ranks), sort_rank_compare);
-			printf("%d\n", __LINE__);
 			for (uint32_t i = 0; i < len(g.ships); i++) {
 				g.ships[g.race_ranks[i].pilot].position_rank = i + 1;
 			}
 		}
 	}
-	printf("%d\n", __LINE__);
 }
 
 void ships_reset_exhaust_plumes(void) {
@@ -239,7 +229,6 @@ void ship_init(ship_t *self, section_t *section, int pilot, int inv_start_rank) 
 		self->fight_back = def.ai_settings[g.race_class][inv_start_rank-1].fight_back;
 	}
 
-	printf("UPDATE_FUNC is %x\n",self->update_func);
 
 	self->section = section;
 	self->prev_section = section;
@@ -376,7 +365,6 @@ void ship_draw_shadow(ship_t *self) {
 }
 
 void ship_update(ship_t *self) {
-printf("%d\n", __LINE__);
 	// Set Unit vectors of this ship
 	fix16_t sx = sin(self->angle.x);
 	fix16_t cx = cos(self->angle.x);
@@ -384,45 +372,34 @@ printf("%d\n", __LINE__);
 	fix16_t cy = cos(self->angle.y);
 	fix16_t sz = sin(self->angle.z);
 	fix16_t cz = cos(self->angle.z);
-printf("%d\n", __LINE__);
 	self->dir_forward.x = -(sy * cx);
 	self->dir_forward.y = - sx;
 	self->dir_forward.z =  (cy * cx);
-printf("%d\n", __LINE__);
 	self->dir_right.x =  (cy * cz) + (sy * sz * sx);
 	self->dir_right.y = -(sz * cx);
 	self->dir_right.z =  (sy * cz) - (cy * sx * sz);
-printf("%d\n", __LINE__);
 	self->dir_up.x = (cy * sz) - (sy * sx * cz);
 	self->dir_up.y = -(cx * cz);
 	self->dir_up.z = (sy * sz) + (cy * sx * cz);
-printf("%d\n", __LINE__);
 	self->prev_section = self->section;
 	fix16_t distance;
-	printf("%d\n", __LINE__);
 	self->section = track_nearest_section(self->position, self->section, &distance);
-	printf("%d\n", __LINE__);
 	if (distance > 3700) {
 		flags_add(self->flags, SHIP_FLYING);
 	}
 	else {
 		flags_rm(self->flags, SHIP_FLYING);
 	}
-printf("%d\n", __LINE__);
 	self->prev_section_num = self->prev_section->num;
 	self->section_num = self->section->num;
 
-printf("%d\n", __LINE__);
 	// Figure out which side of the track the ship is on
 	track_face_t *face = track_section_get_base_face(self->section);
-printf("%d\n", __LINE__);
 	vec3_t to_face_vector = vec3_sub(
 		face->quad.vertices[0].pos,
 		face->quad.vertices[1].pos
 	);
-printf("%d\n", __LINE__);
 	vec3_t direction = vec3_sub(self->section->center, self->position);
-printf("%d\n", __LINE__);
 	if (vec3_dot(direction, to_face_vector) > 0) {
 		flags_add(self->flags, SHIP_LEFT_SIDE);
 	}
@@ -430,7 +407,6 @@ printf("%d\n", __LINE__);
 		flags_rm(self->flags, SHIP_LEFT_SIDE);
 		face++;
 	}
-printf("%d\n", __LINE__);
 	// Collect powerup
 	if (
 		flags_is(face->flags, FACE_PICKUP_ACTIVE) &&
@@ -438,35 +414,22 @@ printf("%d\n", __LINE__);
 		self->weapon_type == WEAPON_TYPE_NONE &&
 		track_collect_pickups(face)
 	) {
-		printf("%d\n", __LINE__);
 		if (self->pilot == g.pilot) {
-			printf("%d\n", __LINE__);
 			sfx_play(SFX_POWERUP);
-			printf("%d\n", __LINE__);
 			if (flags_is(self->flags, SHIP_SHIELDED)) {
-				printf("%d\n", __LINE__);
 				self->weapon_type = weapon_get_random_type(WEAPON_CLASS_PROJECTILE);
-				printf("%d\n", __LINE__);
 			}
 			else {
-				printf("%d\n", __LINE__);
 				self->weapon_type = weapon_get_random_type(WEAPON_CLASS_ANY);
-				printf("%d\n", __LINE__);
 			}
 		}
 		else {
-			printf("%d\n", __LINE__);
 			self->weapon_type = 1;
-			printf("%d\n", __LINE__);
 		}
-		printf("%d\n", __LINE__);
 	}
 
-printf("%d\n", __LINE__);
 	self->last_impact_time += system_tick();
-printf("%d %x\n", __LINE__, self->update_func);	// Call the active player/ai update function
 	(self->update_func)(self);
-printf("%d\n", __LINE__);
 
 	// Animate the exhaust plume
 
@@ -474,42 +437,26 @@ printf("%d\n", __LINE__);
 
 	if (self->pilot == g.pilot) {
 		// get the z exhaust_len related to speed or thrust
-		printf("%d\n", __LINE__);
 		exhaust_len = self->thrust_mag * 0.0625;
-		printf("%d\n", __LINE__);
 		exhaust_len += self->speed * 0.00390625;
-		printf("%d\n", __LINE__);
 	}
 	else {
 		// for remote ships the z exhaust_len is a constant
-		printf("%d\n", __LINE__);
 		exhaust_len = 150;
-		printf("%d\n", __LINE__);
 	}
-printf("%d\n", __LINE__);
 	for (int i = 0; i < 3; i++) {
-		printf("%d\n", __LINE__);
 		if (self->exhaust_plume[i].v != NULL) {
-			printf("%d\n", __LINE__);
 			self->exhaust_plume[i].v->z = self->exhaust_plume[i].initial.z - exhaust_len + (rand_int(-16383, 16383) >> 9);
-			printf("%d\n", __LINE__);
 			self->exhaust_plume[i].v->x = self->exhaust_plume[i].initial.x + (rand_int(-16383, 16383) >> 11);
-			printf("%d\n", __LINE__);
 			self->exhaust_plume[i].v->y = self->exhaust_plume[i].initial.y + (rand_int(-16383, 16383) >> 11);
-			printf("%d\n", __LINE__);
 		}
-		printf("%d\n", __LINE__);
 	}
-printf("%d\n", __LINE__);
 	mat4_set_translation(&self->mat, self->position);
 	mat4_set_yaw_pitch_roll(&self->mat, self->angle);
-
-printf("%d\n", __LINE__);
 
 	// Race position and lap times
 
 	self->lap_time += system_tick();
-printf("%d\n", __LINE__);
 	int start_line_pos = def.circuts[g.circut].settings[g.race_class].start_line_pos;
 
 	// Crossed line backwards
@@ -519,45 +466,27 @@ printf("%d\n", __LINE__);
 	// Crossed line forwards
 	else if (self->prev_section_num == start_line_pos && self->section_num > start_line_pos) {
 		self->lap++;
-printf("%d\n", __LINE__);
 		// Is it the first time we're crossing the line for this lap?
 		if (self->lap > self->max_lap) {
-			printf("%d\n", __LINE__);
 			self->max_lap = self->lap;
 
 			if (self->lap > 0 && self->lap <= NUM_LAPS) {
-				printf("%d\n", __LINE__);
 				g.lap_times[self->pilot][self->lap-1] = self->lap_time;
-printf("%d\n", __LINE__);
 			}
 			self->lap_time = 0;
-printf("%d\n", __LINE__);
 			if (g.race_type == RACE_TYPE_TIME_TRIAL) {
-				printf("%d\n", __LINE__);
 				self->weapon_type = WEAPON_TYPE_TURBO;
-				printf("%d\n", __LINE__);
 			}
-printf("%d\n", __LINE__);
 			if (self->lap == NUM_LAPS && self->pilot == g.pilot) {
-				printf("%d\n", __LINE__);
 				race_end();
-				printf("%d\n", __LINE__);
 			}
-			printf("%d\n", __LINE__);
 		}
-		printf("%d\n", __LINE__);
 	}
-printf("%d\n", __LINE__);
 	int section_num_from_line = self->section_num - (start_line_pos + 1);
-	printf("%d\n", __LINE__);
 	if (section_num_from_line < 0) {
-		printf("%d\n", __LINE__);
 		section_num_from_line += g.track.section_count;
-		printf("%d\n", __LINE__);
 	}
-	printf("%d\n", __LINE__);
 	self->total_section_num = self->lap * g.track.section_count + section_num_from_line;
-	printf("%d\n", __LINE__);
 }
 
 vec3_t ship_cockpit(ship_t *self) {

@@ -22,7 +22,6 @@ vec3_t ship_ai_strat_avoid_other(ship_t *self, track_face_t *face);
 vec3_t ship_ai_strat_zig_zag(ship_t *self, track_face_t *face);
 
 void ship_ai_update_intro(ship_t *self) {
-	printf("%d\n", __LINE__);
 	self->temp_target = self->position;
 	self->update_func = ship_ai_update_intro_await_go;
 

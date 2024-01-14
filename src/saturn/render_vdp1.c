@@ -28,8 +28,6 @@ static void cmdt_list_init(void)
   cmdt_max = _vdp1_vram_partitions.cmdt_size/sizeof(vdp1_cmdt_t);
   cmdt_list = vdp1_cmdt_list_alloc(cmdt_max);
 
-printf("Can get %d CMDS\n", cmdt_max);
-
   assert(cmdt_list != NULL);
 
   (void)memset(&(cmdt_list->cmdts[0]), 0x00, sizeof(vdp1_cmdt_t) * (cmdt_max));
@@ -147,11 +145,8 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object
   } else {
     vdp1_texture_t *tex = get_vdp1_texture(texture_index);
     character = (vdp1_vram_t)tex->pixels;
-    printf("Pix is %x\n", tex->pixels);
-    printf("Char is %x\n", character);
     size = tex->size;
     if (object->palette_id == 0xFFFF) {
-      printf("Allocate palette from %x\n", object->palette);
       object->palette_id = allocate_vdp1_texture((void*)object->palette, 16,1, 16);
     }
     vdp1_texture_t *pal = get_vdp1_texture(object->palette_id);
@@ -166,7 +161,6 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object
   }
   vdp1_cmdt_draw_mode_set(cmd, draw_mode);
   vdp1_cmdt_char_size_set(cmd, size.x, size.y);
-  printf("Setup character to 0x%x\n", character);
   vdp1_cmdt_char_base_set(cmd, character);
   vdp1_cmdt_link_type_set(cmd, VDP1_CMDT_LINK_TYPE_JUMP_ASSIGN);
   cmd->cmd_link = (uint16_t)((uint32_t)&cmdts[nbCommand+1]-(uint32_t)&cmdt_list->cmdts[0])>>3;
@@ -303,27 +297,19 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
 }
 
 void render_vdp1_flush(void) {
-  printf("%s %d\n", __FUNCTION__, nbCommand);
   //Flush shall not force the sync of the screen
   if (nbCommand > 0) {
     //sort all the quads
     //Set the last command as end
-    printf("%d\n", __LINE__);
     quickSort_Z(&chain[0], 0, nbCommand-1);
-    printf("%d\n", __LINE__);
     //Reordering jmp adress based on order
     cmdt_list->cmdts[1].cmd_link = (chain[0].id+2)<<2;
-    printf("%d\n", __LINE__);
     for (int i = 0; i< nbCommand-1; i++) {
       cmdts[chain[i].id].cmd_link = (chain[i+1].id+2)<<2;
     }
-    printf("%d\n", __LINE__);
     cmdts[chain[nbCommand-1].id].cmd_link = (nbCommand+2)<<2;
-    printf("%d\n", __LINE__);
     vdp1_cmdt_end_set(&cmdts[nbCommand]);
-    printf("%d\n", __LINE__);
   }
-  printf("%d\n", __LINE__);
   cmdt_list->count = nbCommand+3;
 
   LOGD("List count = %d\n", cmdt_list->count);

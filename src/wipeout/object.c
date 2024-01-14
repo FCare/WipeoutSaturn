@@ -516,7 +516,7 @@ Object *objects_load(char *name, texture_list_t tl) {
 
 Object_Saturn *object_saturn_load(char *name) {
 	//read first sector so that we have the detail of the model
-	printf("Load %s\n", name);
+	LOGD("Load %s\n", name);
 	Object_Saturn *object = (Object_Saturn*)platform_load_saturn_file(name);
 	//process de l'objet au niveau des memoires
 	object->vertices = (fix16_vec3_t *)((uint32_t)object+(uint32_t)object->vertices);
@@ -527,7 +527,6 @@ Object_Saturn *object_saturn_load(char *name) {
 		object->object[i].characters = (character **)((uint32_t)object+(uint32_t)object->object[i].characters);
 		for (uint32_t j=0; j<object->object[i].faces_len; j++) {
 			object->object[i].characters[j] = (character *)((uint32_t)object+(uint32_t)object->object[i].characters[j]);
-			printf("obj[%d] Character[%d] is set to %x\n", i, j, object->object[i].characters[j]);
 			object->object[i].faces[j].texture_id = 0xFFFF;
 		}
 	}
@@ -706,7 +705,6 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 			if ((geo->flags & POLYGON_FLAG) == 0) {
 				if (curFace->texture_id == 0xFFFF) {
 					//needs to allocate the character on vdp1 - 4bpp LUT
-					printf("Ship[%d] texture[%d] 0x%x\n", geoId, faceId, curChar->pixels);
 					curFace->texture_id = allocate_vdp1_texture((void*)curChar->pixels, curChar->width, curChar->height, 4);
 				}
 				texture_index = curFace->texture_id;

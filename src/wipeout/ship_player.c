@@ -43,7 +43,6 @@ void ship_player_update_sfx(ship_t *self) {
 }
 
 void ship_player_update_intro(ship_t *self) {
-	printf("%d\n", __LINE__);
 	self->temp_target = self->position;
 
 	self->sfx_engine_thrust = sfx_reserve_loop(SFX_ENGINE_THRUST);

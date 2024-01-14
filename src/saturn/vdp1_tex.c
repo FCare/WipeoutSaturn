@@ -43,9 +43,7 @@ uint16_t allocate_vdp1_texture(void* pixel, uint16_t w, uint16_t h, uint8_t elt_
 	textures[id].size.y = h;
 	int length = w*h*elt_size/8; //each pixel is 4bits for the moment
   textures[id].pixels = vdp1_tex_bump(length);
-	printf("Pix is %x\n", textures[id].pixels);
 	scu_dma_transfer(0, (void *)textures[id].pixels, pixel, length);
-	printf("Copy 0x%x from 0x%x to 0x%x\n", length, pixel, textures[id].pixels);
 	scu_dma_transfer_wait(0);
   return id;
 }

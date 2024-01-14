@@ -69,36 +69,22 @@ void race_init(void) {
 
 void race_update(void) {
 	if (is_paused) {
-		printf("%d\n", __LINE__);
 		if (!active_menu) {
-			printf("%d\n", __LINE__);
 			active_menu = pause_menu_init();
-			printf("%d\n", __LINE__);
 		}
 		if (input_pressed(A_MENU_QUIT)) {
-			printf("%d\n", __LINE__);
 			race_unpause();
-			printf("%d\n", __LINE__);
 		}
 	}
 	else {
-		printf("%d\n", __LINE__);
 		ships_update();
-		printf("%d\n", __LINE__);
 		droid_update(&g.droid, &g.ships[g.pilot]);
-		printf("%d\n", __LINE__);
 		camera_update(&g.camera, &g.ships[g.pilot], &g.droid);
-		printf("%d\n", __LINE__);
 		weapons_update();
-		printf("%d\n", __LINE__);
 		particles_update();
-		printf("%d\n", __LINE__);
 		scene_update();
-		printf("%d\n", __LINE__);
 		if (g.race_type != RACE_TYPE_TIME_TRIAL) {
-			printf("%d\n", __LINE__);
 			track_cycle_pickups();
-			printf("%d\n", __LINE__);
 		}
 
 		if (g.is_attract_mode) {
@@ -111,53 +97,35 @@ void race_update(void) {
 			}
 		}
 		else if (active_menu == NULL && (input_pressed(A_MENU_START) || input_pressed(A_MENU_QUIT))) {
-			printf("%d\n", __LINE__);
 			race_pause();
-			printf("%d\n", __LINE__);
 		}
 	}
 
 
 	// Draw 3D
-	printf("%d\n", __LINE__);
 	render_set_view(g.camera.position, g.camera.angle);
-printf("%d\n", __LINE__);
 	render_set_cull_backface(false);
-	printf("%d\n", __LINE__);
 	scene_draw(&g.camera);
-	printf("%d\n", __LINE__);
 	track_draw(&g.camera);
-	printf("%d\n", __LINE__);
 	render_set_cull_backface(true);
-printf("%d\n", __LINE__);
 	ships_draw();
-	printf("%d\n", __LINE__);
 	droid_draw(&g.droid);
-	printf("%d\n", __LINE__);
 	weapons_draw();
-	printf("%d\n", __LINE__);
 	particles_draw();
-	printf("%d\n", __LINE__);
 
 	// Draw 2d
 	render_set_view_2d();
 
 	if (flags_is(g.ships[g.pilot].flags, SHIP_RACING)) {
-		printf("%d\n", __LINE__);
 		hud_draw(&g.ships[g.pilot]);
-		printf("%d\n", __LINE__);
 	}
 
 	if (active_menu) {
 		if (!menu_is_scroll_text) {
-			printf("%d\n", __LINE__);
 			vec2i_t size = render_size();
 			render_push_2d(vec2i(0, 0), size, rgba(0, 0, 0, 128), RENDER_NO_TEXTURE);
-			printf("%d\n", __LINE__);
 		}
-		printf("%d\n", __LINE__);
 		menu_update(active_menu);
-		printf("%d\n", __LINE__);
 	}
 }
 

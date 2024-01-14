@@ -49,13 +49,9 @@ void system_update(void) {
 	render_frame_prepare();
 
 	game_update();
-printf("%d\n", __LINE__);
 	render_frame_end();
-	printf("%d\n", __LINE__);
 	input_clear();
-	printf("%d\n", __LINE__);
 	mem_temp_check();
-	printf("%d\n", __LINE__);
 }
 
 void system_reset_cycle_time(void) {

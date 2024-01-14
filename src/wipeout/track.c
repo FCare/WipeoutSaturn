@@ -110,18 +110,13 @@ ttf_t *track_load_tile_format(char *ttf_name) {
 
 bool track_collect_pickups(track_face_t *face) {
 	if (flags_is(face->flags, FACE_PICKUP_ACTIVE)) {
-		printf("%d\n", __LINE__);
 		flags_rm(face->flags, FACE_PICKUP_ACTIVE);
 		flags_add(face->flags, FACE_PICKUP_COLLECTED);
-		printf("%d\n", __LINE__);
 		track_face_set_color(face, rgba(255, 255, 255, 255));
-		printf("%d\n", __LINE__);
 		return true;
 	}
 	else {
-		printf("%d\n", __LINE__);
 		return false;
-		printf("%d\n", __LINE__);
 	}
 }
 
@@ -136,7 +131,6 @@ vec3_t *track_load_vertices(char *file_name) {
 	int div = 0;
 	for (int i = 0; i < g.track.vertex_count; i++) {
 		int val[3] = {get_i32(bytes, &p),get_i32(bytes, &p),get_i32(bytes, &p)};
-		// printf("Vertices[%d]= {%d,%d,%d}\n", i, val[0], val[1], val[2]);
 		for (int k=0; k<3; k++) {
 			if ((val[k]>>div) > 32768) div++;
 			if ((val[k]>>div) < -32768) div++;
@@ -146,7 +140,6 @@ vec3_t *track_load_vertices(char *file_name) {
 		vertices[i].z = val[2];
 		p += 4; // padding
 	}
-	printf("Finally div is %d\n", div);
 	for (int i = 0; i < g.track.vertex_count; i++) {
 		vertices[i].x = FIX16(vertices[i].x>>div);
 		vertices[i].y = FIX16(vertices[i].y>>div);
