@@ -539,8 +539,9 @@ void main_menu_init(void) {
 	background = image_get_texture("wipeout/textures/wipeout1.tim");
 	track_images = image_get_compressed_textures("wipeout/textures/track.cmp");
 
+	models.misc.options = object_saturn_load("wipeout/common/options.smf");
+	// objects_unpack_saturn(models.misc, objects_saturn_load("wipeout/common/msdos.smf"));
 //To be converted
-	objects_unpack_saturn(models.misc, objects_saturn_load("wipeout/common/msdos.smf"));
 	objects_unpack_saturn(models.race_classes, objects_saturn_load("wipeout/common/leeg.smf"));
 	objects_unpack_saturn(models.teams, objects_saturn_load("wipeout/common/teams.smf"));
 	objects_unpack_saturn(models.pilots, objects_saturn_load("wipeout/common/pilot.smf"));
