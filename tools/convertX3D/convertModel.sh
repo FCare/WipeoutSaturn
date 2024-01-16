@@ -36,4 +36,10 @@ cp ../blender/results/col_sophia.smf ../../cd/wipeout/ship/
 
 ./build/convertX3D ../blender/results/options.x3d
 cp ../blender/results/options.smf ../../cd/wipeout/common/
+./build/convertX3D ../blender/results/pad1.x3d
+cp ../blender/results/pad1.smf ../../cd/wipeout/common/
+./build/convertX3D ../blender/results/head.x3d
+cp ../blender/results/head.smf ../../cd/wipeout/common/
+./build/convertX3D ../blender/results/video.x3d
+cp ../blender/results/video.smf ../../cd/wipeout/common/
 

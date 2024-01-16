@@ -36,7 +36,7 @@ static struct {
 	Object_Saturn *race_classes[2];
 	Object_Saturn *teams[4];
 	Object_Saturn *pilots[8];
-	struct { Object_Saturn *stopwatch, *save, *load, *headphones, *cd; } options;
+	struct { Object_Saturn *stopwatch, *save, *load, *headphones, *video; } options;
 	struct { Object_Saturn *championship, *msdos, *single_race, *options; } misc;
 	Object_Saturn *rescue;
 	Object_Saturn *controller;
@@ -123,9 +123,9 @@ static void button_audio(menu_t *menu, int data __unused) {
 
 static void page_options_draw(menu_t *menu __unused, int data) {
 	switch (data) {
-		case 0: draw_saturn_model(models.controller, vec2(0, -0.1), vec3(0, 0, -6000), system_cycle_time()); break;
-		case 1: draw_saturn_model(models.rescue, vec2(0, -0.2), vec3(0, 0, -700), system_cycle_time()); break; // TODO: needs better model
-		case 2: draw_saturn_model(models.options.headphones, vec2(0, -0.2), vec3(0, 0, -300), system_cycle_time()); break;
+		case 0: draw_saturn_model(models.options.video, vec2(0, -0.2), vec3(0, 0, -700), system_cycle_time()); break; // TODO: needs better model
+		case 1: draw_saturn_model(models.options.headphones, vec2(0, -0.2), vec3(0, 0, -300), system_cycle_time()); break;
+		case 2: draw_saturn_model(models.controller, vec2(0, -0.1), vec3(0, 0, -6000), system_cycle_time()); break;
 	}
 }
 
@@ -137,11 +137,11 @@ static void page_options_init(menu_t *menu) {
 	page->title_anchor = UI_POS_TOP | UI_POS_CENTER;
 	page->items_pos = vec2i(0, -110);
 	page->items_anchor = UI_POS_BOTTOM | UI_POS_CENTER;
+	menu_page_add_button(page, button_nb++, "VIDEO", button_video);
+	menu_page_add_button(page, button_nb++, "AUDIO", button_audio);
 #ifndef SATURN
 	menu_page_add_button(page, button_nb++, "CONTROLS", button_controls);
 #endif
-	menu_page_add_button(page, button_nb++, "VIDEO", button_video);
-	menu_page_add_button(page, button_nb++, "AUDIO", button_audio);
 }
 
 
@@ -540,14 +540,15 @@ void main_menu_init(void) {
 	track_images = image_get_compressed_textures("wipeout/textures/track.cmp");
 
 	models.misc.options = object_saturn_load("wipeout/common/options.smf");
+	models.controller  = object_saturn_load("wipeout/common/pad1.smf");
+	models.options.headphones = object_saturn_load("wipeout/common/head.smf");
+	models.options.video = object_saturn_load("wipeout/common/video.smf");
 	// objects_unpack_saturn(models.misc, objects_saturn_load("wipeout/common/msdos.smf"));
 //To be converted
 	objects_unpack_saturn(models.race_classes, objects_saturn_load("wipeout/common/leeg.smf"));
 	objects_unpack_saturn(models.teams, objects_saturn_load("wipeout/common/teams.smf"));
 	objects_unpack_saturn(models.pilots, objects_saturn_load("wipeout/common/pilot.smf"));
-	objects_unpack_saturn(models.options, objects_saturn_load("wipeout/common/alopt.smf"));
-	objects_unpack_saturn(models.rescue, objects_saturn_load("wipeout/common/rescu.smf"));
-	objects_unpack_saturn(models.controller, objects_saturn_load("wipeout/common/pad1.smf"));
+	// objects_unpack_saturn(models.options, objects_saturn_load("wipeout/common/alopt.smf"));
 
 	menu_reset(main_menu);
 	page_main_init(main_menu);
