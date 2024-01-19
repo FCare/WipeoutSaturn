@@ -111,6 +111,7 @@ enum circut {
 
 typedef struct {
 	char *name;
+	char *model;
 } race_class_t;
 
 typedef struct {

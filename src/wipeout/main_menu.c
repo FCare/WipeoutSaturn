@@ -541,11 +541,15 @@ void main_menu_init(void) {
 
 	models.misc.options = object_saturn_load("wipeout/common/options.smf");
 	models.controller  = object_saturn_load("wipeout/common/pad1.smf");
-	models.options.headphones = object_saturn_load("wipeout/common/head.smf");
+	models.options.headphones = object_saturn_load("wipeout/common/hp.smf");
 	models.options.video = object_saturn_load("wipeout/common/video.smf");
+	for (int i = 0; i<2; i++)
+	{
+		models.race_classes[i] = object_saturn_load(def.race_classes[i].model);
+	}
+	objects_unpack_saturn(models.race_classes, objects_saturn_load("wipeout/common/leeg.smf"));
 	// objects_unpack_saturn(models.misc, objects_saturn_load("wipeout/common/msdos.smf"));
 //To be converted
-	objects_unpack_saturn(models.race_classes, objects_saturn_load("wipeout/common/leeg.smf"));
 	objects_unpack_saturn(models.teams, objects_saturn_load("wipeout/common/teams.smf"));
 	objects_unpack_saturn(models.pilots, objects_saturn_load("wipeout/common/pilot.smf"));
 	// objects_unpack_saturn(models.options, objects_saturn_load("wipeout/common/alopt.smf"));

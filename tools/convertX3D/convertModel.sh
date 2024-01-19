@@ -38,8 +38,11 @@ cp ../blender/results/col_sophia.smf ../../cd/wipeout/ship/
 cp ../blender/results/options.smf ../../cd/wipeout/common/
 ./build/convertX3D ../blender/results/pad1.x3d
 cp ../blender/results/pad1.smf ../../cd/wipeout/common/
-./build/convertX3D ../blender/results/head.x3d
-cp ../blender/results/head.smf ../../cd/wipeout/common/
+./build/convertX3D ../blender/results/hp.x3d
+cp ../blender/results/hp.smf ../../cd/wipeout/common/
 ./build/convertX3D ../blender/results/video.x3d
 cp ../blender/results/video.smf ../../cd/wipeout/common/
-
+./build/convertX3D ../blender/results/venom.x3d
+cp ../blender/results/venom.smf ../../cd/wipeout/common/
+./build/convertX3D ../blender/results/rappier.x3d
+cp ../blender/results/rappier.smf ../../cd/wipeout/common/
