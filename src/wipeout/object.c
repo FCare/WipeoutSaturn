@@ -669,11 +669,26 @@ Object_Saturn_list* objects_saturn_load(char *name) {
 
 int nb_texture = 0;
 
-void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
+void object_saturn_draw(Object_Saturn *object,mat4_t *mat, light_t* lights, uint8_t nbLights) {
+	mat4_t inv_mat;
+	mat4_rot_inv(&inv_mat, mat);
+
 	render_set_model_mat(mat);
 
 	vec3_t *vertex = mem_temp_alloc(object->vertices_len * sizeof(vec3_t));
 	render_object_transform(vertex, object->vertices, object->vertices_len);
+
+	rgb1555_t *light_att = mem_temp_alloc(object->vertices_len * sizeof(rgb1555_t));
+	for (int i = 0; i<object->vertices_len; i++) {
+		light_att[i].raw = 0;
+	}
+	if ((nbLights > 0) && (lights != NULL)) {
+		for (int i=0; i<nbLights; i++) {
+			vec3_t light_pos = vec3_transform(lights[i].position, &inv_mat);
+			printf("La\n");
+			render_object_lights(light_att, object->normals, object->vertices, object->vertices_len, light_pos, lights[i].color); //Do no use intensity for now
+		}
+	}
 
 	for (uint32_t geoId = 0; geoId < object->nbObjects; geoId++) {
 		geometry *geo = &object->object[geoId];
@@ -685,19 +700,19 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 				.vertices = {
 					{
 						.pos = vertex[curFace->vertex_id[0]],
-						.light = FIX16_ZERO
+						.light = light_att[curFace->vertex_id[0]],
 					},
 					{
 						.pos = vertex[curFace->vertex_id[1]],
-						.light = FIX16_ZERO
+						.light = light_att[curFace->vertex_id[1]],
 					},
 					{
 						.pos = vertex[curFace->vertex_id[2]],
-						.light = FIX16_ZERO
+						.light = light_att[curFace->vertex_id[2]],
 					},
 					{
 						.pos = vertex[curFace->vertex_id[3]],
-						.light = FIX16_ZERO
+						.light = light_att[curFace->vertex_id[3]],
 					},
 				}
 			};
@@ -713,6 +728,7 @@ void object_saturn_draw(Object_Saturn *object, mat4_t *mat) {
 			render_push_distorted_saturn( &q, texture_index, object, (geo->flags & EXHAUST_FLAG)!=0);
 		}
 	}
+	mem_temp_free(light_att);
 	mem_temp_free(vertex);
 }
 

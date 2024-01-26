@@ -123,7 +123,6 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object
     fix16_int32_to(quad->vertices[3].pos.x),
     fix16_int32_to(quad->vertices[3].pos.y)
   );
-  //Donc il faut transformer le UV en rectangle
   vdp1_cmdt_end_clear(cmd);
 
   vdp1_cmdt_draw_mode_t draw_mode = {
@@ -134,12 +133,6 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object
 
   if (texture_index == RENDER_NO_TEXTURE_SATURN) {
     LOGD("No color, using a white polygon\n");
-    // rgb1555_t white = (rgb1555_t){
-    //   .r = 0x10,
-    //   .g = 0x10,
-    //   .b = 0x10,
-    //   .msb = 1,
-    // };
     vdp1_cmdt_polygon_set(cmd);
     vdp1_cmdt_color_set(cmd, quad->color);
   } else {
@@ -166,27 +159,21 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object
   cmd->cmd_link = (uint16_t)((uint32_t)&cmdts[nbCommand+1]-(uint32_t)&cmdt_list->cmdts[0])>>3;
   chain[nbCommand].id = nbCommand;
 
-  uint8_t needGouraud = 0;
-  ///Revoir le gouraud basé sur les lights
-  // for (int i =0; i<4; i++) {
-  //   rgb1555_t gouraud = quad->vertices[i].color;
-  //   printf("Color is R=%x G=%x B=%x\n", quad->vertices[i].color.r, quad->vertices[i].color.g, quad->vertices[i].color.b);
-  //   needGouraud |= ((gouraud.r != 0x10) || (gouraud.g != 0x10) || (gouraud.b != 0x10));
-  // }
-  // if (needGouraud != 0) {
-  //   //apply gouraud
-  //   //Shall not be shared between lists
-  //   vdp1_gouraud_table_t *gouraud_base;
-  //   gouraud_base = &_vdp1_vram_partitions.gouraud_base[gouraud_cmd];
-  //   gouraud_base->colors[0] = quad->vertices[0].color;
-  //   gouraud_base->colors[1] = quad->vertices[1].color;
-  //   gouraud_base->colors[2] = quad->vertices[2].color;
-  //   gouraud_base->colors[3] = quad->vertices[3].color;
-  //   gouraud_cmd++;
-  //   draw_mode.cc_mode = VDP1_CMDT_CC_GOURAUD;
-  //
-  //   vdp1_cmdt_gouraud_base_set(cmd, (uint32_t)gouraud_base);
-  // }
+  uint8_t needGouraud = 1;
+  if (needGouraud != 0) {
+    //apply gouraud
+    //Shall not be shared between lists
+    vdp1_gouraud_table_t *gouraud_base;
+    gouraud_base = &_vdp1_vram_partitions.gouraud_base[gouraud_cmd];
+    gouraud_base->colors[0] = quad->vertices[0].light;
+    gouraud_base->colors[1] = quad->vertices[1].light;
+    gouraud_base->colors[2] = quad->vertices[2].light;
+    gouraud_base->colors[3] = quad->vertices[3].light;
+    gouraud_cmd++;
+    draw_mode.cc_mode = VDP1_CMDT_CC_GOURAUD;
+
+    vdp1_cmdt_gouraud_base_set(cmd, (uint32_t)gouraud_base);
+  }
   vdp1_cmdt_draw_mode_set(cmd, draw_mode);
 
   cmd->cmd_xa = fix16_int32_to(quad->vertices[0].pos.x);

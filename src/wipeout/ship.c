@@ -327,7 +327,7 @@ void ship_reset_exhaust_plume(ship_t* self)
 
 
 void ship_draw(ship_t *self) {
-	object_saturn_draw(self->model, &self->mat);
+	object_saturn_draw(self->model, &self->mat, NULL, 0);
 }
 
 void ship_draw_shadow(ship_t *self) {

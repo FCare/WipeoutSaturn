@@ -51,6 +51,7 @@ void render_set_cull_backface(bool enabled);
 
 vec3_t render_transform(vec3_t pos);
 void render_object_transform(vec3_t *out, vec3_t *in, int16_t size);
+void render_object_lights(rgb1555_t *lights, vec3_t *normals, vec3_t *vertex, int16_t size, vec3_t light_pos, rgb1555_t emitter);
 void render_push_tris(tris_t tris, uint16_t texture);
 void render_push_quads(quads_t *quad, uint16_t texture_index);
 void render_push_stripe(quads_t *quad, uint16_t texture_index);

@@ -186,6 +186,17 @@ void render_object_transform(vec3_t *out, vec3_t *in, int16_t size) {
   }
 }
 
+void render_object_lights(rgb1555_t *lights, vec3_t *normals, vec3_t *vertex, int16_t size, vec3_t light_pos, rgb1555_t emitter){
+  //See here https://sites.nova.edu/mjl/graphics/lighting/lighting-models/
+  for (int i = 0; i<size; i++) {
+    fix16_t cos_theta = clamp(vec3_angle_cos(vec3_sub(light_pos,vertex[i]), normals[i]), FIX16_ZERO, FIX16_ONE);
+    //Intensity of light and material coefficient are all one for the moment. Only compute diffuse, no ambient, no reflection
+    lights[i].r += (fix16_int32_to(cos_theta * emitter.r))&0x1F;
+    lights[i].g += (fix16_int32_to(cos_theta * emitter.g))&0x1F;
+    lights[i].b += (fix16_int32_to(cos_theta * emitter.b))&0x1F;
+  }
+}
+
 static void render_push_native_quads(quads_t *quad, rgba_t color, uint16_t texture_index) {
   nb_planes++;
   fix16_t minZ = FIX16_ZERO;

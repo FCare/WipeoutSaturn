@@ -41,7 +41,7 @@ typedef struct {
 
 typedef struct {
 	vec3_t pos;
-	fix16_t light;
+	rgb1555_t light;
 } vertex_saturn_t;
 
 typedef struct {
@@ -199,6 +199,7 @@ static inline angle_t wrap_angle(angle_t a) {
 }
 
 rgba_t rgba_from_u32(uint32_t v);
+fix16_t vec3_angle_cos(vec3_t a, vec3_t b);
 fix16_t vec3_angle(vec3_t a, vec3_t b);
 vec3_t vec3_wrap_angle(vec3_t a);
 vec3_t vec3_normalize(vec3_t a);
@@ -214,5 +215,6 @@ void mat4_set_yaw_pitch_roll(mat4_t *m, vec3_t rot);
 void mat4_set_roll_pitch_yaw(mat4_t *mat, vec3_t rot);
 void mat4_translate(mat4_t *mat, vec3_t translation);
 void mat4_mul(mat4_t *res, mat4_t *a, mat4_t *b);
+void mat4_rot_inv(mat4_t *res, mat4_t *a);
 
 #endif

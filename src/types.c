@@ -15,12 +15,21 @@ vec3_t vec3_wrap_angle(vec3_t a) {
 	return vec3_fix16(wrap_angle(a.x), wrap_angle(a.y), wrap_angle(a.z));
 }
 
+fix16_t vec3_angle_cos(vec3_t a, vec3_t b) {
+	if ((fix16_vec3_length(&a) != FIX16_ZERO) && (fix16_vec3_length(&b) != FIX16_ZERO))
+	{
+		// printf("[%x,%x,%x]x[%x,%x,%x]\n", a.x, a.y, a.z, b.x, b.y, b.z);
+		fix16_vec3_normalize(&a);
+		fix16_vec3_normalize(&b);
+		fix16_t cosine = vec3_dot(a, b);
+		// printf("cosine [%x,%x,%x]x[%x,%x,%x]=>%x\n", a.x, a.y, a.z, b.x, b.y, b.z, cosine);
+		return clamp(cosine, -FIX16_ONE, FIX16_ONE);
+	}
+	return FIX16_ONE;
+}
+
 fix16_t vec3_angle(vec3_t a, vec3_t b) {
-	fix16_t magnitude = fix16_sqrt(fix16_mul(fix16_vec3_sqr_length(&a), fix16_vec3_sqr_length(&b)));
-	fix16_t cosine = (magnitude == FIX16_ZERO)
-		? FIX16_ONE
-		: fix16_div(vec3_dot(a, b), magnitude);
-	return acos(clamp(cosine, -1, 1));
+	return acos(vec3_angle_cos(a, b));
 }
 
 // static vec4_t transpose (const fix16_vec4_t *vec) {
@@ -113,4 +122,23 @@ void mat4_translate(mat4_t *mat, vec3_t translation) {
 
 void mat4_mul(mat4_t *res, mat4_t *a, mat4_t *b) {
 	fix16_mat44_mul(a,b,res);
+}
+
+void mat4_rot_inv(mat4_t *res, mat4_t *a) {
+	res->arr[0] = a->arr[0];
+	res->arr[1] = a->arr[4];
+	res->arr[2] = a->arr[8];
+	res->arr[3] = -a->arr[3];
+	res->arr[4] = a->arr[1];
+	res->arr[5] = a->arr[5];
+	res->arr[6] = a->arr[9];
+	res->arr[7] = -a->arr[7];
+	res->arr[8] = a->arr[2];
+	res->arr[9] = a->arr[6];
+	res->arr[10] = a->arr[10];
+	res->arr[11] = -a->arr[11];
+	res->arr[12] = -a->arr[12];
+	res->arr[13] = -a->arr[13];
+	res->arr[14] = -a->arr[14];
+	res->arr[15] = a->arr[15];
 }

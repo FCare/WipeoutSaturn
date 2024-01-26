@@ -309,6 +309,12 @@ typedef struct {
 	geometry object[];
 } Object_Saturn;
 
+typedef struct {
+	vec3_t position;
+	rgb1555_t color;
+	fix16_t intensity;
+} light_t;
+
 typedef struct{
 	int16_t length;
 	Object_Saturn **objects;
@@ -316,5 +322,5 @@ typedef struct{
 
 extern Object_Saturn_list* objects_saturn_load(char *name);
 extern Object_Saturn *object_saturn_load(char *name);
-extern void object_saturn_draw(Object_Saturn *object, mat4_t *mat);
+extern void object_saturn_draw(Object_Saturn *object,mat4_t *mat, light_t* lights, uint8_t nbLights);
 #endif
