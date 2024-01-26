@@ -685,7 +685,6 @@ void object_saturn_draw(Object_Saturn *object,mat4_t *mat, light_t* lights, uint
 	if ((nbLights > 0) && (lights != NULL)) {
 		for (int i=0; i<nbLights; i++) {
 			vec3_t light_pos = vec3_transform(lights[i].position, &inv_mat);
-			printf("La\n");
 			render_object_lights(light_att, object->normals, object->vertices, object->vertices_len, light_pos, lights[i].color); //Do no use intensity for now
 		}
 	}
