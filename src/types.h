@@ -51,6 +51,7 @@ typedef struct {
 typedef struct {
 	vertex_saturn_t vertices[4];
 	rgb1555_t color;
+	uint8_t useLight;
 } quads_saturn_t;
 
 

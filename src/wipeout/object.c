@@ -695,6 +695,7 @@ void object_saturn_draw(Object_Saturn *object,mat4_t *mat, light_t* lights, uint
 			face *curFace = &geo->faces[faceId];
 			character *curChar = geo->characters[faceId];
 			quads_saturn_t q = {
+				.useLight = (nbLights>0),
 				.color = curFace->RGB,
 				.vertices = {
 					{

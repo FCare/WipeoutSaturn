@@ -159,7 +159,7 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object
   cmd->cmd_link = (uint16_t)((uint32_t)&cmdts[nbCommand+1]-(uint32_t)&cmdt_list->cmdts[0])>>3;
   chain[nbCommand].id = nbCommand;
 
-  uint8_t needGouraud = 1;
+  uint8_t needGouraud = quad->useLight;
   if (needGouraud != 0) {
     //apply gouraud
     //Shall not be shared between lists
