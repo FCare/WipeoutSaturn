@@ -435,8 +435,7 @@ static void button_team_select(menu_t *menu, int data) {
 }
 
 static void page_team_draw(menu_t *menu __unused, int data) {
-	int team_model_index = (data + 3) % 4; // models in the prm are shifted by -1
-	draw_saturn_model(models.teams[team_model_index], vec2(0, -0.2), vec3(0, 0, -10000), system_cycle_time(), NULL, 0);
+	draw_saturn_model(models.teams[data], vec2(0, -0.2), vec3(0, 0, -10000), system_cycle_time(), NULL, 0);
 	// draw_saturn_model(g.ships[def.teams[data].pilots[0]].model, vec2(0, -0.3), vec3(-700, -800, -1300), system_cycle_time()*1.1, NULL, 0);
 	// draw_saturn_model(g.ships[def.teams[data].pilots[1]].model, vec2(0, -0.3), vec3( 700, -800, -1300), system_cycle_time()*1.2, NULL, 0);
 }
@@ -554,7 +553,10 @@ void main_menu_init(void) {
 	// objects_unpack_saturn(models.race_classes, objects_saturn_load("wipeout/common/leeg.smf"));
 	// objects_unpack_saturn(models.misc, objects_saturn_load("wipeout/common/msdos.smf"));
 //To be converted
-	objects_unpack_saturn(models.teams, objects_saturn_load("wipeout/common/teams.smf"));
+	for (int i = 0; i<NUM_TEAMS; i++)
+	{
+		models.teams[i] = object_saturn_load(def.teams[i].model);
+	}
 	objects_unpack_saturn(models.pilots, objects_saturn_load("wipeout/common/pilot.smf"));
 	// objects_unpack_saturn(models.options, objects_saturn_load("wipeout/common/alopt.smf"));
 

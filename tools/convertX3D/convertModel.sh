@@ -53,4 +53,12 @@ cp ../blender/results/champion.smf ../../cd/wipeout/common/
 cp ../blender/results/single.smf ../../cd/wipeout/common/
 ./build/convertX3D ../blender/results/watch.x3d
 cp ../blender/results/watch.smf ../../cd/wipeout/common/
+./build/convertX3D ../blender/results/auri.x3d
+cp ../blender/results/auri.smf ../../cd/wipeout/common/
+./build/convertX3D ../blender/results/qirex.x3d
+cp ../blender/results/qirex.smf ../../cd/wipeout/common/
+./build/convertX3D ../blender/results/feisar.x3d
+cp ../blender/results/feisar.smf ../../cd/wipeout/common/
+./build/convertX3D ../blender/results/ag.x3d
+cp ../blender/results/ag.smf ../../cd/wipeout/common/
 

@@ -37,14 +37,14 @@ const game_def_t def = {
 	},
 
 	.pilots = {
-		[PILOT_JOHN_DEKKA]           = {.name = "JOHN DEKKA",           .portrait = "wipeout/textures/dekka.cmp", .ship = "wipeout/ship/dekka.smf", .collision = "wipeout/ship/col_dekk.smf", .team = 0, .logo_model = 0},
-		[PILOT_DANIEL_CHANG]         = {.name = "DANIEL CHANG",         .portrait = "wipeout/textures/chang.cmp", .ship = "wipeout/ship/chang.smf", .collision = "wipeout/ship/col_chan.smf", .team = 0, .logo_model = 4},
-		[PILOT_ARIAL_TETSUO]         = {.name = "ARIAL TETSUO",         .portrait = "wipeout/textures/arial.cmp", .ship = "wipeout/ship/arial.smf", .collision = "wipeout/ship/col_ari0.smf", .team = 1, .logo_model = 6},
-		[PILOT_ANASTASIA_CHEROVOSKI] = {.name = "ANASTASIA CHEROVOSKI", .portrait = "wipeout/textures/anast.cmp", .ship = "wipeout/ship/anasta.smf", .collision = "wipeout/ship/col_anas.smf", .team = 1, .logo_model = 7},
-		[PILOT_KEL_SOLAAR]           = {.name = "KEL SOLAAR",           .portrait = "wipeout/textures/solar.cmp", .ship = "wipeout/ship/solaar.smf", .collision = "wipeout/ship/col_sola.smf", .team = 2, .logo_model = 2},
-		[PILOT_ARIAN_TETSUO]         = {.name = "ARIAN TETSUO",         .portrait = "wipeout/textures/arian.cmp", .ship = "wipeout/ship/arian.smf", .collision = "wipeout/ship/col_ari1.smf", .team = 2, .logo_model = 5},
-		[PILOT_SOFIA_DE_LA_RENTE]    = {.name = "SOFIA DE LA RENTE",    .portrait = "wipeout/textures/sophi.cmp", .ship = "wipeout/ship/sophia.smf", .collision = "wipeout/ship/col_soph.smf", .team = 3, .logo_model = 1},
-		[PILOT_PAUL_JACKSON]         = {.name = "PAUL JACKSON",         .portrait = "wipeout/textures/paul.cmp",  .ship = "wipeout/ship/jacko.smf", .collision = "wipeout/ship/col_jack.smf", .team = 3, .logo_model = 3},
+		[PILOT_JOHN_DEKKA]           = {.name = "JOHN DEKKA",           .portrait = "wipeout/textures/dekka.cmp", .ship = "wipeout/ship/dekka.smf", .collision = "wipeout/ship/col_dekk.smf", .team = 0},
+		[PILOT_DANIEL_CHANG]         = {.name = "DANIEL CHANG",         .portrait = "wipeout/textures/chang.cmp", .ship = "wipeout/ship/chang.smf", .collision = "wipeout/ship/col_chan.smf", .team = 0},
+		[PILOT_ARIAL_TETSUO]         = {.name = "ARIAL TETSUO",         .portrait = "wipeout/textures/arial.cmp", .ship = "wipeout/ship/arial.smf", .collision = "wipeout/ship/col_ari0.smf", .team = 1},
+		[PILOT_ANASTASIA_CHEROVOSKI] = {.name = "ANASTASIA CHEROVOSKI", .portrait = "wipeout/textures/anast.cmp", .ship = "wipeout/ship/anasta.smf", .collision = "wipeout/ship/col_anas.smf", .team = 1},
+		[PILOT_KEL_SOLAAR]           = {.name = "KEL SOLAAR",           .portrait = "wipeout/textures/solar.cmp", .ship = "wipeout/ship/solaar.smf", .collision = "wipeout/ship/col_sola.smf", .team = 2},
+		[PILOT_ARIAN_TETSUO]         = {.name = "ARIAN TETSUO",         .portrait = "wipeout/textures/arian.cmp", .ship = "wipeout/ship/arian.smf", .collision = "wipeout/ship/col_ari1.smf", .team = 2},
+		[PILOT_SOFIA_DE_LA_RENTE]    = {.name = "SOFIA DE LA RENTE",    .portrait = "wipeout/textures/sophi.cmp", .ship = "wipeout/ship/sophia.smf", .collision = "wipeout/ship/col_soph.smf", .team = 3},
+		[PILOT_PAUL_JACKSON]         = {.name = "PAUL JACKSON",         .portrait = "wipeout/textures/paul.cmp",  .ship = "wipeout/ship/jacko.smf", .collision = "wipeout/ship/col_jack.smf", .team = 3},
 	},
 
 	.race_points_for_rank = {9, 7, 5, 3, 2, 1, 0, 0},
@@ -59,7 +59,7 @@ const game_def_t def = {
 	.teams = {
 		[TEAM_AG_SYSTEMS] = {
 			.name = "AG SYSTEMS",
-			.logo_model = 2,
+			.model = "wipeout/common/ag.smf",
 			.pilots = {0, 1},
 			.attributes = {
 				[RACE_CLASS_VENOM]  = {.mass = 150, .thrust_max =  790, .resistance = 140, .turn_rate = TURN_ACCEL(160), .turn_rate_max = TURN_VEL(2560), .skid = 12},
@@ -68,7 +68,7 @@ const game_def_t def = {
 		},
 		[TEAM_AURICOM] = {
 			.name = "AURICOM",
-			.logo_model = 3,
+			.model = "wipeout/common/auri.smf",
 			.pilots = {2, 3},
 			.attributes = {
 				[RACE_CLASS_VENOM]  = {.mass = 150, .thrust_max =  850, .resistance = 134, .turn_rate = TURN_ACCEL(140), .turn_rate_max = TURN_VEL(1920), .skid = 20},
@@ -77,7 +77,7 @@ const game_def_t def = {
 		},
 		[TEAM_QIREX] = {
 			.name = "QIREX",
-			.logo_model = 1,
+			.model = "wipeout/common/qirex.smf",
 			.pilots = {4, 5},
 			.attributes = {
 				[RACE_CLASS_VENOM]  = {.mass = 150, .thrust_max =  850, .resistance = 140, .turn_rate = TURN_ACCEL(120), .turn_rate_max = TURN_VEL(1920), .skid = 24},
@@ -86,7 +86,7 @@ const game_def_t def = {
 		},
 		[TEAM_FEISAR] = {
 			.name = "FEISAR",
-			.logo_model = 0,
+			.model = "wipeout/common/feisar.smf",
 			.pilots = {6, 7},
 			.attributes = {
 				[RACE_CLASS_VENOM]  = {.mass = 150, .thrust_max =  790, .resistance = 134, .turn_rate = TURN_ACCEL(180), .turn_rate_max = TURN_VEL(2560), .skid = 12},

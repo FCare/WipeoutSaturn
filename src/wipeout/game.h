@@ -123,7 +123,6 @@ typedef struct {
 	char *portrait;
 	char *ship;
 	char *collision;
-	int logo_model;
 	int team;
 } pilot_t;
 
@@ -144,7 +143,7 @@ typedef struct {
 
 typedef struct {
 	char *name;
-	int logo_model;
+	char *model;
 	int pilots[NUM_PILOTS_PER_TEAM];
 	team_attributes_t attributes[NUM_RACE_CLASSES];
 } team_t;
