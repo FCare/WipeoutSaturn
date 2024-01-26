@@ -46,3 +46,11 @@ cp ../blender/results/video.smf ../../cd/wipeout/common/
 cp ../blender/results/venom.smf ../../cd/wipeout/common/
 ./build/convertX3D ../blender/results/rappier.x3d
 cp ../blender/results/rappier.smf ../../cd/wipeout/common/
+
+./build/convertX3D ../blender/results/champion.x3d
+cp ../blender/results/champion.smf ../../cd/wipeout/common/
+./build/convertX3D ../blender/results/single.x3d
+cp ../blender/results/single.smf ../../cd/wipeout/common/
+./build/convertX3D ../blender/results/watch.x3d
+cp ../blender/results/watch.smf ../../cd/wipeout/common/
+

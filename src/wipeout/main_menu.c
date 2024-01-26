@@ -547,7 +547,11 @@ void main_menu_init(void) {
 	{
 		models.race_classes[i] = object_saturn_load(def.race_classes[i].model);
 	}
-	objects_unpack_saturn(models.race_classes, objects_saturn_load("wipeout/common/leeg.smf"));
+	models.misc.championship = object_saturn_load("wipeout/common/champion.smf");
+	models.misc.single_race = object_saturn_load("wipeout/common/single.smf");
+	models.options.stopwatch = object_saturn_load("wipeout/common/watch.smf");
+
+	// objects_unpack_saturn(models.race_classes, objects_saturn_load("wipeout/common/leeg.smf"));
 	// objects_unpack_saturn(models.misc, objects_saturn_load("wipeout/common/msdos.smf"));
 //To be converted
 	objects_unpack_saturn(models.teams, objects_saturn_load("wipeout/common/teams.smf"));
