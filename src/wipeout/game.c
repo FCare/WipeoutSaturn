@@ -528,9 +528,9 @@ void game_init(void) {
 	sfx_load();
 	hud_load();
 	ships_load();
-	droid_load();
-	particles_load();
-	weapons_load();
+	// droid_load();
+	// particles_load();
+	// weapons_load();
 
 	global_textures_len = render_textures_len();
 	global_mem_mark = mem_mark();

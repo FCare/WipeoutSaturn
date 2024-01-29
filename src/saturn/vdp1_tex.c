@@ -3,7 +3,7 @@
 #include "map.h"
 #include "tex.h"
 
-#define VDP1_TEXTURES_MAX  128
+#define VDP1_TEXTURES_MAX  256
 
 static vdp1_texture_t textures[VDP1_TEXTURES_MAX];
 
@@ -36,6 +36,7 @@ void init_vdp1_tex(void) {
 uint16_t allocate_vdp1_texture(void* pixel, uint16_t w, uint16_t h, uint8_t elt_size) {
 	//Not found, bump a new one
 	int id = textures_len;
+	error_if(id>=VDP1_TEXTURES_MAX, "Not enought VDP1 textures - only %d available", VDP1_TEXTURES_MAX);
 	textures_len += 1;
 	textures[id].used = 1;
   textures[id].index = id;
@@ -58,7 +59,6 @@ static uint8_t isSameUv(vec2_t *uv, quads_t *q) {
 }
 
 vdp1_texture_t* get_vdp1_texture(uint16_t texture_index){
-	render_texture_t* src = get_tex(texture_index);
 	for (uint16_t i=0; i<textures_len; i++) {
     if (textures[i].index == texture_index)
 		{

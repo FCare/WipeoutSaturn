@@ -296,7 +296,6 @@ void render_push_sprite(vec3_t pos, vec2i_t size, rgba_t color, uint16_t texture
   vec3_t p1 = vec3_add(pos, vec3_transform(vec3( size.x * 0.5, -size.y * 0.5, 0), &sprite_mat));
   vec3_t p2 = vec3_add(pos, vec3_transform(vec3(-size.x * 0.5,  size.y * 0.5, 0), &sprite_mat));
   vec3_t p3 = vec3_add(pos, vec3_transform(vec3( size.x * 0.5,  size.y * 0.5, 0), &sprite_mat));
-
   render_texture_t *t = get_tex(texture_index);
   quads_t q = {
     .vertices = {
@@ -400,7 +399,6 @@ uint16_t render_texture_create(uint32_t width, uint32_t height, rgba_t *pixels){
   }else{
     LOGD("Need %d kB\n", byte_size/1024);
   }
-  LOGD("Create Texture(%dx%d)\n", width, height);
   uint16_t texture = allocate_tex(width, height, byte_size);
   rgb1555_t *buffer = get_tex(texture)->pixels;
   LOGD("Buffer is 0x%x to 0x%x\n", buffer, &buffer[width*height]);
@@ -413,7 +411,6 @@ uint16_t render_texture_create(uint32_t width, uint32_t height, rgba_t *pixels){
 }
 
 vec2i_t render_texture_size(uint16_t texture){
-  LOGD("%s\n", __FUNCTION__);
   return get_tex(texture)->size;
 }
 void render_texture_replace_pixels(uint16_t texture_index, rgba_t *pixels){

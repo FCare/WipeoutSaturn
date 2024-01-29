@@ -509,7 +509,6 @@ Object *objects_load(char *name, texture_list_t tl) {
 			prm.f3->flag = prm_flag;
 		} // each prim
 	} // each object
-
 	mem_temp_free(bytes);
 	return objectList;
 }
@@ -1007,6 +1006,5 @@ void object_draw(Object *object, mat4_t *mat) {
 
 		}
 	}
-
 	mem_temp_free(vertex);
 }

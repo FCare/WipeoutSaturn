@@ -21,6 +21,7 @@ static void *tex_bump(uint32_t size) {
 void tex_reset(uint16_t len) {
 	LOGD("Tex_reset %d\n", len);
   if (textures_len == len) {
+		LOGD("Tex_reset no need\n");
 		return;
 	}
 	tex_len = 0;
@@ -29,8 +30,10 @@ void tex_reset(uint16_t len) {
 		render_texture_t * last_texture = &textures[len-1];
 		rgb1555_t *new_end = (rgb1555_t *)&last_texture->pixels[last_texture->size.x*last_texture->size.y];
 		tex_len = (uint32_t)new_end - (uint32_t)&tex[0];
+		LOGD("Tex len now id %x\n", tex_len);
 	}
 	textures_len = len;
+	LOGD("Tex reset to %d\n", textures_len);
 }
 
 uint16_t allocate_tex(uint32_t width, uint32_t height, uint32_t size) {
@@ -38,6 +41,7 @@ uint16_t allocate_tex(uint32_t width, uint32_t height, uint32_t size) {
 		rgb1555_t *buffer = (rgb1555_t *)tex_bump(size);
     uint16_t texture_index = textures_len;
     textures[textures_len++] = (render_texture_t){.size = vec2i(width, height), .pixels = buffer};
+		LOGD("Allocate tex %d\n", texture_index);
     return texture_index;
 }
 
@@ -50,6 +54,7 @@ uint16_t create_sub_texture(uint32_t offset, uint32_t width, uint32_t height, ui
 	error_if(textures_len == TEXTURES_MAX, "Not enough texture available");
 	uint16_t texture_index = textures_len;
 	textures[textures_len++] = (render_texture_t){.size = vec2i(width, height), .pixels = &(get_tex(parent)->pixels[offset/sizeof(rgb1555_t)])};
+	LOGD("Allocate sub tex %d\n", texture_index);
 	return texture_index;
 }
 

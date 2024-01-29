@@ -28,11 +28,10 @@ void track_load(const char *base_path) {
 				image_copy(sub_tile, temp_tile, 0, 0, 32, 32, tx * 32, ty * 32);
 				mem_temp_free(sub_tile);
 			}
-		}
+		}+
 		render_texture_create(temp_tile->width, temp_tile->height, temp_tile->pixels);
 		g.track.textures.len++;
 	}
-
 	mem_temp_free(temp_tile);
 	mem_temp_free(cmp);
 	mem_temp_free(ttf);
@@ -145,7 +144,6 @@ vec3_t *track_load_vertices(char *file_name) {
 		vertices[i].y = FIX16(vertices[i].y>>div);
 		vertices[i].z = FIX16(vertices[i].z>>div);
 	}
-
 	mem_temp_free(bytes);
 	return vertices;
 }
@@ -196,7 +194,6 @@ void track_load_faces(char *file_name, vec3_t *vertices) {
 
 		tf++;
 	}
-
 	mem_temp_free(bytes);
 }
 
@@ -247,7 +244,6 @@ void track_load_sections(char *file_name) {
 		p += 2; // padding
 		ts++;
 	}
-
 	mem_temp_free(bytes);
 }
 

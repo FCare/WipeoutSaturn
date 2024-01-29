@@ -45,10 +45,13 @@ static struct {
 static void draw_saturn_model(Object_Saturn *model, vec2_t offset, vec3_t pos, fix16_t rotation, light_t* lights, uint8_t nbLights) {
 	render_set_view(vec3_fix16(FIX16_ZERO,FIX16_ZERO,FIX16_ZERO), vec3_fix16(FIX16_ZERO, -PLATFORM_PI, -PLATFORM_PI));
 	render_set_screen_position(offset);
-	mat4_t mat = mat4_identity();
-	mat4_set_translation(&mat, pos);
-	mat4_set_yaw_pitch_roll(&mat, vec3_fix16(FIX16_ZERO, rotation, PLATFORM_PI));
-	object_saturn_draw(model, &mat, lights, nbLights);
+	mat4_t yaw = mat4_identity();
+	mat4_set_yaw_pitch_roll(&yaw, vec3_fix16(FIX16_ZERO, rotation, PLATFORM_PI));
+	mat4_t translate = mat4_identity();
+	mat4_set_translation(&translate, pos);
+	mat4_t transform;
+	mat4_mul(&transform, &yaw, &translate);
+	object_saturn_draw(model, &transform, lights, nbLights);
 	render_set_screen_position(vec2_fix16(FIX16_ZERO, FIX16_ZERO));
 }
 
@@ -436,8 +439,8 @@ static void button_team_select(menu_t *menu, int data) {
 
 static void page_team_draw(menu_t *menu __unused, int data) {
 	draw_saturn_model(models.teams[data], vec2(0, -0.2), vec3(0, 0, -10000), system_cycle_time(), NULL, 0);
-	// draw_saturn_model(g.ships[def.teams[data].pilots[0]].model, vec2(0, -0.3), vec3(-700, -800, -1300), system_cycle_time()*1.1, NULL, 0);
-	// draw_saturn_model(g.ships[def.teams[data].pilots[1]].model, vec2(0, -0.3), vec3( 700, -800, -1300), system_cycle_time()*1.2, NULL, 0);
+	draw_saturn_model(g.ships[def.teams[data].pilots[0]].model, vec2(0, -0.3), vec3(-700, -800, -1300), fix16_mul(system_cycle_time(), FIX16(1.1)), NULL, 0);
+	draw_saturn_model(g.ships[def.teams[data].pilots[1]].model, vec2(0, -0.3), vec3( 700, -800, -1300), fix16_mul(system_cycle_time(), FIX16(1.2)), NULL, 0);
 }
 
 static void page_team_init(menu_t *menu) {
@@ -536,7 +539,7 @@ void main_menu_init(void) {
 
 //See if it can be optimized
 	background = image_get_texture("wipeout/textures/wipeout1.tim");
-	track_images = image_get_compressed_textures("wipeout/textures/track.cmp");
+	// track_images = image_get_compressed_textures("wipeout/textures/track.cmp");
 
 	models.misc.options = object_saturn_load("wipeout/common/options.smf");
 	models.controller  = object_saturn_load("wipeout/common/pad1.smf");
@@ -557,7 +560,7 @@ void main_menu_init(void) {
 	{
 		models.teams[i] = object_saturn_load(def.teams[i].model);
 	}
-	objects_unpack_saturn(models.pilots, objects_saturn_load("wipeout/common/pilot.smf"));
+	// objects_unpack_saturn(models.pilots, objects_saturn_load("wipeout/common/pilot.smf"));
 	// objects_unpack_saturn(models.options, objects_saturn_load("wipeout/common/alopt.smf"));
 
 	menu_reset(main_menu);

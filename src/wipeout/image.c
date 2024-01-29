@@ -320,7 +320,6 @@ uint16_t image_get_texture(char *name) {
 	uint8_t *bytes = platform_load_asset(name, &size);
 	image_t *image = image_load_from_bytes(bytes, false);
 	uint16_t texture_index = render_texture_create(image->width, image->height, image->pixels);
-
 	mem_temp_free(image);
 	mem_temp_free(bytes);
 

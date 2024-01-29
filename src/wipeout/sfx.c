@@ -113,7 +113,6 @@ void sfx_load(void) {
 			num_sources++;
 		}
 	}
-
 	mem_temp_free(vb);
 	platform_set_audio_mix_cb(sfx_stero_mix);
 }
@@ -177,7 +176,7 @@ sfx_t *sfx_get_node(sfx_source_t source_index) {
 	sfx->current_pan = 0;
 	sfx->position = 0;
 
-	// Set default pitch. All voice samples are 44khz, 
+	// Set default pitch. All voice samples are 44khz,
 	// other effects 22khz
 	sfx->pitch = source_index >= SFX_VOICE_MINES ? 1.0 : 0.5;
 
