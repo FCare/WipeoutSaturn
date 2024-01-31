@@ -112,8 +112,8 @@ void render_set_view_2d(void) {
 
 void render_set_model_mat(mat4_t *m) {
 	mat4_t vm_mat;
-	mat4_mul(&vm_mat, &view_mat, m);
-	mat4_mul(&mvp_mat, &projection_mat, &vm_mat);
+	mat4_mul(&vm_mat, &projection_mat, m);
+	mat4_mul(&mvp_mat, &view_mat, &vm_mat);
 }
 
 void render_set_depth_write(bool enabled) {}

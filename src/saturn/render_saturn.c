@@ -30,22 +30,10 @@ static mat4_t sprite_mat = mat4_identity();
 
 static void print_mat(mat4_t *m __unused) {
   LOGD("\t[%d %d %d %d]\n\t[%d %d %d %d]\n\t[%d %d %d %d]\n\t[%d %d %d %d]\n",
-  (m->arr[0]),
-  (m->arr[1]),
-  (m->arr[2]),
-  (m->arr[3]),
-  (m->arr[4]),
-  (m->arr[5]),
-  (m->arr[6]),
-  (m->arr[7]),
-  (m->arr[8]),
-  (m->arr[9]),
-  (m->arr[10]),
-  (m->arr[11]),
-  (m->arr[12]),
-  (m->arr[13]),
-  (m->arr[14]),
-  (m->arr[15])
+  m->row[0].x, m->row[0].y, m->row[0].z, m->row[0].w,
+  m->row[1].x, m->row[1].y, m->row[1].z, m->row[1].w,
+  m->row[2].x, m->row[2].y, m->row[2].z, m->row[2].w,
+  m->row[3].x, m->row[3].y, m->row[3].z, m->row[3].w
   );
 }
 
@@ -75,32 +63,44 @@ void render_set_screen_size(vec2i_t size __unused){
   //Screen is always same size on saturn port
   fix16_t lr = fix16_div(FIX16_ONE<<1, FIX16(screen_size.x));
   fix16_t bt = -fix16_div(FIX16_ONE<<1, FIX16(screen_size.y));
-  mat4_t proj_2d = mat4(
-    lr,  FIX16_ZERO,  FIX16_ZERO,  FIX16_ZERO,
-    FIX16_ZERO,  bt,  FIX16_ZERO,  FIX16_ZERO,
+  mat4_t projection_mat_2d = mat4(
+    lr,  FIX16_ZERO,  FIX16_ZERO,  -FIX16_ONE,
+    FIX16_ZERO,  bt,  FIX16_ZERO,  FIX16_ONE,
     FIX16_ZERO,  FIX16_ZERO,  -FIX16_ONE,   FIX16_ZERO,
-    -FIX16_ONE, FIX16_ONE, FIX16_ZERO, FIX16_ONE
+    FIX16_ZERO, FIX16_ZERO, FIX16_ZERO, FIX16_ONE
   );
 
-  fix16_t sx = fix16_mul(65523, w2);
-  fix16_t sy = fix16_mul(87365, h2);
 
   mat4_t screen_mat_2d = mat4(
-    w2,         FIX16_ZERO, FIX16_ZERO, FIX16_ZERO,
-    FIX16_ZERO,        -h2, FIX16_ZERO, FIX16_ZERO,
-    FIX16_ZERO, FIX16_ZERO, FIX16_ONE, FIX16_ZERO,
-    w2,         h2, FIX16_ZERO, FIX16_ONE
+    w2,         FIX16_ZERO, FIX16_ZERO, w2,
+    FIX16_ZERO,        -h2, FIX16_ZERO, h2,
+    FIX16_ZERO, FIX16_ZERO, FIX16_ONE,  FIX16_ZERO,
+    FIX16_ZERO, FIX16_ZERO, FIX16_ZERO, FIX16_ONE
   );
-  mat4_mul(&projection_mat_2d, &proj_2d, &screen_mat_2d);
+  LOGD("proj_2d= \n");
+  print_mat(&projection_mat_2d);
+  LOGD("screen_mat_2d= \n");
+  print_mat(&screen_mat_2d);
+
+  applyTransform(&screen_mat_2d, &projection_mat_2d);
   LOGD("Proj 2D Mat= \n");
   print_mat(&projection_mat_2d);
 
+  //Near is 256
+  //Far is infinite
+  //W is 320
+  //H is 240
+  //Mat is
+  // | near*W/800 0      0  0      |
+  // | 0      near*H/600 0  0      |
+  // | 0      0          1 -2*near |
+  // | 0      0          1  0      |
 
 projection_mat_3d = mat4(
-          sx, FIX16_ZERO, FIX16_ZERO, FIX16_ZERO,
-  FIX16_ZERO,         -sy, FIX16_ZERO, FIX16_ZERO,
-  FIX16_ZERO, FIX16_ZERO, -66062, -FIX16_ONE,
-  FIX16_ZERO, FIX16_ZERO, -16844594, FIX16_ZERO
+  6710886   , FIX16_ZERO, FIX16_ZERO, FIX16_ZERO,
+  FIX16_ZERO, 6710886   , FIX16_ZERO, FIX16_ZERO,
+  FIX16_ZERO, FIX16_ZERO, FIX16_ONE , -33554432,
+  FIX16_ZERO, FIX16_ZERO, FIX16_ONE , FIX16_ZERO
 );
 
   LOGD("Proj 3D Mat= \n");
@@ -129,7 +129,7 @@ void render_frame_end(void){
 }
 
 void render_set_view(vec3_t pos, vec3_t angles){
-    LOGD("%s\n", __FUNCTION__);
+  LOGD("%s\n", __FUNCTION__);
   view_mat = mat4_identity();
   LOGD("View Mat= \n");
   print_mat(&view_mat);
@@ -142,31 +142,27 @@ void render_set_view(vec3_t pos, vec3_t angles){
   mat4_set_yaw_pitch_roll(&sprite_mat, vec3_fix16(-angles.x, angles.y - PLATFORM_PI, FIX16_ZERO));
   LOGD("yaw View Mat= \n");
   print_mat(&sprite_mat);
-
-  LOGD("View Mat= \n");
-  print_mat(&view_mat);
-  LOGD("Proj 3D= \n");
-  print_mat(&projection_mat_3d);
-  mat4_mul(&mvp_mat, &view_mat, &projection_mat_3d);
-  LOGD("MVP= \n");
-  print_mat(&mvp_mat);
 }
 void render_set_view_2d(void){
   LOGD("%s\n", __FUNCTION__);
-  view_mat = mat4_identity();
-  LOGD("View Mat= \n");
-  print_mat(&view_mat);
-  LOGD("Proj 2D= \n");
-  print_mat(&projection_mat_2d);
-  mat4_mul(&mvp_mat, &view_mat, &projection_mat_2d);
+  mvp_mat = projection_mat_2d;
   LOGD("MVP= \n");
   print_mat(&mvp_mat);
 }
 void render_set_model_mat(mat4_t *m){
   LOGD("%s\n", __FUNCTION__);
-  mat4_t vm_mat;
-  mat4_mul(&vm_mat, m, &view_mat);
-  mat4_mul(&mvp_mat, &vm_mat, &projection_mat_3d);
+  mvp_mat = mat4_identity();
+  LOGD("model mat= \n");
+  print_mat(m);
+  LOGD("view mat= \n");
+  print_mat(&view_mat);
+  LOGD("projection mat= \n");
+  print_mat(&projection_mat_3d);
+  applyTransform(m, &mvp_mat);
+  applyTransform(&view_mat, &mvp_mat);
+  applyTransform(&projection_mat_3d, &mvp_mat);
+  LOGD("MVP mat= \n");
+  print_mat(&mvp_mat);
 }
 
 void render_set_depth_write(bool enabled __unused){}
@@ -373,10 +369,24 @@ void render_push_2d_tile(vec2i_t pos, vec2i_t uv_offset, vec2i_t uv_size, vec2i_
     (uint32_t)q.vertices[3].uv.y
   );
   currentminZ -= 1;
+  LOGD("MVP =>\n");
+  print_mat(&mvp_mat);
   for (int i = 0; i<4; i++) {
     q.vertices[i].pos = vec3_transform(q.vertices[i].pos, &mvp_mat);
     q.vertices[i].pos.z = currentminZ;
   }
+
+  LOGD(
+    "==> pos %dx%d %dx%d %dx%d %dx%d\n",
+    fix16_int32_to(q.vertices[0].pos.x),
+    fix16_int32_to(q.vertices[0].pos.y),
+    fix16_int32_to(q.vertices[1].pos.x),
+    fix16_int32_to(q.vertices[1].pos.y),
+    fix16_int32_to(q.vertices[2].pos.x),
+    fix16_int32_to(q.vertices[2].pos.y),
+    fix16_int32_to(q.vertices[3].pos.x),
+    fix16_int32_to(q.vertices[3].pos.y)
+  );
   // render_push_native_quads(&q, color, texture_index);
   nb_planes++;
   render_vdp1_add(&q, color, texture_index);

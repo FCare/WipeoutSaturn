@@ -39,19 +39,28 @@ fix16_t vec3_angle(vec3_t a, vec3_t b) {
 // }
 
 vec3_t vec3_transform(vec3_t a, mat4_t *mat) {
-	fix16_t w = fix16_mul(mat->arr[3], a.x) + fix16_mul(mat->arr[7], a.y) + fix16_mul(mat->arr[11], a.z) + mat->arr[15];
+	vec3_t ret;
+	vec4_t ua = (vec4_t){
+		.x = a.x,
+		.y = a.y,
+		.z = a.z,
+		.w = FIX16_ONE
+	};
+	fix16_t w = fix16_vec4_dot(&mat->row[3], &ua);
 
  	if (w == FIX16_ZERO) {
    	w = FIX16_ONE;
 	}
-	a.x = fix16_div(a.x, w);
-	a.y = fix16_div(a.y, w);
-	a.z = fix16_div(a.z, w);
-	return vec3_fix16(
-         fix16_mul(mat->arr[0], a.x) + fix16_mul(mat->arr[4], a.y) + fix16_mul(mat->arr[ 8], a.z) + fix16_div(mat->arr[12], w),
-         fix16_mul(mat->arr[1], a.x) + fix16_mul(mat->arr[5], a.y) + fix16_mul(mat->arr[ 9], a.z) + fix16_div(mat->arr[13], w),
-         fix16_mul(mat->arr[2], a.x) + fix16_mul(mat->arr[6], a.y) + fix16_mul(mat->arr[10], a.z) + fix16_div(mat->arr[14], w)
-        );
+
+	ua.x = fix16_div(ua.x, w);
+	ua.y = fix16_div(ua.y, w);
+	ua.z = fix16_div(ua.z, w);
+
+	ret.x = fix16_vec4_dot(&mat->row[0], &ua);
+	ret.y = fix16_vec4_dot(&mat->row[1], &ua);
+	ret.z = fix16_vec4_dot(&mat->row[2], &ua);
+
+	return ret;
  }
 
 vec3_t vec3_project_to_ray(vec3_t p, vec3_t r0, vec3_t r1) {
@@ -71,58 +80,62 @@ vec3_t vec3_reflect(vec3_t incidence, vec3_t normal, fix16_t f) {
 }
 
 void mat4_set_translation(mat4_t *mat, vec3_t pos) {
-	mat->frow[3][0] = pos.x;
-	mat->frow[3][1] = pos.y;
-	mat->frow[3][2] = pos.z;
+	mat->row[0].w = pos.x;
+	mat->row[1].w = pos.y;
+	mat->row[2].w = pos.z;
 }
 
 void mat4_set_yaw_pitch_roll(mat4_t *mat, vec3_t rot) {
 	fix16_t sx = sin( rot.x);
-	fix16_t sy = sin(-rot.y);
+	fix16_t sy = sin(rot.y);
 	fix16_t sz = sin(-rot.z);
 	fix16_t cx = cos( rot.x);
-	fix16_t cy = cos(-rot.y);
+	fix16_t cy = cos(rot.y);
 	fix16_t cz = cos(-rot.z);
 
-	mat->frow[0][0] = fix16_mul(cy, cz) + fix16_mul(fix16_mul(sx, sy), sz);
-	mat->frow[1][0] = fix16_mul(cz, fix16_mul(sx, sy)) - fix16_mul(cy, sz);
-	mat->frow[2][0] = fix16_mul(cx, sy);
-	mat->frow[0][1] = fix16_mul(cx, sz);
-	mat->frow[1][1] = fix16_mul(cx, cz);
-	mat->frow[2][1] = -sx;
-	mat->frow[0][2] = -fix16_mul(cz, sy) + fix16_mul(cy, fix16_mul(sx, sz));
-	mat->frow[1][2] = fix16_mul(cy, fix16_mul(cz, sx)) + fix16_mul(sy, sz);
-	mat->frow[2][2] = fix16_mul(cx, cy);
+	mat->row[0].x = fix16_mul(cy, cz) + fix16_mul(fix16_mul(sx, sy), sz);
+	mat->row[0].y = fix16_mul(cz, fix16_mul(sx, sy)) - fix16_mul(cy, sz);
+	mat->row[0].z = fix16_mul(cx, sy);
+	mat->row[1].x = fix16_mul(cx, sz);
+	mat->row[1].y = fix16_mul(cx, cz);
+	mat->row[1].z = -sx;
+	mat->row[2].x = -fix16_mul(cz, sy) + fix16_mul(cy, fix16_mul(sx, sz));
+	mat->row[2].y = fix16_mul(cy, fix16_mul(cz, sx)) + fix16_mul(sy, sz);
+	mat->row[2].z = fix16_mul(cx, cy);
 }
 
 void mat4_set_roll_pitch_yaw(mat4_t *mat, vec3_t rot) {
 	fix16_t sx = sin( rot.x);
-	fix16_t sy = sin(-rot.y);
+	fix16_t sy = sin(rot.y);
 	fix16_t sz = sin(-rot.z);
 	fix16_t cx = cos( rot.x);
-	fix16_t cy = cos(-rot.y);
+	fix16_t cy = cos(rot.y);
 	fix16_t cz = cos(-rot.z);
 
-	mat->frow[0][0] = fix16_mul(cy, cz) - fix16_mul(fix16_mul(sx, sy),sz);
-	mat->frow[1][0] = -fix16_mul(cx, sz);
-	mat->frow[2][0] = fix16_mul(cz, sy) + fix16_mul(fix16_mul(cy, sx), sz);
-	mat->frow[0][1] = fix16_mul(fix16_mul(cz, sx), sy) + fix16_mul(cy, sz);
-	mat->frow[1][1] = fix16_mul(cx, cz);
-	mat->frow[2][1] = -fix16_mul(fix16_mul(cy, cz), sx) + fix16_mul(sy, sz);
-	mat->frow[0][2] = -fix16_mul(cx, sy);
-	mat->frow[1][2] = sx;
-	mat->frow[2][2] = fix16_mul(cx, cy);
+	mat->row[0].x = fix16_mul(cy, cz) - fix16_mul(fix16_mul(sx, sy),sz);
+	mat->row[0].y = -fix16_mul(cx, sz);
+	mat->row[0].z = fix16_mul(cz, sy) + fix16_mul(fix16_mul(cy, sx), sz);
+	mat->row[1].x = fix16_mul(fix16_mul(cz, sx), sy) + fix16_mul(cy, sz);
+	mat->row[1].y = fix16_mul(cx, cz);
+	mat->row[1].z = -fix16_mul(fix16_mul(cy, cz), sx) + fix16_mul(sy, sz);
+	mat->row[2].x = -fix16_mul(cx, sy);
+	mat->row[2].y = sx;
+	mat->row[2].z = fix16_mul(cx, cy);
 }
 
 void mat4_translate(mat4_t *mat, vec3_t translation) {
-	mat->arr[12] = fix16_mul(mat->arr[0], translation.x) + fix16_mul(mat->arr[4], translation.y) + fix16_mul(mat->arr[8], translation.z) + mat->arr[12];
-	mat->arr[13] = fix16_mul(mat->arr[1], translation.x) + fix16_mul(mat->arr[5], translation.y) + fix16_mul(mat->arr[9], translation.z) + mat->arr[13];
-	mat->arr[14] = fix16_mul(mat->arr[2], translation.x) + fix16_mul(mat->arr[6], translation.y) + fix16_mul(mat->arr[10], translation.z) + mat->arr[14];
-	mat->arr[15] = fix16_mul(mat->arr[3], translation.x) + fix16_mul(mat->arr[7], translation.y) + fix16_mul(mat->arr[11], translation.z) + mat->arr[15];
+	mat->row[0].w += translation.x;
+	mat->row[1].w += translation.y;
+	mat->row[2].w += translation.z;
 }
 
-void mat4_mul(mat4_t *res, mat4_t *a, mat4_t *b) {
-	fix16_mat44_mul(a,b,res);
+static void mat4_mul(mat4_t *res, mat4_t *A, mat4_t *B) {
+	fix16_mat44_mul(A,B,res);
+}
+
+void applyTransform(mat4_t *transf, mat4_t *res) {
+	mat4_t tmp = *res;
+	mat4_mul(res, transf, &tmp);
 }
 
 void mat4_rot_inv(mat4_t *res, mat4_t *a) {
@@ -142,4 +155,67 @@ void mat4_rot_inv(mat4_t *res, mat4_t *a) {
 	res->arr[13] = -a->arr[13];
 	res->arr[14] = -a->arr[14];
 	res->arr[15] = a->arr[15];
+}
+
+static void print_mat(mat4_t *m __unused) {
+  printf("\t[%d %d %d %d]\n\t[%d %d %d %d]\n\t[%d %d %d %d]\n\t[%d %d %d %d]\n",
+  (m->arr[0]),
+  (m->arr[1]),
+  (m->arr[2]),
+  (m->arr[3]),
+  (m->arr[4]),
+  (m->arr[5]),
+  (m->arr[6]),
+  (m->arr[7]),
+  (m->arr[8]),
+  (m->arr[9]),
+  (m->arr[10]),
+  (m->arr[11]),
+  (m->arr[12]),
+  (m->arr[13]),
+  (m->arr[14]),
+  (m->arr[15])
+  );
+}
+static void print_vec(vec3_t *v __unused) {
+  printf("\t[%d %d %d]\n", v->x, v->y, v->z);
+}
+
+void math_test() {
+	mat4_t m = mat4_identity();
+	printf("Identity =>\n");
+	print_mat(&m);
+	mat4_set_translation(&m, vec3(1,2,3));
+	printf("set_translation =>\n");
+	print_mat(&m);
+	mat4_translate(&m,vec3(1,2,3));
+	printf("translate =>\n");
+	print_mat(&m);
+	vec3_t test = vec3_transform(vec3(1,0,0), &m);
+	printf("transform X =>\n");
+	print_vec(&test);
+	test = vec3_transform(vec3(0,1,0), &m);
+	printf("transform Y =>\n");
+	print_vec(&test);
+	test = vec3_transform(vec3(0,0,1), &m);
+	printf("transform Z =>\n");
+	print_vec(&test);
+	test = vec3_transform(vec3(1,1,1), &m);
+	printf("transform All =>\n");
+	print_vec(&test);
+
+
+	mat4_t yaw = mat4_identity();
+	mat4_set_yaw_pitch_roll(&yaw, vec3_fix16(FIX16_ZERO, FIX16_ZERO, PLATFORM_PI));
+	printf("Yaw =>\n");
+	print_mat(&yaw);
+	mat4_t translate = mat4_identity();
+	mat4_set_translation(&translate, vec3(1,2,3));
+	printf("Translate =>\n");
+	print_mat(&translate);
+	mat4_t transform;
+	mat4_mul(&transform, &translate, &yaw);
+	printf("multiplication =>\n");
+	print_mat(&transform);
+
 }

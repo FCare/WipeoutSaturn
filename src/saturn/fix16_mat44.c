@@ -70,28 +70,28 @@ fix16_mat44_mul(const fix16_mat44_t *m0, const fix16_mat44_t *m1, fix16_mat44_t 
     const fix16_vec4_t * const m03 = (const fix16_vec4_t *)&m0->row[3];
 
     mat44_row_transpose(&m1->arr[0], &transposed_row);
-    result->frow[0][0] = fix16_vec4_dot(m00, &transposed_row);
-    result->frow[1][0] = fix16_vec4_dot(m01, &transposed_row);
-    result->frow[2][0] = fix16_vec4_dot(m02, &transposed_row);
-    result->frow[3][0] = fix16_vec4_dot(m03, &transposed_row);
+    result->row[0].x = fix16_vec4_dot(m00, &transposed_row);
+    result->row[1].x = fix16_vec4_dot(m01, &transposed_row);
+    result->row[2].x = fix16_vec4_dot(m02, &transposed_row);
+    result->row[3].x = fix16_vec4_dot(m03, &transposed_row);
 
     mat44_row_transpose(&m1->arr[1], &transposed_row);
-    result->frow[0][1] = fix16_vec4_dot(m00, &transposed_row);
-    result->frow[1][1] = fix16_vec4_dot(m01, &transposed_row);
-    result->frow[2][1] = fix16_vec4_dot(m02, &transposed_row);
-    result->frow[3][1] = fix16_vec4_dot(m03, &transposed_row);
+    result->row[0].y = fix16_vec4_dot(m00, &transposed_row);
+    result->row[1].y = fix16_vec4_dot(m01, &transposed_row);
+    result->row[2].y = fix16_vec4_dot(m02, &transposed_row);
+    result->row[3].y = fix16_vec4_dot(m03, &transposed_row);
 
     mat44_row_transpose(&m1->arr[2], &transposed_row);
-    result->frow[0][2] = fix16_vec4_dot(m00, &transposed_row);
-    result->frow[1][2] = fix16_vec4_dot(m01, &transposed_row);
-    result->frow[2][2] = fix16_vec4_dot(m02, &transposed_row);
-    result->frow[3][2] = fix16_vec4_dot(m03, &transposed_row);
+    result->row[0].z = fix16_vec4_dot(m00, &transposed_row);
+    result->row[1].z = fix16_vec4_dot(m01, &transposed_row);
+    result->row[2].z = fix16_vec4_dot(m02, &transposed_row);
+    result->row[3].z = fix16_vec4_dot(m03, &transposed_row);
 
     mat44_row_transpose(&m1->arr[3], &transposed_row);
-    result->frow[0][3] = fix16_vec4_dot(m00, &transposed_row);
-    result->frow[1][3] = fix16_vec4_dot(m01, &transposed_row);
-    result->frow[2][3] = fix16_vec4_dot(m02, &transposed_row);
-    result->frow[3][3] = fix16_vec4_dot(m03, &transposed_row);
+    result->row[0].w = fix16_vec4_dot(m00, &transposed_row);
+    result->row[1].w = fix16_vec4_dot(m01, &transposed_row);
+    result->row[2].w = fix16_vec4_dot(m02, &transposed_row);
+    result->row[3].w = fix16_vec4_dot(m03, &transposed_row);
 }
 
 void

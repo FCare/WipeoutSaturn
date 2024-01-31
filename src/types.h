@@ -72,12 +72,12 @@ typedef struct {
 #define vec4_fix16(X, Y, Z, W) ((vec4_t){.x = X, .y = Y, .z = Z, .w = W})
 
 #define mat4(m0,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12,m13,m14,m15) \
-	(mat4_t){.arr = { \
-		m0,   m1,  m2,  m3, \
-		m4,   m5,  m6,  m7, \
-		m8,   m9, m10, m11, \
-		m12, m13, m14, m15  \
-	}}
+	(mat4_t){ \
+		.row[0].x = m0,  .row[0].y = m1,  .row[0].z = m2,  .row[0].w = m3, \
+		.row[1].x = m4,  .row[1].y = m5,  .row[1].z = m6,  .row[1].w = m7, \
+		.row[2].x = m8,  .row[2].y = m9,  .row[2].z = m10, .row[2].w = m11, \
+		.row[3].x = m12, .row[3].y = m13, .row[3].z = m14, .row[3].w = m15, \
+	}
 
 #define mat4_identity() \
 	(mat4_t){   \
@@ -215,7 +215,7 @@ void mat4_set_translation(mat4_t *mat, vec3_t pos);
 void mat4_set_yaw_pitch_roll(mat4_t *m, vec3_t rot);
 void mat4_set_roll_pitch_yaw(mat4_t *mat, vec3_t rot);
 void mat4_translate(mat4_t *mat, vec3_t translation);
-void mat4_mul(mat4_t *res, mat4_t *a, mat4_t *b);
 void mat4_rot_inv(mat4_t *res, mat4_t *a);
 
+void applyTransform(mat4_t *transf, mat4_t *res);
 #endif
