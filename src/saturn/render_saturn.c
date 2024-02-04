@@ -86,21 +86,19 @@ void render_set_screen_size(vec2i_t size __unused){
   LOGD("Proj 2D Mat= \n");
   print_mat(&projection_mat_2d);
 
-  //Near is 256
-  //Far is infinite
-  //W is 320
-  //H is 240
-  //Mat is
-  // | near*W/800 0      0  0      |
-  // | 0      near*H/600 0  0      |
-  // | 0      0          1 -2*near |
-  // | 0      0          1  0      |
-
+  //hal fov is 0,6436 radians
+  fix16_t near = fix16_div(w2,tan(FIX16(0.6436)));
+  fix16_t far = FIX16_ONE<<13;
+  fix16_t zMax = FIX16_ONE; //1024.0
+  fix16_t px = -near;
+  fix16_t py = -near;
+  fix16_t zA = fix16_mul(fix16_div(zMax, near-far), far);
+  fix16_t zB = fix16_mul(zA, near);
 projection_mat_3d = mat4(
-  6710886   , FIX16_ZERO, FIX16_ZERO, FIX16_ZERO,
-  FIX16_ZERO, 6710886   , FIX16_ZERO, FIX16_ZERO,
-  FIX16_ZERO, FIX16_ZERO, FIX16_ONE , -33554432,
-  FIX16_ZERO, FIX16_ZERO, FIX16_ONE , FIX16_ZERO
+  px        , FIX16_ZERO, FIX16_ZERO, FIX16_ZERO,
+  FIX16_ZERO, py        , FIX16_ZERO, FIX16_ZERO,
+  FIX16_ZERO, FIX16_ZERO, zA        , zB,
+  FIX16_ZERO, FIX16_ZERO, -FIX16_ONE ,FIX16_ZERO
 );
 
   LOGD("Proj 3D Mat= \n");

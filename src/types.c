@@ -55,6 +55,7 @@ vec3_t vec3_transform(vec3_t a, mat4_t *mat) {
 	ua.x = fix16_div(ua.x, w);
 	ua.y = fix16_div(ua.y, w);
 	ua.z = fix16_div(ua.z, w);
+	ua.w = fix16_div(ua.w, w);
 
 	ret.x = fix16_vec4_dot(&mat->row[0], &ua);
 	ret.y = fix16_vec4_dot(&mat->row[1], &ua);

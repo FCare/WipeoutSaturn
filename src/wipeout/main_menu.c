@@ -48,9 +48,7 @@ static void draw_saturn_model(Object_Saturn *model, vec2_t offset, vec3_t pos, f
 	render_set_screen_position(offset);
 	mat4_t transform = mat4_identity();
 	mat4_set_yaw_pitch_roll(&transform, vec3_fix16(FIX16_ZERO, rotation, PLATFORM_PI));
-	mat4_t translate = mat4_identity();
-	mat4_set_translation(&translate, pos);
-	applyTransform(&translate, &transform);
+	mat4_set_translation(&transform, pos);
 	object_saturn_draw(model, &transform, lights, nbLights);
 	render_set_screen_position(vec2_fix16(FIX16_ZERO, FIX16_ZERO));
 }
