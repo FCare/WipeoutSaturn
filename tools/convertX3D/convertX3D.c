@@ -165,6 +165,7 @@ void convertSW(render_texture_t *out, quads_t *t, texture_t *texture) {
     if (width == 0) width = 8;
     height = height>>shift;
   }
+  height = min(height, 0xFF);
 
   out->width = width;
   out->height = height;

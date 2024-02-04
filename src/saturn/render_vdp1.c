@@ -105,7 +105,7 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object
   vdp1_cmdt_t *cmd = &cmdts[nbCommand];
   memset(cmd, 0x0, sizeof(vdp1_cmdt_t));
 
-  chain[nbCommand].z = 0;
+  chain[nbCommand].z = FIX16_ZERO;
   for (int i = 0; i<4; i++) {
     chain[nbCommand].z += quad->vertices[i].pos.z;
   }
@@ -139,6 +139,7 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object
     vdp1_texture_t *tex = get_vdp1_texture(texture_index);
     character = (vdp1_vram_t)tex->pixels;
     size = tex->size;
+    LOGD("texture is %dx%d @0x%x\n", size.x, size.y, tex->pixels);
     if (object->palette_id == 0xFFFF) {
       object->palette_id = allocate_vdp1_texture((void*)object->palette, 16,1, 16);
     }
