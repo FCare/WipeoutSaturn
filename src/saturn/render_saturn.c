@@ -94,7 +94,7 @@ void render_set_screen_size(vec2i_t size __unused){
   fix16_t zA = fix16_div(far, near-far);
   fix16_t zB = fix16_mul(zA, near);
 projection_mat_3d = mat4(
-  px        , FIX16_ZERO, FIX16_ZERO, FIX16_ZERO,
+  -px        , FIX16_ZERO, FIX16_ZERO, FIX16_ZERO,
   FIX16_ZERO, py        , FIX16_ZERO, FIX16_ZERO,
   FIX16_ZERO, FIX16_ZERO, zA        , zB,
   FIX16_ZERO, FIX16_ZERO, -FIX16_ONE ,FIX16_ZERO

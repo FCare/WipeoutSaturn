@@ -88,10 +88,10 @@ void mat4_set_translation(mat4_t *mat, vec3_t pos) {
 
 void mat4_set_yaw_pitch_roll(mat4_t *mat, vec3_t rot) {
 	fix16_t sx = sin( rot.x);
-	fix16_t sy = sin(rot.y);
+	fix16_t sy = sin(-rot.y);
 	fix16_t sz = sin(-rot.z);
 	fix16_t cx = cos( rot.x);
-	fix16_t cy = cos(rot.y);
+	fix16_t cy = cos(-rot.y);
 	fix16_t cz = cos(-rot.z);
 
 	mat->row[0].x = fix16_mul(cy, cz) + fix16_mul(fix16_mul(sx, sy), sz);
