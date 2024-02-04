@@ -533,7 +533,7 @@ main(int argc, char **argv)
         while((str=strsep(&coordIndex, " ")) != NULL) {
           if (strlen(str)>0) {
             //convert to fix 16.
-            uint32_t val = FIX16(strtod(str, NULL));
+            uint32_t val = FIX16(strtod(str, NULL)/10.0);
             vertexOut[modelOut.vertexNb++] = val;
           }
         }
@@ -554,7 +554,7 @@ main(int argc, char **argv)
           while((str=strsep(&coordIndex, " ")) != NULL) {
             if (strlen(str)>0) {
               //convert to fix 16.
-              uint32_t val = FIX16(strtod(str, NULL));
+              uint32_t val = FIX16(strtod(str, NULL)/10.0);
               normalOut[nbNormals++] = val;
             }
           }

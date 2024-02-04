@@ -81,9 +81,9 @@ static void button_quit(menu_t *menu, int data __unused) {
 
 static void page_main_draw(menu_t *menu __unused, int data) {
 	switch (data) {
-		case 0: draw_saturn_model(g.ships[0].model, vec2(0, -0.1), vec3(0, 0, -700), system_cycle_time(), NULL, 0); break;
-		case 1: draw_saturn_model(models.misc.options, vec2(0, -0.2), vec3(0, 0, -700), system_cycle_time(), NULL, 0); break;
-		case 2: draw_saturn_model(models.misc.msdos, vec2(0, -0.2), vec3(0, 0, -700), system_cycle_time(), NULL, 0); break;
+		case 0: draw_saturn_model(g.ships[0].model, vec2(0, -0.1), vec3(0, 0, -70), system_cycle_time(), NULL, 0); break;
+		case 1: draw_saturn_model(models.misc.options, vec2(0, -0.2), vec3(0, 0, -70), system_cycle_time(), NULL, 0); break;
+		case 2: draw_saturn_model(models.misc.msdos, vec2(0, -0.2), vec3(0, 0, -70), system_cycle_time(), NULL, 0); break;
 	}
 }
 
@@ -124,9 +124,9 @@ static void button_audio(menu_t *menu, int data __unused) {
 
 static void page_options_draw(menu_t *menu __unused, int data) {
 	switch (data) {
-		case 0: draw_saturn_model(models.options.video, vec2(0, -0.2), vec3(0, 0, -700), system_cycle_time(), NULL, 0); break; // TODO: needs better model
-		case 1: draw_saturn_model(models.options.headphones, vec2(0, -0.2), vec3(0, 0, -300), system_cycle_time(), NULL, 0); break;
-		case 2: draw_saturn_model(models.controller, vec2(0, -0.1), vec3(0, 0, -6000), system_cycle_time(), NULL, 0); break;
+		case 0: draw_saturn_model(models.options.video, vec2(0, -0.2), vec3(0, 0, -70), system_cycle_time(), NULL, 0); break; // TODO: needs better model
+		case 1: draw_saturn_model(models.options.headphones, vec2(0, -0.2), vec3(0, 0, -30), system_cycle_time(), NULL, 0); break;
+		case 2: draw_saturn_model(models.controller, vec2(0, -0.1), vec3(0, 0, -600), system_cycle_time(), NULL, 0); break;
 	}
 }
 
@@ -378,7 +378,7 @@ static void page_race_class_draw(menu_t *menu, int data) {
 	page->title_anchor = UI_POS_TOP | UI_POS_CENTER;
 	page->items_pos = vec2i(0, -110);
 	page->items_anchor = UI_POS_BOTTOM | UI_POS_CENTER;
-	draw_saturn_model(models.race_classes[data], vec2(0, -0.2), vec3(0, 0, -350), system_cycle_time(), NULL, 0);
+	draw_saturn_model(models.race_classes[data], vec2(0, -0.2), vec3(0, 0, -35), system_cycle_time(), NULL, 0);
 
 	if (!save.has_rapier_class && data == RACE_CLASS_RAPIER) {
 		render_set_view_2d();
@@ -407,9 +407,9 @@ static void button_race_type_select(menu_t *menu, int data) {
 
 static void page_race_type_draw(menu_t *menu __unused, int data) {
 	switch (data) {
-		case 0: draw_saturn_model(models.misc.championship, vec2(0, -0.2), vec3(0, 0, -400), system_cycle_time(), NULL, 0); break;
-		case 1: draw_saturn_model(models.misc.single_race, vec2(0, -0.2), vec3(0, 0, -400), system_cycle_time(), NULL, 0); break;
-		case 2: draw_saturn_model(models.options.stopwatch, vec2(0, -0.2), vec3(0, 0, -400), system_cycle_time(), NULL, 0); break;
+		case 0: draw_saturn_model(models.misc.championship, vec2(0, -0.2), vec3(0, 0, -40), system_cycle_time(), NULL, 0); break;
+		case 1: draw_saturn_model(models.misc.single_race, vec2(0, -0.2), vec3(0, 0, -40), system_cycle_time(), NULL, 0); break;
+		case 2: draw_saturn_model(models.options.stopwatch, vec2(0, -0.2), vec3(0, 0, -40), system_cycle_time(), NULL, 0); break;
 	}
 }
 
@@ -436,9 +436,9 @@ static void button_team_select(menu_t *menu, int data) {
 }
 
 static void page_team_draw(menu_t *menu __unused, int data) {
-	draw_saturn_model(models.teams[data], vec2(0, -0.2), vec3(0, 0, -10000), system_cycle_time(), NULL, 0);
-	draw_saturn_model(g.ships[def.teams[data].pilots[0]].model, vec2(0, -0.3), vec3(1, 0, -1300), fix16_mul(system_cycle_time(), FIX16(1.1)), NULL, 0);
-	draw_saturn_model(g.ships[def.teams[data].pilots[1]].model, vec2(0, -0.3), vec3( -1, 0, -1300), fix16_mul(system_cycle_time(), FIX16(1.2)), NULL, 0);
+	draw_saturn_model(models.teams[data], vec2(0, -0.2), vec3(0, 0, -1000), system_cycle_time(), NULL, 0);
+	draw_saturn_model(g.ships[def.teams[data].pilots[0]].model, vec2(0, -0.3), vec3( 150, -100, -200), fix16_mul(system_cycle_time(), FIX16(1.1)), NULL, 0);
+	draw_saturn_model(g.ships[def.teams[data].pilots[1]].model, vec2(0, -0.3), vec3(-150, -100, -200), fix16_mul(system_cycle_time(), FIX16(1.2)), NULL, 0);
 }
 
 static void page_team_init(menu_t *menu) {
@@ -471,7 +471,7 @@ static void button_pilot_select(menu_t *menu, int data) {
 }
 
 static void page_pilot_draw(menu_t *menu __unused, int data) {
-	draw_saturn_model(models.pilots[data], vec2(0, -0.2), vec3(0, 0, -10000), system_cycle_time(), NULL, 0);
+	draw_saturn_model(models.pilots[data], vec2(0, -0.2), vec3(0, 0, -1000), system_cycle_time(), NULL, 0);
 }
 
 static void page_pilot_init(menu_t *menu) {
