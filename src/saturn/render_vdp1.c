@@ -107,10 +107,8 @@ void render_vdp1_add_saturn(quads_saturn_t *quad, uint16_t texture_index, Object
 
   chain[nbCommand].z = FIX16_ZERO;
   for (int i = 0; i<4; i++) {
-    chain[nbCommand].z += quad->vertices[i].pos.z;
+    chain[nbCommand].z += quad->vertices[i].pos.z>>2;
   }
-  chain[nbCommand].z >>= 2;
-
 
   LOGD(
     "after %dx%d %dx%d %dx%d %dx%d\n",
