@@ -211,6 +211,7 @@ vec3_t vec3_reflect(vec3_t incidence, vec3_t normal, fix16_t f);
 angle_t wrap_angle(angle_t a);
 
 vec3_t vec3_transform(vec3_t a, mat4_t *mat);
+vec3_t vec3_rotate(vec3_t a, mat4_t *mat);
 void mat4_set_translation(mat4_t *mat, vec3_t pos);
 void mat4_set_yaw_pitch_roll(mat4_t *m, vec3_t rot);
 void mat4_set_roll_pitch_yaw(mat4_t *mat, vec3_t rot);

@@ -64,6 +64,22 @@ vec3_t vec3_transform(vec3_t a, mat4_t *mat) {
 	return ret;
  }
 
+vec3_t vec3_rotate(vec3_t a, mat4_t *mat) {
+ 	vec3_t ret;
+ 	vec4_t ua = (vec4_t){
+ 		.x = a.x,
+ 		.y = a.y,
+ 		.z = a.z,
+ 		.w = FIX16_ZERO
+ 	};
+
+ 	ret.x = fix16_vec4_dot(&mat->row[0], &ua);
+ 	ret.y = fix16_vec4_dot(&mat->row[1], &ua);
+ 	ret.z = fix16_vec4_dot(&mat->row[2], &ua);
+
+ 	return ret;
+  }
+
 vec3_t vec3_project_to_ray(vec3_t p, vec3_t r0, vec3_t r1) {
 	vec3_t ray = vec3_normalize(vec3_sub(r1, r0));
 	fix16_t dp = vec3_dot(vec3_sub(p, r0), ray);
