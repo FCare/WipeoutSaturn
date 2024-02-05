@@ -692,39 +692,53 @@ void object_saturn_draw(Object_Saturn *object,mat4_t *mat, light_t* lights, uint
 		geometry *geo = &object->object[geoId];
 		for (uint32_t faceId = 0; faceId < geo->faces_len; faceId++){
 			face *curFace = &geo->faces[faceId];
-			character *curChar = geo->characters[faceId];
-			quads_saturn_t q = {
-				.useLight = (nbLights>0),
-				.color = curFace->RGB,
-				.vertices = {
-					{
-						.pos = vertex[curFace->vertex_id[0]],
-						.light = light_att[curFace->vertex_id[0]],
-					},
-					{
-						.pos = vertex[curFace->vertex_id[1]],
-						.light = light_att[curFace->vertex_id[1]],
-					},
-					{
-						.pos = vertex[curFace->vertex_id[2]],
-						.light = light_att[curFace->vertex_id[2]],
-					},
-					{
-						.pos = vertex[curFace->vertex_id[3]],
-						.light = light_att[curFace->vertex_id[3]],
-					},
+			//Use the normal. If normal is not facing, discard
+			vec3_t mean_normal = vec3_fix16(FIX16_ZERO, FIX16_ZERO,FIX16_ZERO);
+			for (int i = 0; i<4; i++) {
+				mean_normal.x += fix16_div(object->normals[curFace->vertex_id[i]].x,FIX16_ONE<<2);
+				mean_normal.y += fix16_div(object->normals[curFace->vertex_id[i]].y,FIX16_ONE<<2);
+				mean_normal.z += fix16_div(object->normals[curFace->vertex_id[i]].z,FIX16_ONE<<2);
+		  }
+			vec3_t transformed_norm = vec3_rotate(mean_normal, mat);
+			vec3_t camera = vec3_fix16(-mat->row[0].w, -mat->row[1].w, -mat->row[2].w);
+			if (camera.z == FIX16_ZERO) camera.z = -FIX16_ONE;
+			fix16_t angle = vec3_angle_cos(transformed_norm, camera);
+			if (angle > FIX16_ZERO) {
+				character *curChar = geo->characters[faceId];
+				quads_saturn_t q = {
+					.useLight = (nbLights>0),
+					.color = curFace->RGB,
+					.vertices = {
+						{
+							.pos = vertex[curFace->vertex_id[0]],
+							.light = light_att[curFace->vertex_id[0]],
+						},
+						{
+							.pos = vertex[curFace->vertex_id[1]],
+							.light = light_att[curFace->vertex_id[1]],
+						},
+						{
+							.pos = vertex[curFace->vertex_id[2]],
+							.light = light_att[curFace->vertex_id[2]],
+						},
+						{
+							.pos = vertex[curFace->vertex_id[3]],
+							.light = light_att[curFace->vertex_id[3]],
+						},
+					}
+				};
+
+				uint16_t texture_index = RENDER_NO_TEXTURE_SATURN;
+				if ((geo->flags & POLYGON_FLAG) == 0) {
+					if (curFace->texture_id == 0xFFFF) {
+						//needs to allocate the character on vdp1 - 4bpp LUT
+						curFace->texture_id = allocate_vdp1_texture((void*)curChar->pixels, curChar->width, curChar->height, 4);
+					}
+					texture_index = curFace->texture_id;
 				}
-			};
-			uint16_t texture_index = RENDER_NO_TEXTURE_SATURN;
-			if ((geo->flags & POLYGON_FLAG) == 0) {
-				if (curFace->texture_id == 0xFFFF) {
-					//needs to allocate the character on vdp1 - 4bpp LUT
-					curFace->texture_id = allocate_vdp1_texture((void*)curChar->pixels, curChar->width, curChar->height, 4);
-				}
-				texture_index = curFace->texture_id;
+				//We need to copy the character to the vdp1 and provide the texture_index
+				render_push_distorted_saturn( &q, texture_index, object, (geo->flags & EXHAUST_FLAG)!=0);
 			}
-			//We need to copy the character to the vdp1 and provide the texture_index
-			render_push_distorted_saturn( &q, texture_index, object, (geo->flags & EXHAUST_FLAG)!=0);
 		}
 	}
 	mem_temp_free(light_att);
