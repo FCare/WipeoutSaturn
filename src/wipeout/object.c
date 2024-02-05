@@ -693,13 +693,7 @@ void object_saturn_draw(Object_Saturn *object,mat4_t *mat, light_t* lights, uint
 		for (uint32_t faceId = 0; faceId < geo->faces_len; faceId++){
 			face *curFace = &geo->faces[faceId];
 			//Use the normal. If normal is not facing, discard
-			vec3_t mean_normal = vec3_fix16(FIX16_ZERO, FIX16_ZERO,FIX16_ZERO);
-			for (int i = 0; i<4; i++) {
-				mean_normal.x += fix16_div(object->normals[curFace->vertex_id[i]].x,FIX16_ONE<<2);
-				mean_normal.y += fix16_div(object->normals[curFace->vertex_id[i]].y,FIX16_ONE<<2);
-				mean_normal.z += fix16_div(object->normals[curFace->vertex_id[i]].z,FIX16_ONE<<2);
-		  }
-			vec3_t transformed_norm = vec3_rotate(mean_normal, mat);
+			vec3_t transformed_norm = vec3_rotate(curFace->normal, mat);
 			vec3_t camera = vec3_fix16(-mat->row[0].w, -mat->row[1].w, -mat->row[2].w);
 			if (camera.z == FIX16_ZERO) camera.z = -FIX16_ONE;
 			fix16_t angle = vec3_angle_cos(transformed_norm, camera);

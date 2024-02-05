@@ -332,6 +332,19 @@ static int savingStep(void) {
       write_32(faceOut[i][j].vertex_id[1], fobj);
       write_32(faceOut[i][j].vertex_id[2], fobj);
       write_32(faceOut[i][j].vertex_id[3], fobj);
+      int centerNormal[3] = {0};
+      for (int p = 0; p<4; p++) {
+        int id = faceOut[i][j].vertex_id[p];
+        centerNormal[0] += normalOut[id*3];
+        centerNormal[1] += normalOut[id*3+1];
+        centerNormal[2] += normalOut[id*3+2];
+      }
+      centerNormal[0] /= 4;
+      centerNormal[1] /= 4;
+      centerNormal[2] /= 4;
+      write_32(centerNormal[0], fobj);
+      write_32(centerNormal[1], fobj);
+      write_32(centerNormal[2], fobj);
       write_16(faceOut[i][j].RGB, fobj);
       write_16(0, fobj);
     }

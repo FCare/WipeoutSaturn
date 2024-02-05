@@ -285,6 +285,7 @@ typedef struct {
 
 typedef struct{
 	uint32_t vertex_id[4]; //A,B,C,D
+	vec3_t normal; //X,Y,Z
 	rgb1555_t RGB;
 	uint16_t texture_id;
 } face;
