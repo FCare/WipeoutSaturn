@@ -207,13 +207,13 @@ void render_vdp1_add(quads_t *quad, rgba_t color, uint16_t texture_index)
 
   const vdp1_cmdt_draw_mode_t draw_mode = {
           .color_mode           = VDP1_CMDT_CM_RGB_32768,
-          .trans_pixel_disable  = true,
+          .trans_pixel_disable  = false,
           .pre_clipping_disable = true,
           .end_code_disable     = false
   };
   const vdp1_cmdt_draw_mode_t draw_mode_gouraud = {
           .color_mode           = VDP1_CMDT_CM_RGB_32768,
-          .trans_pixel_disable  = true,
+          .trans_pixel_disable  = false,
           .pre_clipping_disable = true,
           .end_code_disable     = false,
           .cc_mode              = VDP1_CMDT_CC_GOURAUD
