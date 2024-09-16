@@ -40,6 +40,8 @@ static uint16_t palette_length;
 #define true 1
 #define false 0
 
+#define LOGD printf
+
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 #define die(...) \
@@ -466,7 +468,10 @@ void updatePalette(rgb1555_t pix) {
 }
 
 int main(int argc, char *argv[]) {
-  if (argc != 2) return -1;
+  if (argc != 2) {
+		printf("usage: %s filename\n", argv[0]);
+		return -1;
+	}
   cmp_t *cmp = image_load_compressed(argv[1]);
 
   uint16_t format = 0x1; //RGB/palette 16 bits
@@ -524,7 +529,8 @@ int main(int argc, char *argv[]) {
 				current +=sizeof(uint8_t);
 			}
 
-			//write all pixels
+			//write all pixels+
+			palette[0] = 0;
 			for (int j=0; j<38; j++) {
 				for (int k = char_set[i].glyphs[j].offset.y;
 					k<(char_set[i].glyphs[j].offset.y+char_set[i].height);
