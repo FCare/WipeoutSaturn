@@ -1,4 +1,4 @@
-PORT ?= ORIGINAL
+PORT ?= Saturn
 
 COMMON_SRC = \
 	src/wipeout/race.c \
@@ -54,13 +54,13 @@ include $(YAUL_INSTALL_ROOT)/share/build.pre.mk
 
 
 ifeq ($(DEBUG), ON)
-NO_SFX=ON
 PORT_MSG?=ON
 USER_CFLAGS += -DDEBUG_PRINT -DDUMP
 ifeq ($(PORT_MSG), ON)
 USER_CFLAGS += -DLOGD="printf"
 endif
 else
+NO_SFX=ON
 PORT_MSG?=OFF
 ifeq ($(PORT_MSG), ON)
 USER_CFLAGS += -DDEBUG_PRINT
