@@ -34,8 +34,8 @@ cp ../blender/results/col_jacko.smf ../../cd/wipeout/ship/
 ./build/convertX3D ../blender/results/col_sophia.x3d
 cp ../blender/results/col_sophia.smf ../../cd/wipeout/ship/
 
-./build/convertX3D ../blender/results/options.x3d
-cp ../blender/results/options.smf ../../cd/wipeout/common/
+./build/convertX3D ../blender/results/gear.x3d
+cp ../blender/results/gear.smf ../../cd/wipeout/common/options.smf
 ./build/convertX3D ../blender/results/pad1.x3d
 cp ../blender/results/pad1.smf ../../cd/wipeout/common/
 ./build/convertX3D ../blender/results/hp.x3d

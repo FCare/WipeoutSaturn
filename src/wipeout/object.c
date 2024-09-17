@@ -668,6 +668,8 @@ Object_Saturn_list* objects_saturn_load(char *name) {
 
 int nb_texture = 0;
 
+static rgb1555_t no_light = RGB1555(1, 0x10, 0x10, 0x10);
+
 void object_saturn_draw(Object_Saturn *object,mat4_t *mat, light_t* lights, uint8_t nbLights) {
 	mat4_t inv_mat;
 	mat4_rot_inv(&inv_mat, mat);
@@ -676,12 +678,12 @@ void object_saturn_draw(Object_Saturn *object,mat4_t *mat, light_t* lights, uint
 
 	vec3_t *vertex = mem_temp_alloc(object->vertices_len * sizeof(vec3_t));
 	render_object_transform(vertex, object->vertices, object->vertices_len);
-
-	rgb1555_t *light_att = mem_temp_alloc(object->vertices_len * sizeof(rgb1555_t));
-	for (int i = 0; i<object->vertices_len; i++) {
-		light_att[i].raw = 0;
-	}
+	rgb1555_t *light_att = NULL;
 	if ((nbLights > 0) && (lights != NULL)) {
+		light_att = mem_temp_alloc(object->vertices_len * sizeof(rgb1555_t));
+		for (int i = 0; i<object->vertices_len; i++) {
+			light_att[i].raw = 0;
+		}
 		for (int i=0; i<nbLights; i++) {
 			vec3_t light_pos = vec3_transform(lights[i].position, &inv_mat);
 			render_object_lights(light_att, object->normals, object->vertices, object->vertices_len, light_pos, lights[i].color); //Do no use intensity for now
@@ -705,19 +707,19 @@ void object_saturn_draw(Object_Saturn *object,mat4_t *mat, light_t* lights, uint
 					.vertices = {
 						{
 							.pos = vertex[curFace->vertex_id[0]],
-							.light = light_att[curFace->vertex_id[0]],
+							.light = (light_att == NULL)?no_light:light_att[curFace->vertex_id[0]],
 						},
 						{
 							.pos = vertex[curFace->vertex_id[1]],
-							.light = light_att[curFace->vertex_id[1]],
+							.light = (light_att == NULL)?no_light:light_att[curFace->vertex_id[1]],
 						},
 						{
 							.pos = vertex[curFace->vertex_id[2]],
-							.light = light_att[curFace->vertex_id[2]],
+							.light = (light_att == NULL)?no_light:light_att[curFace->vertex_id[2]],
 						},
 						{
 							.pos = vertex[curFace->vertex_id[3]],
-							.light = light_att[curFace->vertex_id[3]],
+							.light = (light_att == NULL)?no_light:light_att[curFace->vertex_id[3]],
 						},
 					}
 				};
@@ -735,7 +737,7 @@ void object_saturn_draw(Object_Saturn *object,mat4_t *mat, light_t* lights, uint
 			}
 		}
 	}
-	mem_temp_free(light_att);
+	if (light_att != NULL) mem_temp_free(light_att);
 	mem_temp_free(vertex);
 }
 
