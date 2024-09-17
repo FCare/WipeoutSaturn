@@ -694,12 +694,15 @@ void object_saturn_draw(Object_Saturn *object,mat4_t *mat, light_t* lights, uint
 		geometry *geo = &object->object[geoId];
 		for (uint32_t faceId = 0; faceId < geo->faces_len; faceId++){
 			face *curFace = &geo->faces[faceId];
+#ifdef CLIPPING_ON_NORMALS
 			//Use the normal. If normal is not facing, discard
 			vec3_t transformed_norm = vec3_rotate(curFace->normal, mat);
 			vec3_t camera = vec3_fix16(-mat->row[0].w, -mat->row[1].w, -mat->row[2].w);
 			if (camera.z == FIX16_ZERO) camera.z = -FIX16_ONE;
 			fix16_t angle = vec3_angle_cos(transformed_norm, camera);
-			if (angle > FIX16_ZERO) {
+			if (angle > FIX16_ZERO)
+#endif
+			{
 				character *curChar = geo->characters[faceId];
 				quads_saturn_t q = {
 					.useLight = (nbLights>0),
