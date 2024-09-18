@@ -30,7 +30,7 @@ ifeq ($(PORT), Saturn)
 # DEBUG=ON PORT=Saturn make -j16 -C ..
 DEBUG?=OFF
 
-NO_SFX?=OFF
+NO_SFX?=ON
 
 DEDICATED_SRC = \
 	src/saturn/math.c \
