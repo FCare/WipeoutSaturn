@@ -471,7 +471,7 @@ static void button_pilot_select(menu_t *menu, int data) {
 }
 
 static void page_pilot_draw(menu_t *menu __unused, int data) {
-	draw_saturn_model(models.pilots[data], vec2(0, -0.2), vec3(0, 0, -1000), system_cycle_time(), NULL, 0);
+	draw_saturn_model(g.ships[def.teams[g.team].pilots[data]].model, vec2(0, -0.1), vec3(0, 0, -70), system_cycle_time(), NULL, 0);
 }
 
 static void page_pilot_init(menu_t *menu) {
@@ -482,7 +482,7 @@ static void page_pilot_init(menu_t *menu) {
 	page->items_pos = vec2i(0, -110);
 	page->items_anchor = UI_POS_BOTTOM | UI_POS_CENTER;
 	for (uint32_t i = 0; i < len(def.teams[g.team].pilots); i++) {
-		menu_page_add_button(page, def.teams[g.team].pilots[i], def.pilots[def.teams[g.team].pilots[i]].name, button_pilot_select);
+		menu_page_add_button(page, i, def.pilots[def.teams[g.team].pilots[i]].name, button_pilot_select);
 	}
 }
 
