@@ -51,8 +51,8 @@ cp ../blender/results/rappier.smf ../../cd/wipeout/common/
 cp ../blender/results/champion.smf ../../cd/wipeout/common/
 ./build/convertX3D ../blender/results/single.x3d
 cp ../blender/results/single.smf ../../cd/wipeout/common/
-./build/convertX3D ../blender/results/watch.x3d
-cp ../blender/results/watch.smf ../../cd/wipeout/common/
+./build/convertX3D ../blender/results/chrono.x3d
+cp ../blender/results/chrono.smf ../../cd/wipeout/common/watch.smf
 ./build/convertX3D ../blender/results/auri.x3d
 cp ../blender/results/auri.smf ../../cd/wipeout/common/
 ./build/convertX3D ../blender/results/qirex.x3d
