@@ -6,7 +6,7 @@
 		<meta name="generator" content="Blender 4.0.2" />
 	</head>
 	<Scene>
-		<NavigationInfo headlight="true"
+		<NavigationInfo headlight="false"
 		                visibilityLimit="0.0"
 		                type='"EXAMINE", "ANY"'
 		                avatarSize="0.25, 1.75, 0.75"
@@ -15,15 +15,16 @@
 		            groundColor="0.051 0.051 0.051"
 		            skyColor="0.051 0.051 0.051"
 		            />
-		<Transform DEF="Gear_001_TRANSFORM"
-		           translation="0.000000 0.000000 0.000000"
+		<Transform DEF="Light_TRANSFORM"
+		           translation="-4.076245 5.903862 1.005454"
 		           scale="1.000000 1.000000 1.000000"
-		           rotation="0.000000 0.707107 0.707107 3.141593"
+		           rotation="-0.498085 -0.762016 -0.413815 1.513875"
 		           >
-			<Transform DEF="Gear_001_ifs_TRANSFORM"
-			           translation="0.000000 0.000000 0.000000"
-			           scale="1.000000 1.000000 1.000000"
-			           rotation="0.000000 1.000000 0.000000 0.000000"
+			<PointLight DEF="LA_Light"
+			            ambientIntensity="0.0000"
+			            color="1.0000 1.0000 1.0000"
+			            intensity="1.0000"
+          rotation="0.000000 1.000000 0.000000 0.000000"
 			           >
 				<Group DEF="group_ME_Gear_001">
 					<Shape>
