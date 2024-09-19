@@ -29,13 +29,13 @@ typedef struct {
 	uint16_t stride;
 	uint16_t height;
 	uint16_t offset;
-} font_character_t;
+} collection_image_t;
 
 typedef struct {
 	uint16_t format;
 	uint16_t nbQuads;
-	font_character_t character[];
-} saturn_font_t;
+	collection_image_t character[];
+} saturn_collection_t;
 
 typedef struct {
 	uint16_t format;
