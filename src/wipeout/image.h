@@ -19,7 +19,7 @@ typedef struct {
 typedef struct {
 	uint16_t width;
 	uint16_t height;
-	uint16_t offset;
+	uint32_t offset;
 } collection_t;
 
 typedef struct {

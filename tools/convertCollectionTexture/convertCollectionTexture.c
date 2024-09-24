@@ -387,7 +387,7 @@ static inline rgb1555_t convert_to_rgb(rgba_t val) {
 typedef struct {
 	uint16_t width;
 	uint16_t height;
-	uint16_t offset;
+	uint32_t offset;
 } collection_image_t;
 
 typedef struct {
@@ -441,11 +441,12 @@ int main(int argc, char *argv[]) {
 	image_t **images = malloc(sizeof(image_t*) * cmp->len);
 	for (int i = 0; i < cmp->len; i++) {
 		images[i] = image_load_from_bytes(cmp->entries[i], false);
+		printf("Image[%d] is %dx%d\n", i, images[i]->width, images[i]->height);
   }
 	LOGD("extract %s\n", outputObject);
 	FILE *f = fopen(outputObject, "w+");
 
-	uint16_t offset = 0; //offset address shall start on an aligned address to 0x8
+	uint32_t offset = 0; //offset address shall start on an aligned address to 0x8
 	out.format = format;
 	out.nbImg = cmp->len;
 
@@ -475,14 +476,14 @@ int main(int argc, char *argv[]) {
 		col[j].width = images[j]->width;
 		col[j].height = images[j]->height;
 		col[j].offset = offset;
+		printf("%d=> offset %x\n", j, offset);
 
 		uint16_t width_s= SWAP(col[j].width);
 		uint16_t height_s= SWAP(col[j].height);
-		uint16_t offset_s= SWAP(col[j].offset);
+		uint16_t offset_s= col[j].offset;
 		fwrite(&width_s, 1, sizeof(uint16_t), f);
 		fwrite(&height_s, 1, sizeof(uint16_t), f);
-		fwrite(&offset_s, 1, sizeof(uint16_t), f);
-		fseek(f, 2, SEEK_CUR);
+		fwrite(&offset_s, 1, sizeof(uint32_t), f);
 		offset += col[j].width*col[j].height*sizeof(rgb1555_t);
 	}
 
