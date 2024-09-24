@@ -16,11 +16,11 @@ static void page_race_points_init(menu_t * menu);
 static void page_championship_points_init(menu_t * menu);
 static void page_hall_of_fame_init(menu_t * menu);
 
-static texture_list_t pilot_portraits;
+static image_set_t pilot_portraits;
 static menu_t *ingame_menu;
 
 void ingame_menus_load(void) {
-	pilot_portraits = image_get_compressed_textures(def.pilots[g.pilot].portrait);
+	pilot_portraits = saturn_load_image_collection(def.pilots[g.pilot].portrait);
 	ingame_menu = mem_bump(sizeof(menu_t));
 }
 
@@ -155,7 +155,7 @@ static void page_race_stats_draw(menu_t *menu, int data __unused) {
 	// Pilot portrait and race position - only for championship or single race
 	if (g.race_type != RACE_TYPE_TIME_TRIAL) {
 		vec2i_t image_pos = ui_scaled_pos(anchor, vec2i(pos.x + 180, pos.y));
-		uint16_t image = texture_from_list(pilot_portraits, g.race_position <= QUALIFYING_RANK ? 1 : 0);
+		uint16_t image = texture_from_set(pilot_portraits, g.race_position <= QUALIFYING_RANK ? 1 : 0);
 		render_push_2d(image_pos, ui_scaled(render_texture_size(image)), rgba(0, 0, 0, 128), RENDER_NO_TEXTURE);
 		ui_draw_image(image_pos, image);
 

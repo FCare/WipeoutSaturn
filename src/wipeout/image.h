@@ -16,6 +16,26 @@ typedef struct {
 	uint16_t len;
 } texture_list_t;
 
+typedef struct {
+	uint16_t width;
+	uint16_t height;
+	uint16_t offset;
+} collection_t;
+
+typedef struct {
+	uint16_t format;
+	uint16_t nbImg;
+	rgb1555_t palette[256];
+	collection_t list[];
+} saturn_texture_list_t;
+
+typedef struct {
+	saturn_texture_list_t *image;
+	uint16_t *tex;
+} image_set_t;
+
+extern image_set_t saturn_load_image_collection(const char *name);
+
 #define texture_list_empty() ((texture_list_t){0, 0})
 
 typedef struct {
@@ -35,7 +55,7 @@ typedef struct {
 	uint16_t format;
 	uint16_t nbQuads;
 	collection_image_t character[];
-} saturn_collection_t;
+} saturn_font_collection_t;
 
 typedef struct {
 	uint16_t format;
@@ -84,6 +104,6 @@ uint16_t image_get_texture_semi_trans(char *name);
 texture_list_t image_get_compressed_textures(char *name);
 uint16_t texture_from_list(texture_list_t tl, uint16_t index);
 
-saturn_image_ctrl_t* image_get_saturn_textures(char *name);
+extern uint16_t texture_from_set(image_set_t tl, uint16_t index);
 
 #endif

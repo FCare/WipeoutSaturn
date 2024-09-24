@@ -255,64 +255,6 @@ cmp_t *image_load_compressed(char *name) {
 	return cmp;
 }
 
-saturn_image_ctrl_t* image_get_saturn_textures(char *name) {
-	LOGD("load: %s\n", name);
-	uint16_t texture;
-	uint16_t *buf = (uint16_t*)platform_load_saturn_asset(name, &texture);
-	CHECK_ALIGN_4(buf);
-	saturn_image_ctrl_t *list = mem_bump(sizeof(saturn_image_ctrl_t));
-	CHECK_ALIGN_4(list);
-	uint32_t offset = 0;
-	list->nb_palettes = buf[offset++];
-	LOGD("Nb_palettes = %d\n", list->nb_palettes);
-	list->pal = mem_bump(sizeof(palette_t*)*list->nb_palettes);
-	CHECK_ALIGN_4(list->pal);
-	for (int i =0; i<list->nb_palettes; i++) {
-		ALIGN_2(offset);
-		list->pal[i] = (palette_t *)&buf[offset];
-		CHECK_ALIGN_4(list->pal[i]);
-		CHECK_ALIGN_2(list->pal[i]->pixels);
-		LOGD("palette[%d] => size %dx%d 0x%x\n",i, list->pal[i]->texture, list->pal[i]->length, list->pal[i]);
-		offset += 3;
-		uint32_t delta = offset*sizeof(rgb1555_t);
-		uint16_t width = list->pal[i]->texture;
-		list->pal[i]->texture = create_sub_texture(delta , list->pal[i]->length, width, texture);
-		list->pal[i]->length = list->pal[i]->length*width;
-		LOGD("Create palette[%d] texture from offset 0x%x to 0x@%x\n", i, delta, (rgb1555_t *)&buf[offset]);
-		LOGD("Pal texture[%d] = %d\n", i, list->pal[i]->texture);
-		offset += list->pal[i]->length;
-	}
-	LOGD("offset = 0x%x\n", offset);
-	list->nb_objects = buf[offset++];
-	LOGD("nb obj = %d\n", list->nb_objects);
-	list->characters = mem_bump(sizeof(character_list_t)*list->nb_objects);
-	CHECK_ALIGN_4(list->characters);
-	for (int n =0; n<list->nb_objects; n++) {
-		character_list_t *ch_list = &list->characters[n];
-		CHECK_ALIGN_4(ch_list);
-		ch_list->nb_characters = buf[offset];
-		LOGD("%d nb_characters = %d 0x%x\n", n, ch_list->nb_characters, offset*2);
-		offset++;
-		ch_list->character = mem_bump(sizeof(character_t*)*ch_list->nb_characters);
-		CHECK_ALIGN_4(ch_list->character);
-		for (int i =0; i<ch_list->nb_characters; i++) {
-			ALIGN_2(offset);
-			LOGD("Read character[%d] object[%d] t offset @x%x\n", i, n, offset*2);
-			ch_list->character[i] = (character_t *)&buf[offset];
-			CHECK_ALIGN_4(ch_list->character[i]);
-			CHECK_ALIGN_2(ch_list->character[i]->pixels);
-			offset += 5;
-			uint32_t delta = offset*sizeof(rgb1555_t);
-			LOGD("Character %d is at 0x%x vs 0x%x => delta = 0x%x (Obj %d)\n", i, ch_list->character[i]->pixels, (uint32_t)buf, delta, n);
-			ch_list->character[i]->texture = create_sub_texture(delta , ch_list->character[i]->width, ch_list->character[i]->height, texture);
-			LOGD("%dx%d %d\n", ch_list->character[i]->width, ch_list->character[i]->height, ch_list->character[i]->length);
-			offset += ch_list->character[i]->length;
-		}
-		LOGD("done %d\n", n);
-	}
-	return list;
-}
-
 uint16_t image_get_texture(char *name) {
 	LOGD("load: %s\n", name);
 	uint32_t size;
@@ -362,6 +304,11 @@ uint16_t texture_from_list(texture_list_t tl, uint16_t index) {
 	return tl.start + index;
 }
 
+uint16_t texture_from_set(image_set_t tl, uint16_t index) {
+	error_if(index >= tl.image->nbImg, "Texture %d not in list of len %d", index, tl.image->nbImg);
+	return tl.tex[index];
+}
+
 void image_copy(image_t *src, image_t *dst, uint32_t sx, uint32_t sy, uint32_t sw, uint32_t sh, uint32_t dx, uint32_t dy) {
 	rgba_t *src_pixels = src->pixels + sy * src->width + sx;
 	rgba_t *dst_pixels = dst->pixels + dy * dst->width + dx;
@@ -372,5 +319,16 @@ void image_copy(image_t *src, image_t *dst, uint32_t sx, uint32_t sy, uint32_t s
 		src_pixels += src->width - sw;
 		dst_pixels += dst->width - sw;
 	}
+}
+
+image_set_t saturn_load_image_collection(const char *name) {
+  image_set_t ret;
+  uint16_t texture;
+	ret.image = (saturn_texture_list_t*)platform_load_saturn_asset(name, &texture);
+	ret.tex = mem_bump(sizeof(uint16_t) * ret.image->nbImg);
+	for (int i =0; i<ret.image->nbImg; i++) {
+		ret.tex[i] = create_sub_texture(ret.image->list[i].offset, ret.image->list[i].width, ret.image->list[i].height, texture);
+	}
+  return ret;
 }
 
