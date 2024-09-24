@@ -250,6 +250,12 @@ uint8_t *platform_load_saturn_asset(const char *name, uint16_t *texture) {
   return image;
 }
 
+uint32_t platform_get_asset_size(const char *name) {
+  cdfs_filelist_entry_t *file_entry = getEntry(name);
+  error_if(file_entry==NULL, "File not found\n");
+  return file_entry->size;
+}
+
 uint8_t *platform_load_asset(const char *name, uint32_t *bytes_read) {
   LOGD("Load asset %s\n", name);
   int ret __unused;

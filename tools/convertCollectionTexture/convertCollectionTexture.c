@@ -476,7 +476,6 @@ int main(int argc, char *argv[]) {
 		col[j].width = images[j]->width;
 		col[j].height = images[j]->height;
 		col[j].offset = offset;
-		printf("%d=> offset %x\n", j, offset);
 
 		uint16_t width_s= SWAP(col[j].width);
 		uint16_t height_s= SWAP(col[j].height);

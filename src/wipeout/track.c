@@ -11,30 +11,11 @@
 #include "game.h"
 
 void track_load(const char *base_path) {
-	// Load and assemble high res track tiles
-
-	g.track.textures.start = render_textures_len();
-	g.track.textures.len = 0;
-
-	ttf_t *ttf = track_load_tile_format(get_path(base_path, "library.ttf"));
-	cmp_t *cmp = image_load_compressed(get_path(base_path, "library.cmp"));
-
-	image_t *temp_tile = image_alloc(128, 128);
-	for (uint32_t i = 0; i < ttf->len; i++) {
-		for (int tx = 0; tx < 4; tx++) {
-			for (int ty = 0; ty < 4; ty++) {
-				uint32_t sub_tile_index = ttf->tiles[i].near[ty * 4 + tx];
-				image_t *sub_tile = image_load_from_bytes(cmp->entries[sub_tile_index], false);
-				image_copy(sub_tile, temp_tile, 0, 0, 32, 32, tx * 32, ty * 32);
-				mem_temp_free(sub_tile);
-			}
-		}+
-		render_texture_create(temp_tile->width, temp_tile->height, temp_tile->pixels);
-		g.track.textures.len++;
-	}
-	mem_temp_free(temp_tile);
-	mem_temp_free(cmp);
-	mem_temp_free(ttf);
+	// Load pre-assembled high res track tiles
+	image_set_t cmp = saturn_load_image_collection(get_path(base_path, "library.smf"));
+	g.track.textures.start = cmp.tex[0];
+	g.track.textures.len = render_textures_len() - g.track.textures.start;
+	LOGD("Track has %d texture from %d\n",g.track.textures.len,g.track.textures.start);
 
 	vec3_t *vertices = track_load_vertices(get_path(base_path, "track.trv"));
 	track_load_faces(get_path(base_path, "track.trf"), vertices);
@@ -84,13 +65,13 @@ void track_load(const char *base_path) {
 }
 
 ttf_t *track_load_tile_format(char *ttf_name) {
-	uint32_t ttf_size;
+	uint32_t ttf_size = platform_get_asset_size(ttf_name);
+	uint32_t num_tiles = ttf_size / 42;
+	ttf_t *ttf = mem_temp_alloc(sizeof(ttf_t) + sizeof(ttf_tile_t) * num_tiles);
+
 	uint8_t *ttf_bytes = platform_load_asset(ttf_name, &ttf_size);
 
 	uint32_t p = 0;
-	uint32_t num_tiles = ttf_size / 42;
-
-	ttf_t *ttf = mem_temp_alloc(sizeof(ttf_t) + sizeof(ttf_tile_t) * num_tiles);
 	ttf->len = num_tiles;
 
 	for (uint32_t t = 0; t < num_tiles; t++) {

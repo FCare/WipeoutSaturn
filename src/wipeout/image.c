@@ -328,6 +328,7 @@ image_set_t saturn_load_image_collection(const char *name) {
 	ret.tex = mem_bump(sizeof(uint16_t) * ret.image->nbImg);
 	for (int i =0; i<ret.image->nbImg; i++) {
 		ret.tex[i] = create_sub_texture(ret.image->list[i].offset, ret.image->list[i].width, ret.image->list[i].height, texture);
+		LOGD("Generate tex %d\n", ret.tex[i]);
 	}
   return ret;
 }

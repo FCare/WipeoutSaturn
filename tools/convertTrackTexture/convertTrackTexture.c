@@ -444,11 +444,10 @@ ttf_t *track_load_tile_format(char *ttf_name) {
 
 	uint32_t p = 0;
 	ttf->len = num_tiles;
-
+	LOGD("Output %d high res textures\n", ttf->len);
 	for (uint32_t t = 0; t < num_tiles; t++) {
 		for (int i = 0; i < 16; i++) {
 			ttf->tiles[t].near[i] = get_i16(ttf_bytes, &p);
-			printf("Near %d %d => %d\n", t, i, ttf->tiles[t].near[i]);
 		}
 		for (int i = 0; i < 4; i++) {
 			ttf->tiles[t].med[i] = get_i16(ttf_bytes, &p);
