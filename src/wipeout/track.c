@@ -101,11 +101,11 @@ bool track_collect_pickups(track_face_t *face) {
 }
 
 vec3_t *track_load_vertices(char *file_name) {
-	uint32_t size;
-	uint8_t *bytes = platform_load_asset(file_name, &size);
-
+	uint32_t size = platform_get_asset_size(file_name);
 	g.track.vertex_count = size / 16; // VECTOR_SIZE
 	vec3_t *vertices = mem_temp_alloc(sizeof(vec3_t) * g.track.vertex_count);
+
+	uint8_t *bytes = platform_load_asset(file_name, &size);
 
 	uint32_t p = 0;
 	int div = 0;
@@ -135,11 +135,12 @@ static const vec2_t track_uv[2][4] = {
 };
 
 void track_load_faces(char *file_name, vec3_t *vertices) {
-	uint32_t size;
-	uint8_t *bytes = platform_load_asset(file_name, &size);
-
+	uint32_t size = platform_get_asset_size(file_name);
 	g.track.face_count = size / 20; // TRACK_FACE_DATA_SIZE
 	g.track.faces = mem_bump(sizeof(track_face_t) * g.track.face_count);
+
+	uint8_t *bytes = platform_load_asset(file_name, &size);
+
 
 	uint32_t p = 0;
 	track_face_t *tf = g.track.faces;
@@ -180,11 +181,11 @@ void track_load_faces(char *file_name, vec3_t *vertices) {
 
 
 void track_load_sections(char *file_name) {
-	uint32_t size;
-	uint8_t *bytes = platform_load_asset(file_name, &size);
-
+	uint32_t size = platform_get_asset_size(file_name);
 	g.track.section_count = size / 156; // SECTION_DATA_SIZE
 	g.track.sections = mem_bump(sizeof(section_t) * g.track.section_count);
+
+	uint8_t *bytes = platform_load_asset(file_name, &size);
 
 	uint32_t p = 0;
 	section_t *ts = g.track.sections;
