@@ -45,6 +45,8 @@ void race_init(void) {
 	// render_textures_dump("texture_atlas.png");
 
 	if (g.is_attract_mode) {
+		LOGD("Attract mode\n");
+		//Pas supporté
 		attract_start_time = system_time();
 		for (uint32_t i = 0; i < len(g.ships); i++) {
 			// FIXME: this is needed to initializes the engine sound. Should
