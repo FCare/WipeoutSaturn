@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-//#define SAVE_EXTRACT
+// #define SAVE_EXTRACT
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
@@ -125,12 +125,11 @@ static inline uint32_t get_u32_le(uint8_t *bytes, uint32_t *p) {
 
 image_t *image_load_from_bytes(uint8_t *bytes, bool transparent) {
 	uint32_t p = 0;
-
+	rgba_t palette[256];
 	uint32_t magic = get_i32_le(bytes, &p);
 	uint32_t type = get_i32_le(bytes, &p);
-	rgba_t palette[256];
 
-	printf("Type is %d\n", type);
+	LOGD("Type is %d\n", type);
 
 	if (
 		type == TIM_TYPE_PALETTED_4_BPP ||
@@ -393,14 +392,13 @@ typedef struct {
 typedef struct {
 	uint16_t format;
 	uint16_t nbImg;
-	rgb1555_t palette[256];
 	collection_image_t image[];
 } texture_t;
 
 #define SWAP(X) (((X&0xFF)<<8)|(X>>8))
 
 void updatePalette(rgb1555_t pix) {
-	for (int i=0; i< palette_length; i++) {
+	for (int i=0; i< (palette_length%256); i++) {
 		if (palette[i] == pix) return;
 	}
 	if (palette_length >= 256) {
@@ -439,21 +437,12 @@ int main(int argc, char *argv[]) {
 
 	palette_length = 0;
 	image_t **images = malloc(sizeof(image_t*) * cmp->len);
+	LOGD("There is %d images in the collection\n", cmp->len);
+
 	for (int i = 0; i < cmp->len; i++) {
 		images[i] = image_load_from_bytes(cmp->entries[i], false);
-		printf("Image[%d] is %dx%d\n", i, images[i]->width, images[i]->height);
+		LOGD("Image[%d] is %dx%d\n", i, images[i]->width, images[i]->height);
   }
-	LOGD("extract %s\n", outputObject);
-	FILE *f = fopen(outputObject, "w+");
-
-	uint32_t offset = 0; //offset address shall start on an aligned address to 0x8
-	out.format = format;
-	out.nbImg = cmp->len;
-
-	uint16_t format_s= SWAP(out.format);
-	uint16_t nbImg_s= SWAP(out.nbImg);
-	fwrite(&format_s, 1, sizeof(uint16_t), f); offset += sizeof(uint16_t);
-	fwrite(&nbImg_s, 1, sizeof(uint16_t), f); offset += sizeof(uint16_t);
 
 	palette[0] = 0;
 	for (int i=0; i<cmp->len; i++) {
@@ -465,6 +454,24 @@ int main(int argc, char *argv[]) {
 			}
 		}
 	}
+
+	LOGD("Palette updated\n");
+	LOGD("Palette is %d\n", palette_length);
+	if (palette_length >= 256) {
+		format = 2;
+		LOGD("Palette is too big, switch to RGB\n");
+	}
+	LOGD("extract %s\n", outputObject);
+	FILE *f = fopen(outputObject, "w+");
+
+	uint32_t offset = 0; //offset address shall start on an aligned address to 0x8
+	out.format = format;
+	out.nbImg = cmp->len;
+
+	uint16_t format_s= SWAP(out.format);
+	uint16_t nbImg_s= SWAP(out.nbImg);
+	fwrite(&format_s, 1, sizeof(uint16_t), f); offset += sizeof(uint16_t);
+	fwrite(&nbImg_s, 1, sizeof(uint16_t), f); offset += sizeof(uint16_t);
 	for (int i=0; i<(sizeof(palette)/sizeof(rgb1555_t)); i++) {
 		uint16_t pal_s= SWAP(palette[i]);
 		fwrite(&pal_s, 1, sizeof(uint16_t), f);
@@ -491,8 +498,16 @@ int main(int argc, char *argv[]) {
 		for (int j=0; j<images[i]->height; j++) {
 			rgba_t* src =  &images[i]->pixels[j*images[i]->width];
 			for (int l = 0; l<images[i]->width; l++) {
-    		rgb1555_t pix = SWAP(convert_to_rgb(src[l]));
-				fwrite(&pix, 1, sizeof(rgb1555_t), f);
+				if (out.format == 1) {
+					//Palette is less than 256. Might be 8 bits but for now, let's use 16 bits.
+					//Should save size here
+					rgb1555_t pix = SWAP(convert_to_rgb(src[l]));
+					fwrite(&pix, 1, sizeof(rgb1555_t), f);
+				} else {
+					//Format is RGB 16 bits
+					rgb1555_t pix = SWAP(convert_to_rgb(src[l]));
+					fwrite(&pix, 1, sizeof(rgb1555_t), f);
+				}
   		}
 		}
 		#ifdef SAVE_EXTRACT
@@ -505,7 +520,6 @@ int main(int argc, char *argv[]) {
 	fclose(f);
 
 	// }
-	LOGD("Palette is %d\n", palette_length);
 
 	free(col);
 	free(images);
