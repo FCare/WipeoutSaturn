@@ -50,11 +50,19 @@ void scene_move_oil_pump(Object *obj);
 void scene_update_aurora_borealis(void);
 
 void scene_load(const char *base_path, fix16_t sky_y_offset) {
-	texture_list_t scene_textures = image_get_compressed_textures(get_path(base_path, "scene.cmp"));
-	scene_objects = objects_load(get_path(base_path, "scene.prm"), scene_textures);
+	image_set_t scene_textures = saturn_load_image_collection(get_path(base_path, "scene.smf"));
+	texture_list_t tl_scene = (texture_list_t){
+		.start = scene_textures.tex[0],
+		.len = render_textures_len() - scene_textures.tex[0]
+	};
+	scene_objects = objects_load(get_path(base_path, "scene.prm"), tl_scene);
 
-	texture_list_t sky_textures = image_get_compressed_textures(get_path(base_path, "sky.cmp"));
-	sky_object = objects_load(get_path(base_path, "sky.prm") , sky_textures);
+	image_set_t sky_textures = saturn_load_image_collection(get_path(base_path, "sky.smf"));
+	texture_list_t tl_sky = (texture_list_t){
+		.start = sky_textures.tex[0],
+		.len = render_textures_len() - sky_textures.tex[0]
+	};
+	sky_object = objects_load(get_path(base_path, "sky.prm") , tl_sky);
 	sky_offset = vec3_fix16(FIX16_ZERO, sky_y_offset, FIX16_ZERO);
 
 	// Collect all objects that need to be updated each frame
