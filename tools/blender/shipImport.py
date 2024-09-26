@@ -50,9 +50,9 @@ def read_some_data(context, filepath, use_some_setting):
             pad(f,4)
             vertices = []
             for i in range(nb_vertices):
-                x = get_i16(f)
-                y = get_i16(f)
-                z = get_i16(f)
+                x = get_i16(f) + originX
+                y = get_i16(f) + originY
+                z = get_i16(f) + originZ
                 print(str(x)+ " " + str(y) + " " + str(z))
                 vertices.append((x,y,z))
                 pad(f,2)
