@@ -15,11 +15,21 @@ def get_i16(f):
 def get_i8(f):
     return int.from_bytes( f.read(1), byteorder='big', signed = True)
 
+def int32torgb(color):
+    rgb = []
+    for i in range(3):
+        rgb.append(color&0xFF)
+        color = color >> 8
+    rgb.append(0xFF)
+    return rgb
+
 def pad(f, off):
     f.seek(off, 1)
 
 def read_some_data(context, filepath, use_some_setting):
     print("importing from "+filepath)
+    collection = bpy.data.collections.new("Scene")
+    bpy.context.scene.collection.children.link(collection)
     with open(filepath, mode="rb") as f:
         chunk = f.read(16)
         while chunk:
@@ -29,7 +39,9 @@ def read_some_data(context, filepath, use_some_setting):
             bpy.data.objects.new(name, mesh_data)
             bm = bmesh.new()   # create an empty BMesh
             # add the mesh object into the scene
-            bpy.context.scene.collection.objects.link(mesh_obj)
+            collection.objects.link(mesh_obj)
+            
+            collayer = bm.loops.layers.color.new("Attribute")
             
             
             new_uv = mesh_data.uv_layers.new(name='CMP_UV') # create new UV maps
@@ -84,24 +96,27 @@ def read_some_data(context, filepath, use_some_setting):
                     case 1: #F3
                         face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
                         pad(f, 2)
-                        color = get_u32(f)
-                        bm.faces.new(face_vertices)
-                        faces.append((face_vertices,(), (), (color)))
+                        color = int32torgb(get_u32(f))
+                        new = bm.faces.new(face_vertices)
+                        for loop in new.loops:
+                            loop[collayer] = color
                     case 2: #FT3
                         face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
                         texture = get_i16(f)
                         pad(f, 4)
                         face_uv = ((get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f)))
                         pad(f, 2)
-                        color = get_u32(f)
-                        bm.faces.new(face_vertices)
-                        faces.append((face_vertices, face_uv, texture, (color)))
+                        color = int32torgb(get_u32(f))
+                        new = bm.faces.new(face_vertices)
+                        for loop in new.loops:
+                            loop[collayer] = color
                     case 3: #F4
                         point = (get_i16(f),get_i16(f),get_i16(f),get_i16(f))
                         face_vertices = [bm.verts[point[0]],bm.verts[point[1]],bm.verts[point[3]],bm.verts[point[2]]]
-                        color = get_u32(f)
-                        bm.faces.new(face_vertices)
-                        faces.append((face_vertices,(), (), (color)))
+                        color = int32torgb(get_u32(f))
+                        new = bm.faces.new(face_vertices)
+                        for loop in new.loops:
+                            loop[collayer] = color
                     case 4: #FT4
                         point = (get_i16(f),get_i16(f),get_i16(f),get_i16(f))
                         face_vertices = [bm.verts[point[0]],bm.verts[point[1]],bm.verts[point[3]],bm.verts[point[2]]]
@@ -110,32 +125,31 @@ def read_some_data(context, filepath, use_some_setting):
                         f_uv = (get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f), get_i8(f), get_i8(f))
                         face_uv = ((f_uv[0],f_uv[1],f_uv[2],f_uv[3],f_uv[6],f_uv[7],f_uv[4],f_uv[5]))
                         pad(f, 2)
-                        color = get_u32(f)
-                        bm.faces.new(face_vertices)
-                        faces.append((face_vertices, face_uv, texture, (color)))
+                        color = int32torgb(get_u32(f))
+                        new = bm.faces.new(face_vertices)
+                        for loop in new.loops:
+                            loop[collayer] = color
                     case 5: #G3
                         face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
                         pad(f,2)
-                        color = (get_u32(f),get_u32(f),get_u32(f))
-                        bm.faces.new(face_vertices)
-                        faces.append((face_vertices,(), (), (color)))
+                        new = bm.faces.new(face_vertices)
+                        for loop in new.loops:
+                            loop[collayer] = int32torgb(get_u32(f))
                     case 6: #GT3
                         face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
                         texture = get_i16(f)
                         pad(f, 4)
                         face_uv = (get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f))
                         pad(f,2)
-                        color = (get_u32(f),get_u32(f),get_u32(f))
-                        
-                        bm.faces.new(face_vertices)
-                        faces.append((face_vertices, face_uv, texture, (color)))
+                        new = bm.faces.new(face_vertices)
+                        for loop in new.loops:
+                            loop[collayer] = int32torgb(get_u32(f))
                     case 7: #G4
                         point = (get_i16(f),get_i16(f),get_i16(f),get_i16(f))
                         face_vertices = [bm.verts[point[0]],bm.verts[point[1]],bm.verts[point[3]],bm.verts[point[2]]]
-                        faces.append((point[0],point[1],point[3],point[2]))
-                        color = (get_u32(f),get_u32(f),get_u32(f),get_u32(f))
-                        bm.faces.new(face_vertices)
-                        faces.append((face_vertices, (), (), (color)))
+                        new = bm.faces.new(face_vertices)
+                        for loop in new.loops:
+                            loop[collayer] = int32torgb(get_u32(f))
                     case 8: #GT4
                         point = (get_i16(f),get_i16(f),get_i16(f),get_i16(f))
                         face_vertices = [bm.verts[point[0]],bm.verts[point[1]],bm.verts[point[3]],bm.verts[point[2]]]
@@ -144,9 +158,9 @@ def read_some_data(context, filepath, use_some_setting):
                         f_uv = (get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f), get_i8(f), get_i8(f))
                         face_uv = ((f_uv[0],f_uv[1],f_uv[2],f_uv[3],f_uv[6],f_uv[7],f_uv[4],f_uv[5]))
                         pad(f,2)
-                        color = (get_u32(f),get_u32(f),get_u32(f),get_u32(f))
-                        bm.faces.new(face_vertices)
-                        faces.append((face_vertices, face_uv, texture, (color)))
+                        new = bm.faces.new(face_vertices)
+                        for loop in new.loops:
+                            loop[collayer] = int32torgb(get_u32(f))
                     #case 9: #LF2 - never seen
                     #case 10 | 11: #TSPR
                     case 10 | 11: #BSPR
@@ -154,26 +168,28 @@ def read_some_data(context, filepath, use_some_setting):
                     case 12: #LSF3
                         face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
                         pad(f, 2) #shall be a normal
-                        color = (get_u32(f),get_u32(f),get_u32(f))
-                        bm.faces.new(face_vertices)
-                        faces.append((face_vertices, (), (), (color)))
+                        new = bm.faces.new(face_vertices)
+                        for loop in new.loops:
+                            loop[collayer] = int32torgb(get_u32(f))
                     case 13: #LSFT3
                         face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
                         pad(f, 2) #shall be a normal
                         texture = get_i16(f)
                         pad(f, 4)
                         face_uv = (get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f))
-                        color = get_u32(f)
-                        bm.faces.new(face_vertices)
-                        faces.append((face_vertices, (), (), (color)))
+                        color = int32torgb(get_u32(f))
+                        new = bm.faces.new(face_vertices)
+                        for loop in new.loops:
+                            loop[collayer] = color
                     case 14: #LSF4
                         point = (get_i16(f),get_i16(f),get_i16(f),get_i16(f))
                         face_vertices = [bm.verts[point[0]],bm.verts[point[1]],bm.verts[point[3]],bm.verts[point[2]]]
                         pad(f, 2) #shall be a normal
                         pad(f, 2)
-                        color = get_u32(f)
-                        bm.faces.new(face_vertices)
-                        faces.append((face_vertices, (), (), (color)))
+                        color = int32torgb(get_u32(f))
+                        new = bm.faces.new(face_vertices)
+                        for loop in new.loops:
+                            loop[collayer] = color
                     case 15: #LSFT4
                         point = (get_i16(f),get_i16(f),get_i16(f),get_i16(f))
                         face_vertices = [bm.verts[point[0]],bm.verts[point[1]],bm.verts[point[3]],bm.verts[point[2]]]
@@ -182,31 +198,32 @@ def read_some_data(context, filepath, use_some_setting):
                         pad(f, 4)
                         f_uv = (get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f), get_i8(f), get_i8(f))
                         face_uv = ((f_uv[0],f_uv[1],f_uv[2],f_uv[3],f_uv[6],f_uv[7],f_uv[4],f_uv[5]))
-                        color = get_u32(f)
-                        bm.faces.new(face_vertices)
-                        faces.append((face_vertices, face_uv, texture, (color)))
+                        color = int32torgb(get_u32(f))
+                        new = bm.faces.new(face_vertices)
+                        for loop in new.loops:
+                            loop[collayer] = color
                     case 16: #LSG3
                         face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
                         pad(f, 6) #shall be a normal
-                        color = (get_u32(f),get_u32(f),get_u32(f))
-                        bm.faces.new(face_vertices)
-                        faces.append((face_vertices, (), (), (color)))
+                        new = bm.faces.new(face_vertices)
+                        for loop in new.loops:
+                            loop[collayer] = int32torgb(get_u32(f))
                     case 17: #LSGT3
                         face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
                         pad(f, 6) #shall be a normal
                         texture = get_i16(f)
                         pad(f, 4)
                         face_uv = (get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f))
-                        color = (get_u32(f),get_u32(f),get_u32(f))
-                        bm.faces.new(face_vertices)
-                        faces.append((face_vertices, face_uv, texture, (color)))
+                        new = bm.faces.new(face_vertices)
+                        for loop in new.loops:
+                            loop[collayer] = int32torgb(get_u32(f))
                     case 18: #LSG4
                         point = (get_i16(f),get_i16(f),get_i16(f),get_i16(f))
                         face_vertices = [bm.verts[point[0]],bm.verts[point[1]],bm.verts[point[3]],bm.verts[point[2]]]
                         pad(f, 8) #shall be a normal
-                        color = (get_u32(f),get_u32(f),get_u32(f),get_u32(f))
-                        bm.faces.new(face_vertices)
-                        faces.append((face_vertices, (), (), (color)))
+                        new = bm.faces.new(face_vertices)
+                        for loop in new.loops:
+                            loop[collayer] = int32torgb(get_u32(f))
                     case 19: #LSGT4
                         point = (get_i16(f),get_i16(f),get_i16(f),get_i16(f))
                         face_vertices = [bm.verts[point[0]],bm.verts[point[1]],bm.verts[point[3]],bm.verts[point[2]]]
@@ -215,9 +232,9 @@ def read_some_data(context, filepath, use_some_setting):
                         pad(f, 4)
                         face_uv = (get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f))
                         pad(f, 2)
-                        color = (get_u32(f),get_u32(f),get_u32(f),get_u32(f))
-                        bm.faces.new(face_vertices)
-                        faces.append((face_vertices, face_uv, texture, (color)))
+                        new = bm.faces.new(face_vertices)
+                        for loop in new.loops:
+                            loop[collayer] = int32torgb(get_u32(f))
                     case 20: #SPLINE
                         pad(f, 52)
                     case 21: #INFINITE_LIGHT
@@ -230,6 +247,8 @@ def read_some_data(context, filepath, use_some_setting):
                         print("Error unsupported primitive")
             bm.to_mesh(mesh_data)
             mesh_data.update()
+            set_act = mesh_data.color_attributes.get("Attribute")
+            mesh_data.attributes.active_color = set_act
             chunk = f.read(16)
             bm.free()
     return {'FINISHED'}

@@ -389,7 +389,7 @@ void render_push_2d_tile(vec2i_t pos, vec2i_t uv_offset, vec2i_t uv_size, vec2i_
   render_vdp1_add(&q, color, texture_index);
 }
 
-static inline rgb1555_t convert_to_rgb(rgba_t val) {
+inline rgb1555_t convert_to_rgb(rgba_t val) {
   //RGB 16bits, MSB 1, transparent code 0
   if (val.a == 0) return RGB888_RGB1555(0,0,0,0);
   if ((val.b == 0) && (val.r == 0) && (val.g == 0)) {
