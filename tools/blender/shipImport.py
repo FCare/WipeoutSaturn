@@ -1,12 +1,19 @@
 import bpy
 import array as arr
+import bmesh
 
 
 def get_i32(f):
     return int.from_bytes( f.read(4), byteorder='big', signed = True)
 
+def get_u32(f):
+    return int.from_bytes( f.read(4), byteorder='big', signed = False)
+
 def get_i16(f):
     return int.from_bytes( f.read(2), byteorder='big', signed = True)
+
+def get_i8(f):
+    return int.from_bytes( f.read(1), byteorder='big', signed = True)
 
 def pad(f, off):
     f.seek(off, 1)
@@ -17,7 +24,15 @@ def read_some_data(context, filepath, use_some_setting):
         chunk = f.read(16)
         while chunk:
             name = chunk.decode("utf-8", "ignore")
-            mesh = bpy.data.meshes.new( name ) # create a new mesh
+            mesh_data = bpy.data.meshes.new( f"{name}_data" ) # create a new mesh
+            mesh_obj =bpy.data.objects.new(name, mesh_data)
+            bpy.data.objects.new(name, mesh_data)
+            bm = bmesh.new()   # create an empty BMesh
+            # add the mesh object into the scene
+            bpy.context.scene.collection.objects.link(mesh_obj)
+            
+            
+            new_uv = mesh_data.uv_layers.new(name='CMP_UV') # create new UV maps
             print("Generating mesh "+name)
             nb_vertices = get_i16(f)
             pad(f,2)
@@ -25,7 +40,7 @@ def read_some_data(context, filepath, use_some_setting):
             nb_normals = get_i16(f)
             pad(f,2)
             pad(f,4)
-            nb_primitives = get_i16(f)
+            nb_faces = get_i16(f)
             pad(f,2)
             pad(f,4)
             pad(f,4)
@@ -48,117 +63,161 @@ def read_some_data(context, filepath, use_some_setting):
             pad(f,4)
             pad(f,4)
             pad(f,4)
-            vertices = []
             for i in range(nb_vertices):
                 x = get_i16(f) + originX
                 y = get_i16(f) + originY
                 z = get_i16(f) + originZ
-                print(str(x)+ " " + str(y) + " " + str(z))
-                vertices.append((x,y,z))
+                bm.verts.new((x,y,z))
                 pad(f,2)
+            bm.verts.ensure_lookup_table()
             normals = []
             for i in range(nb_normals):
                 normals.append((get_i16(f),get_i16(f),get_i16(f)))
                 pad(f,2)
 
-            primitives = []
-            for i in range(nb_primitives):
+            faces = []
+            for i in range(nb_faces):
                 prm_type = get_i16(f)
                 # print("type is "+ str(prm_type))
                 prm_flag = get_i16(f)
                 match prm_type:
                     case 1: #F3
-                        primitives.append((get_i16(f),get_i16(f),get_i16(f)))
-                        pad(f, 6)
+                        face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
+                        pad(f, 2)
+                        color = get_u32(f)
+                        bm.faces.new(face_vertices)
+                        faces.append((face_vertices,(), (), (color)))
                     case 2: #FT3
-                        primitives.append((get_i16(f),get_i16(f),get_i16(f)))
-                        pad(f, 18)
-                    case 3: #F4
-                        point = []
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        primitives.append((point[0],point[1],point[3],point[2]))
+                        face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
+                        texture = get_i16(f)
                         pad(f, 4)
+                        face_uv = ((get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f)))
+                        pad(f, 2)
+                        color = get_u32(f)
+                        bm.faces.new(face_vertices)
+                        faces.append((face_vertices, face_uv, texture, (color)))
+                    case 3: #F4
+                        point = (get_i16(f),get_i16(f),get_i16(f),get_i16(f))
+                        face_vertices = [bm.verts[point[0]],bm.verts[point[1]],bm.verts[point[3]],bm.verts[point[2]]]
+                        color = get_u32(f)
+                        bm.faces.new(face_vertices)
+                        faces.append((face_vertices,(), (), (color)))
                     case 4: #FT4
-                        point = []
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        primitives.append((point[0],point[1],point[3],point[2]))
-                        pad(f, 20)
+                        point = (get_i16(f),get_i16(f),get_i16(f),get_i16(f))
+                        face_vertices = [bm.verts[point[0]],bm.verts[point[1]],bm.verts[point[3]],bm.verts[point[2]]]
+                        texture = get_i16(f)
+                        pad(f, 4)
+                        f_uv = (get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f), get_i8(f), get_i8(f))
+                        face_uv = ((f_uv[0],f_uv[1],f_uv[2],f_uv[3],f_uv[6],f_uv[7],f_uv[4],f_uv[5]))
+                        pad(f, 2)
+                        color = get_u32(f)
+                        bm.faces.new(face_vertices)
+                        faces.append((face_vertices, face_uv, texture, (color)))
                     case 5: #G3
-                        primitives.append((get_i16(f),get_i16(f),get_i16(f)))
-                        pad(f, 14)
+                        face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
+                        pad(f,2)
+                        color = (get_u32(f),get_u32(f),get_u32(f))
+                        bm.faces.new(face_vertices)
+                        faces.append((face_vertices,(), (), (color)))
                     case 6: #GT3
-                        primitives.append((get_i16(f),get_i16(f),get_i16(f)))
-                        pad(f, 26)
+                        face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
+                        texture = get_i16(f)
+                        pad(f, 4)
+                        face_uv = (get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f))
+                        pad(f,2)
+                        color = (get_u32(f),get_u32(f),get_u32(f))
+                        
+                        bm.faces.new(face_vertices)
+                        faces.append((face_vertices, face_uv, texture, (color)))
                     case 7: #G4
-                        point = []
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        primitives.append((point[0],point[1],point[3],point[2]))
-                        pad(f, 16)
+                        point = (get_i16(f),get_i16(f),get_i16(f),get_i16(f))
+                        face_vertices = [bm.verts[point[0]],bm.verts[point[1]],bm.verts[point[3]],bm.verts[point[2]]]
+                        faces.append((point[0],point[1],point[3],point[2]))
+                        color = (get_u32(f),get_u32(f),get_u32(f),get_u32(f))
+                        bm.faces.new(face_vertices)
+                        faces.append((face_vertices, (), (), (color)))
                     case 8: #GT4
-                        point = []
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        primitives.append((point[0],point[1],point[3],point[2]))
-                        pad(f, 32)
+                        point = (get_i16(f),get_i16(f),get_i16(f),get_i16(f))
+                        face_vertices = [bm.verts[point[0]],bm.verts[point[1]],bm.verts[point[3]],bm.verts[point[2]]]
+                        texture = get_i16(f)
+                        pad(f, 4)
+                        f_uv = (get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f), get_i8(f), get_i8(f))
+                        face_uv = ((f_uv[0],f_uv[1],f_uv[2],f_uv[3],f_uv[6],f_uv[7],f_uv[4],f_uv[5]))
+                        pad(f,2)
+                        color = (get_u32(f),get_u32(f),get_u32(f),get_u32(f))
+                        bm.faces.new(face_vertices)
+                        faces.append((face_vertices, face_uv, texture, (color)))
                     #case 9: #LF2 - never seen
                     #case 10 | 11: #TSPR
                     case 10 | 11: #BSPR
                         pad(f, 12)
                     case 12: #LSF3
-                        primitives.append((get_i16(f),get_i16(f),get_i16(f)))
-                        pad(f, 6)
+                        face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
+                        pad(f, 2) #shall be a normal
+                        color = (get_u32(f),get_u32(f),get_u32(f))
+                        bm.faces.new(face_vertices)
+                        faces.append((face_vertices, (), (), (color)))
                     case 13: #LSFT3
-                        primitives.append((get_i16(f),get_i16(f),get_i16(f)))
-                        pad(f, 18)
+                        face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
+                        pad(f, 2) #shall be a normal
+                        texture = get_i16(f)
+                        pad(f, 4)
+                        face_uv = (get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f))
+                        color = get_u32(f)
+                        bm.faces.new(face_vertices)
+                        faces.append((face_vertices, (), (), (color)))
                     case 14: #LSF4
-                        point = []
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        primitives.append((point[0],point[1],point[3],point[2]))
-                        pad(f, 8)
+                        point = (get_i16(f),get_i16(f),get_i16(f),get_i16(f))
+                        face_vertices = [bm.verts[point[0]],bm.verts[point[1]],bm.verts[point[3]],bm.verts[point[2]]]
+                        pad(f, 2) #shall be a normal
+                        pad(f, 2)
+                        color = get_u32(f)
+                        bm.faces.new(face_vertices)
+                        faces.append((face_vertices, (), (), (color)))
                     case 15: #LSFT4
-                        point = []
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        primitives.append((point[0],point[1],point[3],point[2]))
-                        pad(f, 20)
+                        point = (get_i16(f),get_i16(f),get_i16(f),get_i16(f))
+                        face_vertices = [bm.verts[point[0]],bm.verts[point[1]],bm.verts[point[3]],bm.verts[point[2]]]
+                        pad(f, 2) #shall be a normal
+                        texture = get_i16(f)
+                        pad(f, 4)
+                        f_uv = (get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f), get_i8(f), get_i8(f))
+                        face_uv = ((f_uv[0],f_uv[1],f_uv[2],f_uv[3],f_uv[6],f_uv[7],f_uv[4],f_uv[5]))
+                        color = get_u32(f)
+                        bm.faces.new(face_vertices)
+                        faces.append((face_vertices, face_uv, texture, (color)))
                     case 16: #LSG3
-                        primitives.append((get_i16(f),get_i16(f),get_i16(f)))
-                        pad(f, 18)
+                        face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
+                        pad(f, 6) #shall be a normal
+                        color = (get_u32(f),get_u32(f),get_u32(f))
+                        bm.faces.new(face_vertices)
+                        faces.append((face_vertices, (), (), (color)))
                     case 17: #LSGT3
-                        primitives.append((get_i16(f),get_i16(f),get_i16(f)))
-                        pad(f, 30)
+                        face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
+                        pad(f, 6) #shall be a normal
+                        texture = get_i16(f)
+                        pad(f, 4)
+                        face_uv = (get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f))
+                        color = (get_u32(f),get_u32(f),get_u32(f))
+                        bm.faces.new(face_vertices)
+                        faces.append((face_vertices, face_uv, texture, (color)))
                     case 18: #LSG4
-                        point = []
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        primitives.append((point[0],point[1],point[3],point[2]))
-                        pad(f, 24)
+                        point = (get_i16(f),get_i16(f),get_i16(f),get_i16(f))
+                        face_vertices = [bm.verts[point[0]],bm.verts[point[1]],bm.verts[point[3]],bm.verts[point[2]]]
+                        pad(f, 8) #shall be a normal
+                        color = (get_u32(f),get_u32(f),get_u32(f),get_u32(f))
+                        bm.faces.new(face_vertices)
+                        faces.append((face_vertices, (), (), (color)))
                     case 19: #LSGT4
-                        point = []
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        point.append(get_i16(f))
-                        primitives.append((point[0],point[1],point[3],point[2]))
-                        pad(f, 38)
+                        point = (get_i16(f),get_i16(f),get_i16(f),get_i16(f))
+                        face_vertices = [bm.verts[point[0]],bm.verts[point[1]],bm.verts[point[3]],bm.verts[point[2]]]
+                        pad(f, 8) #shall be a normal
+                        texture = get_i16(f)
+                        pad(f, 4)
+                        face_uv = (get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f))
+                        pad(f, 2)
+                        color = (get_u32(f),get_u32(f),get_u32(f),get_u32(f))
+                        bm.faces.new(face_vertices)
+                        faces.append((face_vertices, face_uv, texture, (color)))
                     case 20: #SPLINE
                         pad(f, 52)
                     case 21: #INFINITE_LIGHT
@@ -169,14 +228,10 @@ def read_some_data(context, filepath, use_some_setting):
                         pad(f, 36)
                     case _:
                         print("Error unsupported primitive")
-
+            bm.to_mesh(mesh_data)
+            mesh_data.update()
             chunk = f.read(16)
-            mesh.from_pydata(vertices, [], primitives)
-            mesh.update()
-            object = bpy.data.objects.new(name, mesh)
-            collection = bpy.data.collections.new(name)
-            bpy.context.scene.collection.children.link(collection)
-            collection.objects.link(object)
+            bm.free()
     return {'FINISHED'}
 
 
