@@ -133,8 +133,12 @@ def read_some_data(context, filepath, use_some_setting):
                         face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
                         pad(f,2)
                         new = bm.faces.new(face_vertices)
-                        for loop in new.loops:
-                            loop[collayer] = int32torgb(get_u32(f))
+                        color = [0,0,0]
+                        color[0] = int32torgb(get_u32(f))
+                        color[1] = int32torgb(get_u32(f))
+                        color[2] = int32torgb(get_u32(f))
+                        for i, loop in enumerate(new.loops):
+                            loop[collayer] = color[i]
                     case 6: #GT3
                         face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
                         texture = get_i16(f)
@@ -142,14 +146,23 @@ def read_some_data(context, filepath, use_some_setting):
                         face_uv = (get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f))
                         pad(f,2)
                         new = bm.faces.new(face_vertices)
-                        for loop in new.loops:
-                            loop[collayer] = int32torgb(get_u32(f))
+                        color = [0,0,0]
+                        color[0] = int32torgb(get_u32(f))
+                        color[1] = int32torgb(get_u32(f))
+                        color[2] = int32torgb(get_u32(f))
+                        for i, loop in enumerate(new.loops):
+                            loop[collayer] = color[i]
                     case 7: #G4
                         point = (get_i16(f),get_i16(f),get_i16(f),get_i16(f))
                         face_vertices = [bm.verts[point[0]],bm.verts[point[1]],bm.verts[point[3]],bm.verts[point[2]]]
                         new = bm.faces.new(face_vertices)
-                        for loop in new.loops:
-                            loop[collayer] = int32torgb(get_u32(f))
+                        color = [0,0,0,0]
+                        color[0] = int32torgb(get_u32(f))
+                        color[1] = int32torgb(get_u32(f))
+                        color[3] = int32torgb(get_u32(f))
+                        color[2] = int32torgb(get_u32(f))
+                        for i, loop in enumerate(new.loops):
+                            loop[collayer] = color[i]
                     case 8: #GT4
                         point = (get_i16(f),get_i16(f),get_i16(f),get_i16(f))
                         face_vertices = [bm.verts[point[0]],bm.verts[point[1]],bm.verts[point[3]],bm.verts[point[2]]]
@@ -159,8 +172,13 @@ def read_some_data(context, filepath, use_some_setting):
                         face_uv = ((f_uv[0],f_uv[1],f_uv[2],f_uv[3],f_uv[6],f_uv[7],f_uv[4],f_uv[5]))
                         pad(f,2)
                         new = bm.faces.new(face_vertices)
-                        for loop in new.loops:
-                            loop[collayer] = int32torgb(get_u32(f))
+                        color = [0,0,0,0]
+                        color[0] = int32torgb(get_u32(f))
+                        color[1] = int32torgb(get_u32(f))
+                        color[3] = int32torgb(get_u32(f))
+                        color[2] = int32torgb(get_u32(f))
+                        for i, loop in enumerate(new.loops):
+                            loop[collayer] = color[i]
                     #case 9: #LF2 - never seen
                     #case 10 | 11: #TSPR
                     case 10 | 11: #BSPR
@@ -169,8 +187,9 @@ def read_some_data(context, filepath, use_some_setting):
                         face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
                         pad(f, 2) #shall be a normal
                         new = bm.faces.new(face_vertices)
-                        for loop in new.loops:
-                            loop[collayer] = int32torgb(get_u32(f))
+                        color = int32torgb(get_u32(f))
+                        for loop in enumerate(new.loops):
+                            loop[collayer] = color
                     case 13: #LSFT3
                         face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
                         pad(f, 2) #shall be a normal
@@ -206,8 +225,12 @@ def read_some_data(context, filepath, use_some_setting):
                         face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
                         pad(f, 6) #shall be a normal
                         new = bm.faces.new(face_vertices)
-                        for loop in new.loops:
-                            loop[collayer] = int32torgb(get_u32(f))
+                        color = [0,0,0]
+                        color[0] = int32torgb(get_u32(f))
+                        color[1] = int32torgb(get_u32(f))
+                        color[2] = int32torgb(get_u32(f))
+                        for i, loop in enumerate(new.loops):
+                            loop[collayer] = color[i]
                     case 17: #LSGT3
                         face_vertices = [bm.verts[get_i16(f)],bm.verts[get_i16(f)],bm.verts[get_i16(f)]]
                         pad(f, 6) #shall be a normal
@@ -215,15 +238,24 @@ def read_some_data(context, filepath, use_some_setting):
                         pad(f, 4)
                         face_uv = (get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f))
                         new = bm.faces.new(face_vertices)
-                        for loop in new.loops:
-                            loop[collayer] = int32torgb(get_u32(f))
+                        color = [0,0,0]
+                        color[0] = int32torgb(get_u32(f))
+                        color[1] = int32torgb(get_u32(f))
+                        color[2] = int32torgb(get_u32(f))
+                        for i, loop in enumerate(new.loops):
+                            loop[collayer] = color[i]
                     case 18: #LSG4
                         point = (get_i16(f),get_i16(f),get_i16(f),get_i16(f))
                         face_vertices = [bm.verts[point[0]],bm.verts[point[1]],bm.verts[point[3]],bm.verts[point[2]]]
                         pad(f, 8) #shall be a normal
                         new = bm.faces.new(face_vertices)
-                        for loop in new.loops:
-                            loop[collayer] = int32torgb(get_u32(f))
+                        color = [0,0,0,0]
+                        color[0] = int32torgb(get_u32(f))
+                        color[1] = int32torgb(get_u32(f))
+                        color[3] = int32torgb(get_u32(f))
+                        color[2] = int32torgb(get_u32(f))
+                        for i, loop in enumerate(new.loops):
+                            loop[collayer] = color[i]
                     case 19: #LSGT4
                         point = (get_i16(f),get_i16(f),get_i16(f),get_i16(f))
                         face_vertices = [bm.verts[point[0]],bm.verts[point[1]],bm.verts[point[3]],bm.verts[point[2]]]
@@ -233,8 +265,13 @@ def read_some_data(context, filepath, use_some_setting):
                         face_uv = (get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f),get_i8(f))
                         pad(f, 2)
                         new = bm.faces.new(face_vertices)
-                        for loop in new.loops:
-                            loop[collayer] = int32torgb(get_u32(f))
+                        color = [0,0,0,0]
+                        color[0] = int32torgb(get_u32(f))
+                        color[1] = int32torgb(get_u32(f))
+                        color[3] = int32torgb(get_u32(f))
+                        color[2] = int32torgb(get_u32(f))
+                        for i, loop in enumerate(new.loops):
+                            loop[collayer] = color[i]
                     case 20: #SPLINE
                         pad(f, 52)
                     case 21: #INFINITE_LIGHT
